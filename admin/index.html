@@ -488,7 +488,7 @@ function busy(btn, on, label) {
    ★ 설정 — Supabase 프로젝트 정보만 넣으면 실서비스 모드로 동작합니다.
    (비워두면 브라우저 저장소를 쓰는 '데모 모드'로 동작)
    ===================================================================== */
-const SUPABASE_URL      = 'https://jiaccvnamqoshnxbyoud.supabase.co/';   // 예: 'https://abcdxyz.supabase.co'
+const SUPABASE_URL      = 'https://jiaccvnamqoshnxbyoud.supabase.co';   // 예: 'https://abcdxyz.supabase.co'
 const SUPABASE_ANON_KEY = 'sb_publishable_etPefDosp2zFZaUoqlFHNQ_n2gQQIyp';   // Project Settings → API → anon public key
 const EMAIL_DOMAIN      = 'voy-community.app';   // 관리자 아이디 → 내부 이메일 변환용 (변경 금지)
 const COMPANY_DOMAIN    = 'yuhan.co.kr';         // 회원 로그인 이메일 도메인 (아이디만 입력하면 자동으로 붙임)
@@ -497,7 +497,7 @@ const USER_PAGE_URL     = '../';      // 관리자 페이지 → 커뮤니티로
 const ADMIN_PAGE_URL    = 'admin/';   // 커뮤니티 → 관리자 콘솔 경로
 
 const LOCAL = !SUPABASE_URL || !SUPABASE_ANON_KEY;
-const sb = (!LOCAL && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const sb = (!LOCAL && window.supabase) ? window.supabase.createClient(SUPABASE_URL.trim().replace(/\/+$/, ''), SUPABASE_ANON_KEY.trim()) : null;   // 주소 끝 / 는 자동 제거
 
 /* ---------------- 공통 유틸 ---------------- */
 const KST_OFFSET = 9 * 3600e3;
