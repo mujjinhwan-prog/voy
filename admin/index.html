@@ -1769,10 +1769,10 @@ function pageMembers(c) {
   const users = A.profiles.filter(p => p.role === 'user');
   const rows = users.filter(p => !f.role || (f.role === 'blocked' ? p.status === 'blocked' : f.role === 'pw' ? p.must_change_pw : f.role === 'never' ? !p.last_seen || p.must_change_pw : p.status === 'active'));
   const t = dtHTML('members', rows, supOnly([
+    { k: 'nickname', l: '닉네임', v: p => p.nickname, cls: 'b nowrap' },
     ...detailCols().slice(0, 2),
     { k: 'email', l: '이메일(로그인)', v: p => p.email, cls: 'mono dim' },
-    ...detailCols().slice(2),
-    { k: 'nickname', l: '닉네임', v: p => p.nickname, cls: 'b nowrap' },
+    ...detailCols().slice(2).filter(c => c.k !== 'sales_office'),   // 영업소 열은 목록에서 숨김 (회원 정보·엑셀에는 그대로 저장)
     { k: 'status', l: '상태', v: p => p.status === 'blocked' ? '이용 제한' : p.must_change_pw ? '비밀번호 미변경' : '정상', r: p => p.status === 'blocked' ? '<span class="status-blocked">이용 제한</span>' : p.must_change_pw ? '<span class="pst wait">비번 미변경</span>' : '<span class="pst on">정상</span>' },
     { k: 'created', l: '가입일', v: p => p.created_at, s: p => fmtDT(p.created_at), r: p => dtCell(p.created_at) },
     { k: 'seen', l: '최근접속', v: p => p.last_seen, s: p => fmtDT(p.last_seen), r: p => dtCell(p.last_seen) },
