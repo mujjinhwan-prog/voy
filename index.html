@@ -200,6 +200,27 @@ body{min-height:100vh}
 .lightbox img{max-width:100%;max-height:calc(100vh - 120px);object-fit:contain;border-radius:8px}
 .lb-x{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;border:0;background:rgba(255,255,255,.15);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
 .lb-bar{display:flex;gap:8px}.lb-bar .btn:not(.primary){background:rgba(255,255,255,.14);color:#fff;border-color:transparent}
+.menu-group{padding:4px 0}.menu-group .menu-row{padding-top:12px;padding-bottom:12px}.menu-group .menu-row+.menu-row{border-top:1px solid var(--border)}
+.policy .subbar{margin-bottom:12px}
+.pol-hero{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(135deg,#2f7a3e,#6aa864);color:#fff;border-radius:18px;padding:18px 18px;margin-bottom:12px}
+[data-theme=dark] .pol-hero{background:linear-gradient(135deg,#7a1f52,#1f6b45)}
+.pol-hero b{display:block;font-size:17px;margin-bottom:4px}.pol-hero p{margin:0;font-size:13.5px;line-height:1.6;opacity:.95}
+.pol-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 18px;margin-bottom:12px}
+.pol-card h4{display:flex;align-items:center;gap:7px;margin:0 0 10px;font-size:15px}
+.pol-card ol,.pol-card ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.pol-card li b{display:block;font-size:14px;line-height:1.5}.pol-card li span{display:block;font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:2px}
+.pol-card.pol-ok h4{color:var(--accent)}.pol-card.pol-ok ol{counter-reset:k}
+.pol-card.pol-ok li{position:relative;padding-left:24px;counter-increment:k}.pol-card.pol-ok li::before{content:counter(k) '.';position:absolute;left:0;top:0;font-weight:800;color:var(--accent)}
+.pol-card.pol-no{border-color:color-mix(in srgb,#e03131 30%,var(--border))}.pol-card.pol-no h4{color:#e03131}
+.pol-card.pol-no li{position:relative;padding-left:22px}.pol-card.pol-no li::before{content:'✕';position:absolute;left:2px;top:0;color:#e03131;font-weight:800}
+.pol-card.pol-warn{background:color-mix(in srgb,#f59f00 10%,var(--surface));border-color:color-mix(in srgb,#f59f00 40%,var(--border))}.pol-card.pol-warn h4{color:#b26a00}
+.pol-card.pol-warn p{margin:0;font-size:13px;line-height:1.65;color:var(--text2)}
+.pol-card.doc h4{margin:18px 0 6px;font-size:14.5px}.pol-card.doc h4:first-of-type{margin-top:8px}
+.pol-card.doc p{margin:0 0 6px;font-size:13.5px;line-height:1.7;color:var(--text2)}
+.pol-card.doc ul{gap:6px;margin:4px 0 6px}.pol-card.doc li{position:relative;padding-left:14px;font-size:13.5px;line-height:1.65;color:var(--text2)}
+.pol-card.doc li::before{content:'';position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.pol-card.doc li b{display:inline;font-size:inherit;color:var(--text)}
+.pol-date{font-size:12px!important;color:var(--muted)!important}
 .month-pill{display:flex;gap:10px;align-items:center;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:9px 16px;border-radius:99px;font-size:13px;margin-bottom:12px}
 .month-pill b{color:var(--point)}
 .event-banner{display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
@@ -290,7 +311,7 @@ a.att{text-decoration:none}
 .cbox textarea{flex:1;min-width:0;height:auto;min-height:0;resize:none;border-radius:14px;background:var(--surface);line-height:1.5;padding:10px 14px;font-size:14.5px}
 .cbox-side{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .cbox .cimg-btn,.cbox .csend{width:48px;flex:1;min-height:40px;height:auto;padding:0;display:grid;place-items:center;border-radius:12px}
-body:has(.cbox-wrap) .theme-fab{display:none}
+body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .own-act{display:flex;gap:6px}
 .cbox-wrap{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));background:var(--bg);padding-top:6px}
 .cbox-wrap .cbox{position:static;padding-top:4px}
@@ -1751,6 +1772,8 @@ function route() {
   if (view === 'edit' && arg) return viewWrite(arg);
   if (view === 'rank') return isAdminRole(S.me.role) ? viewRank() : go('#/feed');   // 랭킹은 관리자만
   if (view === 'me') return viewMe();
+  if (view === 'guide') return viewGuide();
+  if (view === 'privacy') return viewPrivacy();
   if (view === 'myposts') return viewMyPosts();
   if (view === 'research' && arg) return viewSurvey(arg);
   if (view === 'research') return viewResearch();
@@ -1921,6 +1944,47 @@ async function refreshComments(pid) {
   document.getElementById('ccount').textContent = list.length;
   document.getElementById('react').innerHTML = reactHTML(p);
   S._cmts = list;
+}
+
+/* ---------------- 내 정보 > Compliance 가이드라인 · 개인정보 처리방침 ---------------- */
+function viewGuide() {
+  const ok = [['영업 현장 경험을 구체적으로 공유하세요.', '성공 사례, 처방 유도 전략, 거래처 대응법 등 실무에 도움이 되는 내용을 작성해 주세요.'],
+    ['건설적인 피드백을 제공하세요.', '동료의 게시물에 공감하거나, 보완할 수 있는 의견을 댓글로 남겨 주세요.'],
+    ['카테고리를 정확히 선택하세요.', `${S.boards.filter(b => !b.admin_only).map(b => b.name).slice(0, 3).join(', ') || '게시판'} 중 가장 적합한 카테고리를 선택해 주세요.`],
+    ['익명성을 존중하세요.', '다른 사용자의 실제 신원을 추측하거나 공개하려는 시도를 하지 마세요.']];
+  const no = [['의약품 허가사항 외 정보 공유', '허가되지 않은 적응증, 용법·용량에 대한 정보를 게시하지 마세요.'],
+    ['환자 개인정보 포함 게시', '환자의 이름, 병원명, 처방 내역 등 개인을 특정할 수 있는 정보를 포함하지 마세요.'],
+    ['경쟁사 비방 및 허위 정보', '경쟁 제품이나 타사에 대한 근거 없는 비방, 허위 사실 유포를 금지합니다.'],
+    ['비속어, 혐오 표현, 인신공격', '동료를 향한 비속어, 혐오 표현, 인신공격성 게시물 및 댓글을 금지합니다.'],
+    ['사내 기밀정보 유출', '미공개 제품 정보, 내부 전략, 영업 실적 수치 등 기밀사항을 게시하지 마세요.']];
+  shell(`<div class="page policy"><div class="subbar"><button class="back" data-act="back" aria-label="뒤로">${I('left')}</button><b>Compliance 가이드라인</b></div>
+    <div class="pol-hero">${I('shield', 24)}<div><b>VOY 커뮤니티 가이드라인</b><p>유한양행 세일즈 직원 모두가 안전하고 건설적인 소통을 할 수 있도록 아래 가이드라인을 준수해 주세요.</p></div></div>
+    <section class="pol-card pol-ok"><h4>${I('check', 18)} 권장 사항</h4><ol>${ok.map(([t, d]) => `<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join('')}</ol></section>
+    <section class="pol-card pol-no"><h4>${I('x', 18)} 금지 사항</h4><ul>${no.map(([t, d]) => `<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join('')}</ul></section>
+    <section class="pol-card pol-warn"><h4>⚠️ 위반 시 조치</h4><p>가이드라인을 위반한 게시물은 관리자에 의해 사전 통보 없이 삭제될 수 있으며, 반복적인 위반 시 계정 이용이 제한될 수 있습니다.</p></section>
+  </div>`, 'me', false);
+}
+function viewPrivacy() {
+  const li = a => `<ul>${a.map(x => `<li>${x}</li>`).join('')}</ul>`;
+  shell(`<div class="page policy"><div class="subbar"><button class="back" data-act="back" aria-label="뒤로">${I('left')}</button><b>개인정보 처리방침</b></div>
+    <section class="pol-card doc"><p class="pol-date">최종 수정일: 2026년 11월 8일</p>
+      <h4>1. 수집하는 개인정보 항목</h4><p>VOY(Voice of YUHAN)는 서비스 제공을 위해 다음과 같은 최소한의 정보를 수집합니다.</p>
+      ${li(['<b>회사 이메일</b>: 로그인 아이디 및 본인 확인',
+        '<b>성명·사번</b>: 회원 명단 관리 및 본인 확인 (사번은 최초 비밀번호로만 사용)',
+        '<b>비밀번호</b>: 암호화(해시)해서 저장하며, 원문은 보관하지 않습니다',
+        '<b>소속 정보</b>(구분·조직지점·근무지점·영업소·직위·직책): 설문 대상 지정 및 운영 통계',
+        '<b>닉네임</b>: 익명 활동을 위한 표시명 (매월 자동 갱신)',
+        '<b>이용 기록</b>: 가입일·최근 접속 시각, 월별 좋아요 누른 횟수(어느 글인지는 기록하지 않음), 새 글 알림을 켠 경우 알림 수신 정보'])}
+      <h4>2. 개인정보의 이용 목적</h4><p>수집된 정보는 다음의 목적으로만 이용됩니다.</p>
+      ${li(['회원 인증 및 로그인 세션 관리', '익명 게시판 서비스 제공 (게시글 작성, 댓글, 좋아요)', '월간 시상·히든보이스 이벤트 운영 및 당첨자 안내', '설문조사(VOY Research) 대상 지정 및 결과 집계', '새 글 알림 발송 (알림을 켠 경우에만)'])}
+      <h4>3. 개인정보의 보유 및 파기</h4><p>개인정보는 서비스 이용 기간 동안 보유하며, 퇴사 또는 회원 삭제 시 지체 없이 파기합니다. 삭제된 회원이 작성한 글·댓글은 '탈퇴회원'으로 표시되며 작성자 정보와의 연결이 끊어집니다. 비밀번호는 단방향 해시로 저장되어 원문 복원이 불가능합니다.</p>
+      <h4>4. 익명성 보장</h4><p>VOY는 익명 커뮤니티로서 다음과 같은 익명성 보장 정책을 운영합니다.</p>
+      ${li(['게시글·댓글에는 이름·사번·소속이 아닌 <b>월별 닉네임</b>만 표시됩니다.', '닉네임은 매월 1일 자동으로 새로 부여되며, 월 1회 수동 변경이 가능합니다.',
+        '다른 회원과 일반 관리자는 게시글·댓글 작성자의 실제 신원을 <b>확인할 수 없습니다</b>. (서버에서 작성자 정보를 아예 보내지 않도록 막혀 있습니다)',
+        '단, 가이드라인 위반 대응·이벤트 당첨자 안내 등 운영상 꼭 필요한 경우에 한해 <b>최고관리자 1인</b>만 작성자를 확인할 수 있으며, 이 정보는 다른 목적으로 이용하거나 공개하지 않습니다.'])}
+      <h4>5. 제3자 제공</h4><p>VOY는 수집된 개인정보를 외부 제3자에게 제공하지 않습니다. 다만, 법령에 의한 요청이 있는 경우 관련 법률에 따라 제공될 수 있습니다. 서비스 운영을 위해 데이터는 클라우드 데이터베이스(Supabase)에 암호화된 연결로 저장됩니다.</p>
+      <h4>6. 문의</h4><p>개인정보 처리방침에 대한 문의사항은 VOY 관리자(영업기획팀)에게 문의해 주시기 바랍니다.</p>
+    </section></div>`, 'me', false);
 }
 
 /* 이미지 크게 보기 + 원본 다운로드 */
@@ -2169,6 +2233,10 @@ async function viewMe() {
       ${[['light', 'sun', '화이트'], ['dark', 'moon', '블랙']].map(([k, ic, t]) => `<button class="${pref === k ? 'on' : ''}" data-act="theme" data-v="${k}" aria-label="${t}" title="${t}">${I(ic, 16)}</button>`).join('')}</div></div></div>
     <div class="box" id="pushBox">${pushBoxHTML()}</div>
     <div class="box"><button class="menu-row" data-act="pw"><div class="mi">${I('lock', 19)}</div><div><b>비밀번호 변경</b><small>로그인 비밀번호를 바꿉니다</small></div>${I('right')}</button></div>
+    <div class="box menu-group">
+      <button class="menu-row" data-act="go" data-to="#/guide"><div class="mi">${I('shield', 19)}</div><div><b>Compliance 가이드라인</b><small>VOY 커뮤니티 권장·금지 사항과 위반 시 조치</small></div>${I('right')}</button>
+      <button class="menu-row" data-act="go" data-to="#/privacy"><div class="mi">${I('lock', 19)}</div><div><b>개인정보 처리방침</b><small>수집 항목·이용 목적·익명성 보장 안내</small></div>${I('right')}</button>
+    </div>
     ${isAdminRole(me.role) ? `<div class="box"><a class="menu-row" href="${ADMIN_PAGE_URL}" style="text-decoration:none;color:inherit"><div class="mi">${I('shield', 19)}</div><div><b>관리자 콘솔</b><small>게시글·회원·점수·히든보이스 관리</small></div>${I('right')}</a></div>` : ''}
     <button class="btn block ghost" data-act="logout" style="margin-top:4px;color:var(--muted)">${I('logout', 16)} 로그아웃</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:12px">데모 모드로 실행 중입니다. 데이터는 이 브라우저에만 저장돼요.</p>` : ''}
