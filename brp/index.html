@@ -1,0 +1,620 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BRP insight 수급대시보드</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 캘린더형 헤더 + 칩 보드(신규/장기 레인) → 기회요인 → 위험요인 → 전체 목록 → 데이터 갱신 */
+:root{
+  --bg:#FFFFFF; --card:#FFFFFF; --ink:#111827; --sub:#4B5563; --mute:#8A93A3; --line:#E3E6EC; --soft:#F7F8FA;
+  --accent:#1E3FA6; --accent-soft:#EAF0FF;
+  --opp:#0E8A63; --opp-soft:#E3F5EE; --risk:#C8243A; --risk-soft:#FDECEE; --warn:#B7791F; --warn-soft:#FDF3E1;
+  --c1:#3B6FD8; --c2:#D2542A; --c3:#B83A70; --c4:#5F8A1E; --c5:#0F7C70; --c6:#6B4FD3; --c7:#64748B; --c8:#0B84A5; --c9:#A9780E; --c10:#7A4B26; --c11:#C0274A;
+  --chip-alpha:.32;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1218; --card:#171B23; --ink:#EEF1F6; --sub:#B4BCC9; --mute:#7D8696; --line:#2A303B; --soft:#1C212A;
+  --accent:#8FAEFF; --accent-soft:#1D2742;
+  --opp:#3CCB98; --opp-soft:#12302A; --risk:#FF6B7E; --risk-soft:#3A1A20; --warn:#E9B455; --warn-soft:#352A15;
+  --chip-alpha:.45; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1218; --card:#171B23; --ink:#EEF1F6; --sub:#B4BCC9; --mute:#7D8696; --line:#2A303B; --soft:#1C212A;
+  --accent:#8FAEFF; --accent-soft:#1D2742;
+  --opp:#3CCB98; --opp-soft:#12302A; --risk:#FF6B7E; --risk-soft:#3A1A20; --warn:#E9B455; --warn-soft:#352A15;
+  --chip-alpha:.45; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1320px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.theme-fab{position:fixed;z-index:20;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 6px 20px rgba(15,18,24,.18)}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:transparent;color:var(--sub);padding:8px 14px;font-size:13px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:700}
+.theme-fab{border-radius:999px;padding:3px;gap:2px}
+.theme-fab button{width:36px;height:36px;padding:0;border-radius:999px;display:grid;place-items:center}
+.theme-fab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+.hero h1{margin:0;font-size:clamp(26px,3.4vw,38px);font-weight:900;letter-spacing:-.03em;text-wrap:balance;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.hero h1 .tag{font-size:13px;font-weight:600;letter-spacing:0;color:var(--accent);border:1.5px solid var(--accent);border-radius:999px;padding:5px 14px}
+.hero p{margin:12px 0 14px;color:var(--sub);max-width:68ch;font-size:14.5px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--sub)}
+.pill b{color:var(--ink);font-variant-numeric:tabular-nums}
+.pill .pi{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;line-height:1.3}
+.pill .sep{width:1px;height:12px;background:var(--line);flex:none}
+.pill .dot{flex:none}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--opp)}
+.stats{display:flex;gap:30px}
+.stat{text-align:right}
+.stat .n{font-family:var(--f-num);font-size:30px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12px;color:var(--sub);margin-top:6px}
+.stat.opp .n{color:var(--opp)} .stat.risk .n{color:var(--risk)}
+/* 기회요인 통계 하이라이트 */
+.stat.opp{position:relative;isolation:isolate}
+.stat.opp::before{content:"";position:absolute;inset:-10px -14px;border-radius:14px;z-index:-1;background:var(--opp-soft);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--opp) 35%,transparent);animation:statglow 2.6s ease-in-out infinite}
+.stat.opp .n{background:linear-gradient(110deg,var(--opp) 38%,#B8F5DC 50%,var(--opp) 62%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:textshine 3s ease-in-out infinite}
+.stat.opp .l{color:var(--opp);font-weight:700}
+.stat.opp .star{position:absolute;top:-8px;right:-10px;font-size:15px;color:var(--warn);animation:twinkle 1.6s ease-in-out infinite;pointer-events:none}
+.stat.opp .star.s2{top:auto;bottom:16px;right:auto;left:-11px;font-size:10px;animation-delay:.8s}
+@keyframes textshine{0%{background-position:100% 0}60%,100%{background-position:0 0}}
+@keyframes statglow{0%,100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--opp) 35%,transparent)}50%{box-shadow:0 0 0 1px var(--opp),0 0 18px 2px color-mix(in srgb,var(--opp) 40%,transparent)}}
+@media (prefers-reduced-motion:reduce){.stat.opp::before,.stat.opp .n,.stat.opp .star{animation:none}}
+
+/* panel */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 20px}
+.panel h2{margin:0 0 4px;font-size:16px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel .desc{margin:0 0 16px;color:var(--sub);font-size:13px}
+.badge{font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px}
+.b-opp{background:var(--opp-soft);color:var(--opp)} .b-risk{background:var(--risk-soft);color:var(--risk)} .b-warn{background:var(--warn-soft);color:var(--warn)} .b-mute{background:var(--soft);color:var(--mute)}
+
+/* legend + board */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--sub);margin-bottom:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend .yh i{background:transparent;border:2px solid var(--opp)}
+.board{border-top:1px solid var(--line)}
+.lane{display:grid;grid-template-columns:120px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.lane-h{padding:14px 10px 14px 0;font-weight:700;font-size:13.5px}
+.lane-h small{display:block;font-weight:400;color:var(--sub);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:12px 0 12px 12px;border-left:1px solid var(--line)}
+.chip{position:relative;border:0;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:500;color:var(--ink);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-flex;gap:6px;align-items:center;background:color-mix(in srgb,var(--cc) calc(var(--chip-alpha)*100%),var(--card))}
+.chip .r{font-family:var(--f-num);font-size:11px;opacity:.75}
+.chip.is-opp{background:var(--cc);color:#fff;box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--opp)}
+.chip.is-risk{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--risk);background:var(--cc);color:#fff}
+.chip:hover{filter:brightness(1.05);transform:translateY(-1px)}
+/* 기회요인 반짝 하이라이트 */
+.chip.is-opp{overflow:hidden;font-weight:700;animation:glow 2.4s ease-in-out infinite;animation-delay:calc(var(--i,0) * .35s)}
+.chip.is-opp::after,.flow .to::after,.om-tag.in::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.6) 50%,transparent 65%);transform:translateX(-130%);
+  animation:shine 3.2s ease-in-out infinite;animation-delay:calc(var(--i,0) * .35s)}
+.flow .to::after{background:linear-gradient(110deg,transparent 35%,color-mix(in srgb,var(--opp) 22%,transparent) 50%,transparent 65%)}
+.flow .to,.om-tag.in{position:relative;overflow:hidden}
+.spark{display:inline-block;font-size:11px;line-height:1;color:#FFE27A;animation:twinkle 1.6s ease-in-out infinite;animation-delay:calc(var(--i,0) * .35s)}
+.flow .to .spark,.om-row.to .spark{color:var(--warn);margin-left:4px;vertical-align:2px}
+@keyframes shine{0%{transform:translateX(-130%)}55%,100%{transform:translateX(130%)}}
+@keyframes twinkle{0%,100%{opacity:.35;transform:scale(.75) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(20deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--opp)}50%{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--opp),0 0 14px 3px color-mix(in srgb,var(--opp) 55%,transparent)}}
+@media (prefers-reduced-motion:reduce){.chip:hover{transform:none}.chip.is-opp,.chip.is-opp::after,.flow .to::after,.om-tag.in::after,.spark{animation:none}.chip.is-opp::after,.flow .to::after,.om-tag.in::after{display:none}}
+
+/* opportunity cards */
+.grid-opp{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.oc{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--card);min-width:0}
+.oc-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.oc-src{font-size:12px;color:var(--sub);word-break:keep-all;min-width:0}
+.nw{white-space:nowrap}
+.oc-top .badge,.om-head .badge{flex:none;white-space:nowrap}
+.flow b,.flow small{word-break:keep-all;overflow-wrap:break-word}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr);align-items:center;gap:6px}
+.flow .from,.flow .to{border-radius:8px;padding:9px 10px;min-width:0}
+.flow .from{background:var(--soft)}
+.flow .to{background:var(--opp-soft)}
+.flow b{display:block;font-size:13px;line-height:1.35;letter-spacing:-.01em}
+.flow small{display:block;font-size:11.5px;color:var(--sub)}
+.flow .to small{color:var(--opp)}
+.flow .arr{text-align:center;color:var(--opp);font-weight:900}
+.oc p{margin:0;font-size:12.5px;color:var(--sub)}
+.oc .act{font-size:12.5px;border-top:1px dashed var(--line);padding-top:9px}
+.oc .act b{color:var(--ink)}
+.meter{height:6px;background:var(--soft);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--opp);border-radius:4px}
+
+/* risk */
+.risk-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px}
+.selfbox{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.selfbox .big{display:flex;align-items:baseline;gap:10px}
+.selfbox .big .n{font-family:var(--f-num);font-size:34px;font-weight:600;color:var(--risk)}
+.selfbox .big.ok .n{color:var(--opp)}
+.matrix{display:grid;grid-template-columns:30px repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(78px,auto)) 26px;gap:4px;font-size:11.5px}
+.mx{border-radius:8px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+.mx.l1{background:var(--soft)} .mx.l2{background:var(--warn-soft)} .mx.l3{background:var(--risk-soft)}
+.ylab{writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;color:var(--mute)}
+.xlab{display:flex;align-items:center;justify-content:center;color:var(--mute)}
+.rdot{border:0;background:var(--ink);color:var(--bg);font-family:var(--f-num);font-weight:600;font-size:11px;border-radius:999px;padding:2px 8px}
+.rlist{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.ri{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13px}
+.ri .id{font-family:var(--f-num);font-weight:600;color:var(--risk)}
+.ri b{display:block}
+.ri p{margin:3px 0 0;color:var(--sub);font-size:12.5px}
+.ri.hl{outline:2px solid var(--risk)}
+
+/* table */
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tools input{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:8px;padding:8px 12px;font:inherit;font-size:13px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:960px;table-layout:fixed}
+th{background:var(--soft);color:var(--sub);font-weight:600;text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}
+tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--soft)}
+th.c,td.c{text-align:center}
+td.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.nw{white-space:nowrap}
+.cell-ing{display:flex;align-items:flex-start;gap:7px}
+.cell-ing .area-dot{flex:none;margin:6px 0 0}
+.cell-name b{font-weight:700}
+td .badge{white-space:nowrap;display:inline-block}
+.yh-cell{color:var(--opp);font-weight:600}
+.yh-cell.risk{color:var(--risk)}
+.up{color:var(--risk)} .down{color:var(--accent)}
+tr.flash td{background:var(--accent-soft)}
+.area-dot{display:inline-block;width:8px;height:8px;border-radius:2px}
+.msg{font-size:12.5px;color:var(--sub)}
+.opp-list,.m-desc,.m-count{display:none}
+.opp-list{list-style:none;margin:0;padding:0;flex-direction:column;gap:10px}
+.om{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
+.om-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;background:var(--soft);font-size:12px;color:var(--sub)}
+.om-head .no{font-family:var(--f-num);font-weight:600;color:var(--ink);margin-right:6px}
+.om-body{display:flex;flex-direction:column;padding:12px 14px 4px}
+.om-row{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start}
+.om-tag{font-size:11px;font-weight:700;text-align:center;border-radius:6px;padding:3px 0;margin-top:2px}
+.om-tag.out{background:var(--risk-soft);color:var(--risk)}
+.om-tag.in{background:var(--opp);color:#fff}
+.om-row b{display:block;font-size:15.5px;line-height:1.35;word-break:keep-all;overflow-wrap:break-word}
+.om-row small{display:block;font-size:12.5px;color:var(--sub);margin-top:2px;word-break:keep-all}
+.om-row.to b{color:var(--opp)}
+.om-arrow{display:grid;grid-template-columns:44px 1fr;gap:10px;color:var(--mute);font-size:14px;line-height:1;padding:6px 0}
+.om-arrow span{text-align:center}
+.om details{border-top:1px solid var(--line);margin-top:10px}
+.om summary{list-style:none;cursor:pointer;padding:10px 14px;font-size:13px;font-weight:600;color:var(--accent);display:flex;justify-content:space-between;align-items:center}
+.om summary::-webkit-details-marker{display:none}
+.om summary:after{content:"＋";font-weight:400}
+.om details[open] summary:after{content:"－"}
+.om .om-more{padding:0 14px 14px;font-size:13.5px;line-height:1.65;color:var(--sub);display:flex;flex-direction:column;gap:8px}
+.om .om-more b{color:var(--ink)}
+.scope{display:flex;gap:10px;align-items:flex-start;background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--sub);margin:-4px 0 14px}
+.scope b{color:var(--ink)}
+.scope .badge{flex:none;margin-top:1px}
+.foot{font-size:12px;color:var(--mute);line-height:1.7;margin:0}
+.sec-hero{order:1} .sec-opp{order:2} .sec-board{order:3} .sec-risk{order:4} .sec-tbl{order:5} .foot{order:6}
+
+@media (min-width:861px){ .sec-opp{order:3} .sec-board{order:2} }
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:14px}
+  .stats{justify-content:flex-start;gap:22px}
+  .stat{text-align:left}
+  .stat .n{font-size:22px}
+  .risk-grid{grid-template-columns:1fr}
+  .lane{grid-template-columns:1fr}
+  .chips{border-left:0;padding-left:0}
+}
+@media (max-width:640px){
+  .wrap{padding-block:18px 84px;gap:18px}
+  .hero p{display:none}
+  .hero h1 .tag{display:none}
+  .panel{padding:18px 14px}
+  .grid-opp,.d-only{display:none}
+  .opp-list{display:flex}
+  .m-desc{display:block;margin:0 0 14px;color:var(--sub);font-size:13.5px;line-height:1.6}
+  .m-count{display:inline;margin-left:auto;font-family:var(--f-num);font-size:13px;color:var(--opp)}
+  .sec-opp{border:0;padding:4px 0 0;border-radius:0}
+  .sec-opp h2{font-size:18px}
+  .sec-opp h2 .badge{display:none}
+  .hero h1{font-size:26px}
+  .pill{display:grid;grid-template-columns:1fr 1px 1fr;align-items:center;gap:0;border-radius:12px;padding:10px 0;width:100%}
+  .pill .pi{flex-direction:column;justify-content:center;gap:2px;text-align:center;white-space:normal;font-size:12px;padding:0 10px;min-width:0}
+  .pill .pi b{font-size:15px;white-space:nowrap}
+  .pill .sep{height:100%;min-height:32px}
+  .pill .dot{display:none}
+  .stats{border-top:1px solid var(--line);padding:22px 4px 8px;width:100%;justify-content:space-between}
+  /* table → 카드형 */
+  .tbl-wrap{border:0;overflow:visible}
+  table{min-width:0;table-layout:auto}
+  thead{display:none}
+  tbody{display:flex;flex-direction:column;gap:10px}
+  tbody tr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card)}
+  tbody td{display:block;padding:0;border:0;background:none!important}
+  tbody td.c{text-align:left}
+  td.t-kind{grid-column:1;grid-row:1;color:var(--sub);font-size:12px}
+  td.t-rank{grid-column:1;grid-row:2;font-size:15px;font-weight:600}
+  td.t-name{grid-column:2;grid-row:1 / span 2}
+  td.t-judge{grid-column:3;grid-row:1;text-align:right}
+  td.t-val{grid-column:3;grid-row:2;text-align:right}
+  td.t-maker{grid-column:2;grid-row:3;color:var(--sub);font-size:12px}
+  td.t-ing{grid-column:1 / -1;grid-row:4;font-size:12.5px;color:var(--sub);padding-top:6px;border-top:1px dashed var(--line)}
+  td.t-yh{grid-column:1 / -1;grid-row:5;font-size:12.5px}
+  td.t-yh:before{content:"유한 대응 · ";color:var(--mute);font-weight:400}
+  td.t-ing:before{content:"성분 · ";color:var(--mute)}
+}
+</style>
+
+<div class="wrap">
+  <header class="hero sec-hero">
+    <div>
+      <h1>BRP insight 수급대시보드 <span class="tag">Opportunity · Risk</span></h1>
+      <p>국내 의약품 품절 순위(신규 진입 Top20·장기 지속 Top20)를 기준으로, 경쟁사 품절 품목 중 유한양행 품목으로 처방 전환이 가능한 건은 <b style="color:var(--opp)">기회요인</b>으로, 유한양행 품목의 품절과 대체 수요 유입에 따른 공급 부담은 <b style="color:var(--risk)">위험요인</b>으로 분류했습니다. 보드의 품목을 누르면 아래 표의 해당 행으로 이동합니다.</p>
+      <span class="pill"><span class="pi"><span class="dot"></span>기준일 <b id="asof">2026.11.05</b></span><span class="sep" aria-hidden="true"></span><span class="pi">신규·장기 Top20 <b><span id="cnt-src">40</span>건</b></span></span>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="s-all">40</div><div class="l">모니터링 품목</div></div>
+      <div class="stat opp"><span class="star" aria-hidden="true">✦</span><span class="star s2" aria-hidden="true">✦</span><div class="n" id="s-opp">0</div><div class="l">기회요인</div></div>
+      <div class="stat risk"><div class="n" id="s-risk">0</div><div class="l">유한 품절(방어)</div></div>
+    </div>
+  </header>
+
+  <section class="panel sec-board" aria-labelledby="h-board">
+    <h2 id="h-board">수급 보드 · 신규 / 장기 품절</h2>
+    <p class="desc">색은 치료영역, 초록 테두리는 유한양행 대체 후보가 있는 품목, 빨간 테두리는 유한양행 자사 품목입니다. 앞 숫자는 순위입니다.</p>
+    <div class="scope"><span class="badge b-mute">분석 범위</span><span>신규·장기 품절 <b>각 20위까지</b>만 분석합니다. 21위 이하는 품절이 처방·매출에 주는 영향이 약해 <b>중요도가 낮은 구간</b>으로 보고 기회·위험 판정에서 제외했습니다.</span></div>
+    <div class="legend" id="legend"></div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section class="panel sec-opp" aria-labelledby="h-opp">
+    <h2 id="h-opp">기회요인 <span class="badge b-opp">경쟁사 품절 → 유한 전환</span><span class="m-count" id="opp-count"></span></h2>
+    <p class="desc d-only">성분이 달라 약국 대체조제는 불가하므로, 처방의 대상 <b>계열 전환(처방 변경) 디테일</b>이 필요한 기회입니다. 유한양행 취급 여부와 현재 재고는 배포 전 확인해 주세요.</p>
+    <p class="m-desc">경쟁사 품절 품목을 유한양행 품목으로 처방 전환할 수 있는 기회입니다. 신규·장기 품절 순위 순으로 정렬했고, 품목을 누르면 전환 포인트가 열립니다.</p>
+    <div class="grid-opp" id="opp"></div>
+    <ol class="opp-list" id="opp-m"></ol>
+  </section>
+
+  <section class="panel sec-risk" aria-labelledby="h-risk">
+    <h2 id="h-risk">위험요인 <span class="badge b-risk">방어 필요</span></h2>
+    <p class="desc">유한양행 자사 품목의 품절 여부와, 기회요인 실행 시 함께 커지는 리스크를 발생가능성 × 영향도로 정리했습니다.</p>
+    <div class="risk-grid">
+      <div class="selfbox" id="selfbox"></div>
+      <div>
+        <div class="matrix" id="matrix"></div>
+      </div>
+    </div>
+    <div class="rlist" id="rlist"></div>
+  </section>
+
+  <section class="panel sec-tbl" aria-labelledby="h-tbl">
+    <h2 id="h-tbl">전체 품절 품목</h2>
+    <p class="desc">성분·영역은 제품명 기준 분류이며 ‘추정’ 표시는 허가정보 대조가 필요합니다.</p>
+    <div class="tools">
+      <input id="q" type="search" placeholder="제약사·제품명·성분 검색">
+      <div class="seg" role="group" aria-label="필터">
+        <button id="f-all" data-f="all" aria-pressed="true">전체</button>
+        <button id="f-new" data-f="신규">신규</button>
+        <button id="f-long" data-f="장기">장기</button>
+        <button id="f-opp" data-f="opp">기회</button>
+        <button id="f-risk" data-f="risk">위험</button>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <colgroup><col style="width:64px"><col style="width:58px"><col style="width:150px"><col style="width:220px"><col style="width:200px"><col style="width:90px"><col style="width:104px"><col></colgroup>
+      <thead><tr><th class="c">구분</th><th class="c">순위</th><th>제약사</th><th>제품명</th><th>성분 / 계열</th><th class="c">변동·기간</th><th class="c">판정</th><th>유한 대응</th></tr></thead>
+      <tbody id="tb"></tbody>
+    </table></div>
+  </section>
+
+  <div class="seg theme-fab" role="group" aria-label="테마">
+    <button id="th-light" data-t="light" aria-label="라이트 모드" title="라이트 모드"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <button id="th-dark" data-t="dark" aria-label="다크 모드" title="다크 모드"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="th-sys" data-t="system" aria-label="시스템 설정 따르기" title="시스템 설정 따르기"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button>
+  </div>
+
+  <p class="foot">출처: 품절 순위 화면 캡처(신규 품절 진입 순위·장기 품절 지속 순위, 각 20위까지, <span id="foot-date">2026.11.05</span> 기준). 대체 후보는 치료계열 기준 제안이며 동일성분 대체조제 대상이 아닙니다. 유한양행 판매·코프로모션 범위, 보험 급여기준, 용량 환산은 학술·RA 검토 후 활용하세요.</p>
+</div>
+
+<script>
+(function(){
+/* ---------- 치료영역 ---------- */
+const AREAS = {
+  meta:{n:'당뇨·지질',c:'--c1'}, cv:{n:'고혈압·심혈관',c:'--c11'}, gi:{n:'소화기·간',c:'--c5'},
+  neuro:{n:'신경·정신',c:'--c6'}, inf:{n:'감염',c:'--c2'}, allergy:{n:'호흡기·알레르기',c:'--c8'},
+  eye:{n:'안과',c:'--c4'}, derm:{n:'피부',c:'--c3'}, uro:{n:'비뇨',c:'--c9'},
+  pain:{n:'진통·스테로이드',c:'--c10'}, nut:{n:'영양·비타민',c:'--c7'}
+};
+
+/* ---------- 제품 메타 (성분/영역) ---------- */
+const META = {
+  '리바로정2mg':['피타바스타틴','meta'],
+  '세토펜정325mg':['아세트아미노펜','pain'],
+  '위더스세파클러캡슐250mg':['세파클러','inf'],
+  '히알루미니점안액0.1% 0.5mL':['히알루론산나트륨','eye'],
+  '히알루미니점안액0.15% 0.5mL':['히알루론산나트륨','eye'],
+  '히알루미니점안액0.18% 0.5mL':['히알루론산나트륨','eye'],
+  '제미메트서방정25/500mg':['제미글립틴/메트포르민','meta'],
+  '메이킨큐장용정':['장정결제','gi'],
+  '토비애즈서방정4mg':['페소테로딘','uro'],
+  '토파맥스정25mg':['토피라메이트','neuro'],
+  '토파맥스정100mg':['토피라메이트','neuro'],
+  '미라펙스정0.25mg':['프라미펙솔','neuro'],
+  '다파엔듀오서방정10/500mg':['다파글리플로진/메트포르민','meta'],
+  '메드닌정':['메틸프레드니솔론','pain'],
+  '삼아아토크건조시럽 100g':['항알레르기 시럽(추정)','allergy'],
+  '라베졸정20mg':['라베프라졸','gi'],
+  '셀트리온트리메부틴말레산염정':['트리메부틴','gi'],
+  '라미실정125mg':['테르비나핀','derm'],
+  '올디피정5/40/12.5mg':['암로디핀/올메사르탄/HCTZ','cv'],
+  '자루텍스정625mg':['확인 필요','gi'],
+  '다이아벡스정250mg':['메트포르민','meta'],
+  '듀락칸시럽 15mL':['락툴로오스','gi'],
+  '듀락칸이지시럽 15mL':['락툴로오스','gi'],
+  '듀락칸이지시럽 500mL':['락툴로오스','gi'],
+  '우루사정100mg':['우르소데옥시콜산','gi'],
+  '이모튼캡슐300mg':['아보카도·소야 불검화물','pain'],
+  '헤로바유서방정':['확인 필요','pain'],
+  '헤파멜즈산':['L-오르니틴 L-아스파르트산','gi'],
+  '하모닐란액 200mL':['경장영양제','nut'],
+  '비카페롤플러스정':['비타민 복합(추정)','nut'],
+  '더모베이트연고 15g':['클로베타솔','derm'],
+  '락티케어제마지스로션0.25% 20g':['하이드로코르티손','derm'],
+  '알베릭스연질캡슐':['확인 필요','gi'],
+  '산도스설트랄린정':['설트랄린','neuro'],
+  '파자임95mg이중정':['소화효소','gi'],
+  '디카맥스디정':['칼슘/비타민D','nut'],
+  '헤모니아캡슐':['확인 필요','nut'],
+  '시카플루이드점안겔':['인공눈물(추정)','eye'],
+  '라미나지액 20mL':['확인 필요','gi'],
+  '테그레톨씨알정200mg':['카르바마제핀 CR','neuro']
+};
+
+/* ---------- 유한양행 대체 후보 (계열 전환) ---------- */
+// key: 제품명 또는 성분 키워드. pri: 전환 매력도(1~3)
+const OPP_MAP = [
+  {k:['제미메트','제미글립틴'], yh:'트라젠타듀오정', yhIng:'리나글립틴/메트포르민', pri:3, diff:1,
+   why:'DPP-4i+메트포르민 복합제 간 전환으로 처방 구조가 동일합니다. 리나글립틴은 신기능 용량조절이 필요 없어 신장기능 저하 환자 설득 포인트가 있습니다.',
+   act:'내과·가정의학과 당뇨 다처방 의원 우선 방문, 신기능 무관 용법 디테일'},
+  {k:['다파엔듀오','다파글리플로진'], yh:'자디앙듀오정', yhIng:'엠파글리플로진/메트포르민', pri:3, diff:1,
+   why:'SGLT2i+메트포르민 복합제 동일 계열 전환입니다. 순위가 3계단 오르며 품절이 확산 중입니다. 다파글리플로진 제네릭 다수가 동시에 이 수요를 노립니다.',
+   act:'심혈관·신장 아웃컴 근거로 오리지널 차별화, 제네릭 대비 포지셔닝 정리'},
+  {k:['리바로','피타바스타틴'], yh:'로수바미브정 · 아토바미브정', yhIng:'로수바스타틴(또는 아토르바스타틴)/에제티미브', pri:2, diff:2,
+   why:'신규 품절 1위 품목입니다. 스타틴 단일제에서 스타틴+에제티미브 복합제로 바꾸면 LDL 강하 강도가 달라지므로, 목표치 미달 환자부터 전환을 제안하는 방식이 적합합니다.',
+   act:'LDL 목표 미도달 환자 대상 복합제 상향 전환 메시지'},
+  {k:['올디피','올메사르탄'], yh:'트윈스타정', yhIng:'텔미사르탄/암로디핀', pri:2, diff:2,
+   why:'3제(ARB+CCB+이뇨제)에서 2제로 바뀌므로 이뇨제 별도 병용이 필요합니다. 순위가 14계단 올라 품절이 빠르게 확산되고 있습니다.',
+   act:'ARB+CCB 기반 처방 유지 제안, 이뇨제 병용 여부는 처방의 판단 안내'},
+  {k:['메드닌','메틸프레드니솔론'], yh:'소론도정', yhIng:'프레드니솔론', pri:2, diff:2,
+   why:'전신 스테로이드 간 전환입니다. 메틸프레드니솔론 4mg ≈ 프레드니솔론 5mg 역가 환산을 함께 안내해야 합니다.',
+   act:'역가 환산표 리플렛 제공, 정형외과·이비인후과·피부과 대상'},
+  {k:['비카페롤'], yh:'메가트루 · 삐콤씨', yhIng:'비타민 복합 (일반의약품)', pri:1, diff:1,
+   why:'52주 이상 장기 품절된 비타민 복합제로, 약국 진열 공백을 일반의약품으로 채울 수 있습니다. 처방 변경이 필요 없습니다.',
+   act:'약국 채널 진열·추천 프로모션, 동국제약 거래 약국 리스트 우선'},
+  {k:['다이아벡스'], yh:'트라젠타듀오정 (병용 환자 한정)', yhIng:'리나글립틴/메트포르민', pri:1, diff:3,
+   why:'메트포르민 단일제의 직접 대체품은 없습니다. 다만 DPP-4i를 따로 병용 중인 환자는 복합제로 묶어 품절 공백과 복약 부담을 함께 줄일 수 있습니다.',
+   act:'메트포르민+DPP-4i 2정 병용 환자 복합제 전환 제안'}
+];
+
+/* ---------- 리스크 (발생가능성 L, 영향도 I : 1~3) ---------- */
+const RISKS = [
+  {id:'R1', L:2, I:3, t:'대체 수요 유입에 따른 유한 품목 공급 부족',
+   d:'트라젠타듀오·자디앙듀오·트윈스타는 수입 완제품이어서 발주 리드타임이 깁니다. 전환 캠페인이 성공하면 유한 품목이 다음 품절 리스트에 오를 수 있습니다. 캠페인 전에 3개월 수요 증분과 안전재고를 SCM과 맞춰야 합니다.'},
+  {id:'R2', L:3, I:2, t:'품절 해소 후 원 처방 회귀',
+   d:'신규 품절(단기)은 재입고 시 처방이 원래 품목으로 돌아갈 가능성이 큽니다. 리바로·제미메트처럼 단기 품절 품목은 품절 기간이 아니라 전환 후 유지율로 성과를 봐야 합니다.'},
+  {id:'R3', L:2, I:1, t:'21위 이하 유한 품목 품절 (중요도 낮음)',
+   d:'21위 아래 품절은 처방 이탈 영향이 약해 분석 대상에서 제외했습니다. 다만 다음 업데이트에서 Top20으로 올라오는 유한 품목은 즉시 방어 대상으로 전환됩니다.'},
+  {id:'R4', L:3, I:1, t:'대체조제 불가로 인한 전환 지연',
+   d:'제안된 대체는 모두 성분이 달라 약국에서 바꿀 수 없고 처방의 변경이 필요합니다. 방문 주기가 긴 의원은 품절이 먼저 해소될 수 있습니다.'},
+  {id:'R5', L:3, I:2, t:'동일 계열 경쟁 제네릭과의 동시 공략',
+   d:'다파글리플로진·DPP-4i 제네릭사도 같은 품절 공백을 노립니다. 가격 경쟁에 끌려가지 말고 오리지널 근거와 공급 안정성을 메시지로 써야 합니다.'}
+];
+
+/* ---------- 기본 데이터 (캡처 기준) ---------- */
+const ASOF = '2026.11.05';   // 업데이트 시 기준일만 바꾸면 화면 전체에 반영
+const DEFAULT = [
+ ['신규',1,'제이더블유중외제약','리바로정2mg','-'],
+ ['신규',2,'삼아제약','세토펜정325mg','-'],
+ ['신규',3,'위더스제약','위더스세파클러캡슐250mg','▲12'],
+ ['신규',4,'한미약품','히알루미니점안액0.1% 0.5mL','▼1'],
+ ['신규',5,'한미약품','히알루미니점안액0.15% 0.5mL','▼1'],
+ ['신규',6,'엘지화학','제미메트서방정25/500mg','-'],
+ ['신규',7,'명인제약','메이킨큐장용정','▲1'],
+ ['신규',8,'한국화이자제약','토비애즈서방정4mg','▲98'],
+ ['신규',9,'한국얀센','토파맥스정25mg','▼4'],
+ ['신규',10,'한국베링거인겔하임','미라펙스정0.25mg','▼1'],
+ ['신규',11,'에이치케이이노엔','다파엔듀오서방정10/500mg','▲3'],
+ ['신규',12,'안국약품','메드닌정','▼1'],
+ ['신규',13,'삼아제약','삼아아토크건조시럽 100g','▲100+'],
+ ['신규',14,'테라젠이텍스','라베졸정20mg','▲2'],
+ ['신규',15,'한국얀센','토파맥스정100mg','▼2'],
+ ['신규',16,'셀트리온제약','셀트리온트리메부틴말레산염정','▼9'],
+ ['신규',17,'한국노바티스','라미실정125mg','▼5'],
+ ['신규',18,'셀트리온제약','올디피정5/40/12.5mg','▲14'],
+ ['신규',19,'테라젠이텍스','자루텍스정625mg','-'],
+ ['신규',20,'한미약품','히알루미니점안액0.18% 0.5mL','▼3'],
+ ['장기',1,'대웅제약','다이아벡스정250mg','52주+'],
+ ['장기',2,'제이더블유중외제약','듀락칸시럽 15mL','52주+'],
+ ['장기',3,'제이더블유중외제약','듀락칸이지시럽 15mL','52주+'],
+ ['장기',4,'제이더블유중외제약','듀락칸이지시럽 500mL','52주+'],
+ ['장기',5,'대웅제약','우루사정100mg','52주+'],
+ ['장기',6,'종근당','이모튼캡슐300mg','52주+'],
+ ['장기',7,'부광약품','헤로바유서방정','52주+'],
+ ['장기',8,'한화제약','헤파멜즈산','52주+'],
+ ['장기',9,'영진약품','하모닐란액 200mL','52주+'],
+ ['장기',10,'동국제약','비카페롤플러스정','52주+'],
+ ['장기',11,'글락소스미스클라인','더모베이트연고 15g','52주+'],
+ ['장기',12,'한국파마','락티케어제마지스로션0.25% 20g','52주+'],
+ ['장기',13,'부광약품','알베릭스연질캡슐','52주+'],
+ ['장기',14,'삼일제약','산도스설트랄린정','52주+'],
+ ['장기',15,'부광약품','파자임95mg이중정','52주+'],
+ ['장기',16,'다림바이오텍','디카맥스디정','52주+'],
+ ['장기',17,'동구바이오제약','헤모니아캡슐','52주+'],
+ ['장기',18,'삼일제약','시카플루이드점안겔','52주+'],
+ ['장기',19,'태준제약','라미나지액 20mL','52주+'],
+ ['장기',20,'한국노바티스','테그레톨씨알정200mg','52주+']
+];
+
+let DATA = [];
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const isYH = m=>/유한/.test(m);
+// 제품명은 이름과 함량 사이에서만 줄바꿈되도록 <wbr> 삽입
+const nm = s=>esc(s).replace(/([가-힣])(\d)/,'$1<wbr>$2');
+
+function changeNum(v){ const m=String(v).match(/([▲▼+-])?\s*(\d+)/); if(!m) return 0; const n=+m[2]; return (m[1]==='▼'||m[1]==='-')?-n:n; }
+function weeks(v){ const m=String(v).match(/(\d+)\s*주/); return m?+m[1]:0; }
+
+function enrich(rows){
+  return rows.map((r,i)=>{
+    const [kind,rank,maker,name,val]=r;
+    const meta = META[name] || guessMeta(name);
+    const ing = meta[0], area = meta[1];
+    const opp = isYH(maker)?null:OPP_MAP.find(o=>o.k.some(k=>name.includes(k)||ing.includes(k)));
+    let score=0;
+    if(opp){
+      const rk = kind==='신규' ? (21-Math.min(rank,20))*2 : 18;          // 순위 / 장기 지속 가중
+      const mo = kind==='신규' ? Math.max(0,Math.min(changeNum(val),20)) : Math.min(weeks(val),52)/4;
+      score = Math.round(rk + mo + opp.pri*8);
+    }
+    return {id:'p'+i,kind,rank:+rank,maker,name,val,ing,area,opp,score,risk:isYH(maker)};
+  });
+}
+function guessMeta(name){
+  for(const k in META){ if(name.replace(/\s/g,'').startsWith(k.replace(/\s/g,'').slice(0,4))) return META[k]; }
+  return ['확인 필요','nut'];
+}
+
+/* ---------- render ---------- */
+function renderLegend(){
+  $('#legend').innerHTML = Object.values(AREAS).map(a=>`<span><i style="background:var(${a.c})"></i>${a.n}</span>`).join('')
+   + `<span class="yh"><i></i>유한 대체 후보</span><span class="yh"><i style="border-color:var(--risk)"></i>유한 자사 품목</span>`;
+}
+function renderBoard(){
+  const lanes=[['신규','신규 품절 진입','순위 변동 기준'],['장기','장기 품절 지속','52주 이상']];
+  $('#board').innerHTML = lanes.map(([k,t,s])=>{
+    const items=DATA.filter(d=>d.kind===k).sort((a,b)=>a.rank-b.rank);
+    return `<div class="lane"><div class="lane-h">${t}<small>${items.length}건 · ${s}</small></div><div class="chips">${
+      items.map((d,i)=>`<button class="chip ${d.opp?'is-opp':''} ${d.risk?'is-risk':''}" style="--cc:var(${(AREAS[d.area]||AREAS.nut).c});--i:${i%5}" data-go="${d.id}" title="${esc(d.maker)} ${esc(d.name)}${d.opp?' · 유한 대체: '+esc(d.opp.yh):''}"><span class="r">${d.rank}</span>${d.opp?'<span class="spark" aria-hidden="true">✦</span>':''}${esc(d.name)}</button>`).join('')
+    }</div></div>`;
+  }).join('');
+}
+function renderOpp(){
+  const list=DATA.filter(d=>d.opp).sort((a,b)=>(a.kind==='장기')-(b.kind==='장기')||a.rank-b.rank);
+  const max=Math.max(...list.map(d=>d.score),1);
+  $('#opp').innerHTML = list.length? list.map((d,i)=>{
+    const tr = d.kind==='신규' ? (d.val==='-'?'–':d.val) : d.val;
+    return `<article class="oc">
+      <div class="oc-top"><span class="oc-src"><span class="nw">${d.rank}위 · ${esc(tr)}</span> · <span class="nw">${esc(d.maker)}</span></span><span class="badge ${d.kind==='신규'?'b-warn':'b-risk'}">${d.kind} 품절</span></div>
+      <div class="flow">
+        <div class="from"><b>${nm(d.name)}</b><small>${esc(d.ing)}</small></div>
+        <div class="arr" aria-hidden="true">→</div>
+        <div class="to" style="--i:${i%5}"><b>${nm(d.opp.yh)}<span class="spark" aria-hidden="true">✦</span></b><small>${esc(d.opp.yhIng)}</small></div>
+      </div>
+      <div class="meter" aria-hidden="true"><i style="width:100%"></i></div>
+      <p>${esc(d.opp.why)}</p>
+      <div class="act"><b>실행</b> · ${esc(d.opp.act)}</div>
+    </article>`;}).join('') : `<p class="msg">현재 데이터에서 대체 후보가 매칭된 품목이 없습니다.</p>`;
+  $('#s-opp').textContent=list.length;
+  $('#opp-count').textContent=list.length+'건';
+  $('#opp-m').innerHTML = list.map((d,i)=>{
+    const tr = d.kind==='신규' ? (d.val==='-'?'–':d.val) : d.val;
+    return `<li class="om">
+      <div class="om-head"><span class="nw"><span class="no">${i+1}</span>${d.rank}위 · ${esc(tr)}</span><span class="badge ${d.kind==='신규'?'b-warn':'b-risk'}">${d.kind} 품절</span></div>
+      <div class="om-body">
+        <div class="om-row"><span class="om-tag out">품절</span><div><b>${nm(d.name)}</b><small>${esc(d.maker)} · ${esc(d.ing)}</small></div></div>
+        <div class="om-arrow" aria-hidden="true"><span>↓</span></div>
+        <div class="om-row to"><span class="om-tag in" style="--i:${i%5}">유한</span><div><b>${nm(d.opp.yh)}<span class="spark" aria-hidden="true">✦</span></b><small>${esc(d.opp.yhIng)}</small></div></div>
+      </div>
+      <details><summary>전환 포인트</summary>
+        <div class="om-more"><span>${esc(d.opp.why)}</span><span><b>실행</b> · ${esc(d.opp.act)}</span></div>
+      </details>
+    </li>`;}).join('');
+}
+function renderRisk(){
+  const own=DATA.filter(d=>d.risk).sort((a,b)=>(b.kind==='장기')-(a.kind==='장기')||a.rank-b.rank);
+  $('#s-risk').textContent=own.length;
+  if(own.length){
+    $('#selfbox').innerHTML = `<div class="big"><span class="n">${own.length}</span><b>유한양행 품목 품절 중</b></div>
+      <div class="rlist" style="margin:0">${own.map(d=>{
+        const w=weeks(d.val), crit=d.kind==='장기'&&w>=26;
+        return `<div class="ri"><span class="id">${d.kind==='장기'?'장':'신'}${d.rank}</span><div><b>${esc(d.name)} <span class="badge ${crit?'b-risk':'b-warn'}">${crit?'심각':'주의'}</span></b>
+        <p>${esc(d.ing)} · ${esc(d.val)}. ${crit?'장기 품절로 처방 이탈이 이미 진행 중일 수 있습니다. 동일 성분 경쟁 제네릭으로의 대체조제 유출 여부를 거래처별로 확인하고, 재입고 일정 공지와 회복 프로모션을 준비하세요.':'신규 품절 단계입니다. 재입고 예정일을 영업부에 즉시 공유하고, 주요 거래처에 품절 기간 안내와 재처방 약속을 받아두세요.'}</p></div></div>`;}).join('')}</div>`;
+  } else {
+    $('#selfbox').innerHTML = `<div class="big ok"><span class="n">0</span><b>Top20 내 유한양행 품절 품목 없음</b></div>
+      <p class="msg" style="margin:0">신규·장기 품절 Top20 ${DATA.length}건 가운데 유한양행 품목은 없습니다. 21위 이하는 중요도가 낮아 판정에서 제외했습니다. 직접 방어 대상은 없지만 아래 한 가지는 관리가 필요합니다.</p>
+      <div class="ri"><span class="id">!</span><div><b>기회요인이 곧 위험요인</b><p>전환 캠페인 대상 ${DATA.filter(d=>d.opp).length}개 품목이 유한 품목 수요를 끌어올립니다. 공급 여력 확인이 먼저입니다.</p></div></div>`;
+  }
+  // matrix: rows = 영향도 3→1, cols = 발생가능성 1→3
+  let h='';
+  for(let I=3;I>=1;I--){
+    h+=`<div class="ylab">${I===3?'영향 상':I===2?'영향 중':'영향 하'}</div>`;
+    for(let L=1;L<=3;L++){
+      const lv=(I+L>=5)?'l3':(I+L>=4)?'l2':'l1';
+      h+=`<div class="mx ${lv}">${RISKS.filter(r=>r.L===L&&r.I===I).map(r=>`<button class="rdot" data-r="${r.id}">${r.id}</button>`).join('')}</div>`;
+    }
+  }
+  h+=`<div></div><div class="xlab">발생 낮음</div><div class="xlab">발생 중간</div><div class="xlab">발생 높음</div>`;
+  $('#matrix').innerHTML=h;
+  $('#rlist').innerHTML=RISKS.slice().sort((a,b)=>(b.L*b.I)-(a.L*a.I)).map(r=>{
+    const s=r.L*r.I, lv=s>=6?['상','b-risk']:s>=4?['중','b-warn']:['하','b-mute'];
+    return `<div class="ri" id="ri-${r.id}"><span class="id">${r.id}</span><div><b>${esc(r.t)} <span class="badge ${lv[1]}">위험도 ${lv[0]} · ${s}</span></b><p>${esc(r.d)}</p></div></div>`;
+  }).join('');
+}
+let filter='all';
+function renderTable(){
+  const q=$('#q').value.trim();
+  const rows=DATA.filter(d=>{
+    if(filter==='opp'&&!d.opp) return false;
+    if(filter==='risk'&&!d.risk) return false;
+    if((filter==='신규'||filter==='장기')&&d.kind!==filter) return false;
+    if(q && !(d.maker+d.name+d.ing).includes(q)) return false;
+    return true;
+  });
+  $('#tb').innerHTML = rows.map(d=>{
+    const c=changeNum(d.val);
+    const vcls = d.kind==='신규' ? (c>0?'up':c<0?'down':'') : 'up';
+    const judge = d.risk?'<span class="badge b-risk">위험 · 방어</span>':d.opp?'<span class="badge b-opp">기회</span>':'<span class="badge b-mute">모니터링</span>';
+    const yh = d.risk?'<span class="yh-cell risk">재입고 일정 공유 · 이탈 거래처 관리</span>':d.opp?`<span class="yh-cell">${esc(d.opp.yh)}</span>`:'<span style="color:var(--mute)">대체 후보 없음</span>';
+    return `<tr id="${d.id}"><td class="c nw t-kind">${d.kind}</td><td class="c num t-rank">${d.rank}</td><td class="t-maker">${esc(d.maker)}</td><td class="cell-name t-name"><b>${nm(d.name)}</b></td>
+      <td class="t-ing"><span class="cell-ing"><span class="area-dot" style="background:var(${(AREAS[d.area]||AREAS.nut).c})"></span><span>${esc(d.ing)}</span></span></td>
+      <td class="c num t-val ${vcls}">${esc(d.val)}</td><td class="c t-judge">${judge}</td><td class="t-yh">${yh}</td></tr>`;
+  }).join('') || `<tr><td colspan="8" class="msg">조건에 맞는 품목이 없습니다.</td></tr>`;
+}
+function renderAll(){
+  $('#s-all').textContent=DATA.length; $('#cnt-src').textContent=DATA.length;
+  renderBoard(); renderOpp(); renderRisk(); renderTable();
+}
+
+/* ---------- interactions ---------- */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-go]');
+  if(c){
+    filter='all'; setFilterBtns(); $('#q').value=''; renderTable();
+    const tr=document.getElementById(c.dataset.go);
+    if(tr){ tr.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'}); tr.classList.add('flash'); setTimeout(()=>tr.classList.remove('flash'),1800); }
+  }
+  const r=e.target.closest('[data-r]');
+  if(r){ const el=document.getElementById('ri-'+r.dataset.r); document.querySelectorAll('.ri.hl').forEach(x=>x.classList.remove('hl')); if(el){el.classList.add('hl'); el.scrollIntoView({behavior:'smooth',block:'center'});} }
+});
+function setFilterBtns(){ document.querySelectorAll('[data-f]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===filter))); }
+document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;setFilterBtns();renderTable();});
+$('#q').addEventListener('input',renderTable);
+
+/* theme */
+function applyTheme(t){
+  if(t==='system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('[data-t]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===t)));
+  try{localStorage.setItem('brp-theme2',t)}catch(_){}
+}
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>applyTheme(b.dataset.t));
+let saved='light'; try{saved=localStorage.getItem('brp-theme2')||'light'}catch(_){}
+applyTheme(saved);
+
+/* init */
+$('#asof').textContent=ASOF; $('#foot-date').textContent=ASOF;
+renderLegend();
+DATA=enrich(DEFAULT); renderAll();
+})();
+</script>
