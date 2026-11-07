@@ -1298,6 +1298,7 @@ const QL_DEFAULTS = [
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
   { id: 'health',   name: '건강의 벗',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '2026 국내·해외 학회정보', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
+  { id: 'pm',       name: '품목 검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1315,6 +1316,8 @@ const QL_ICONS = {
     '<rect x="13" y="17" width="34" height="31" rx="5" fill="#fff"/><path d="M13 26h34" stroke="#2B78E4" stroke-width="2.6"/><path d="M21 13v8M39 13v8" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><text x="25" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="13" fill="#2B6FE0">26</text><circle cx="45" cy="44" r="8.5" fill="#2B6FE0" stroke="#fff" stroke-width="2.6"/><path d="M36.5 44h17M45 35.5c-3 3-3 14 0 17M45 35.5c3 3 3 14 0 17" fill="none" stroke="#fff" stroke-width="1.8"/>' },
   research: { name: 'VOY Research (설문)', c: ['#B9DB4E', '#5E9E2B'], g:
     '<rect x="16" y="14" width="30" height="37" rx="5" fill="#fff"/><rect x="25" y="11" width="12" height="7" rx="2.5" fill="#fff" stroke="#6AA832" stroke-width="2"/><path d="M21 27l2.5 2.5L28 25" fill="none" stroke="#6AA832" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 37l2.5 2.5L28 35" fill="none" stroke="#6AA832" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 27.5h10M31 37.5h8" stroke="#B5CF8F" stroke-width="2.8" stroke-linecap="round"/><circle cx="45" cy="46" r="7" fill="#F2B233" stroke="#fff" stroke-width="2.4"/><path d="M42 46l2 2 3.5-3.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>' },
+  pm: { name: '품목 검색 (캡슐·돋보기)', c: ['#C58BFF', '#7B3FE4'], g:
+    '<g transform="rotate(-40 26 28)"><rect x="12" y="21" width="28" height="14" rx="7" fill="#fff"/><path d="M26 21h7a7 7 0 0 1 0 14h-7Z" fill="#E9D8FF"/></g><circle cx="38" cy="38" r="9.5" fill="#8B4CEB" stroke="#fff" stroke-width="3.6"/><circle cx="38" cy="38" r="4.2" fill="none" stroke="#fff" stroke-width="2" opacity=".55"/><path d="M45 45l6.5 6.5" stroke="#fff" stroke-width="4.4" stroke-linecap="round"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -1324,6 +1327,13 @@ function qlIconSVG(key, size) {
     <rect width="64" height="64" rx="16" fill="url(#${id})"/><rect width="64" height="32" rx="16" fill="#fff" opacity=".08"/>${ic.g}</svg>`;
 }
 
+/* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
+function qlMerge(raw) {
+  if (!(Array.isArray(raw) && raw.length)) return QL_DEFAULTS.map(l => ({ ...l }));
+  const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
+  QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
+  return out;
+}
 const QL = {
   list: [], auto: {}, flags: {}, base: location.href,
   /* 폴더 주소(yhdbt/)는 커뮤니티 첫 페이지 기준으로 해석 — 관리자 페이지(/admin/)에서도 같은 곳을 가리키도록 */
@@ -1331,7 +1341,7 @@ const QL = {
   resolve(u) { u = String(u || '').trim(); if (!u) return '';
     if (!/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(u)) { const [path, rest = ''] = u.split(/(?=[?#])/); if (path.endsWith('/')) u = path + 'index.html' + rest; else if (!/\.[a-z0-9]{2,5}$/i.test(path.split('/').pop())) u = path + '/index.html' + rest; }
     try { return new URL(u, this.base).href; } catch (e) { return u; } },
-  init(raw) { this.list = (Array.isArray(raw) && raw.length ? raw : QL_DEFAULTS).filter(l => l.on !== false); },
+  init(raw) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed); },
   seen() { try { return JSON.parse(localStorage.getItem('voy_ql_seen') || '{}'); } catch (e) { return {}; } },
   markSeen(id) { const s = this.seen(); s[id] = Date.now(); try { localStorage.setItem('voy_ql_seen', JSON.stringify(s)); } catch (e) {} },
   lastUpdate(l) { return Math.max(l.updated_at ? new Date(l.updated_at).getTime() : 0, this.auto[l.id] || 0); },
