@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YH MKT PM 품목 검색</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Oswald:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #1a7a4a;
+      --green-dark:  #0f5233;
+      --green-light: #e8f5ee;
+      --green-mid:   #c5e8d4;
+      --black:       #111111;
+      --gray:        #555555;
+      --gray-light:  #f5f5f5;
+      --border:      #d4d4d4;
+      --white:       #ffffff;
+      --pink:        #e8005a;
+      --pink-light:  #fff0f5;
+      --red:         #cc1c1c;
+    }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--green-dark);
+      padding: 32px 40px 28px;
+    }
+
+    /* 상단 한 줄: 로고/타이틀 + 날짜 배지 */
+    .hd-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: nowrap;
+    }
+    .hd-left {}
+    .hd-eyebrow {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--green-mid);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    h1 {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(22px, 4vw, 44px);
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    h1 em { font-style: normal; color: #6dffb0; }
+    .hd-sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--green-mid);
+      line-height: 1.5;
+    }
+
+    /* 날짜 배지 */
+    .hd-badge {
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 14px;
+      padding: 14px 22px;
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .badge-dot-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #6dffb0;
+      animation: blink 2s infinite;
+      flex-shrink: 0;
+    }
+    .badge-label {
+      font-size: 11px;
+      color: var(--green-mid);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    /* 금일 접속수 fixed 위젯 */
+    #visit-widget {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: rgba(0,0,0,0.1);
+      color: var(--gray);
+      border-radius: 8px;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 999;
+      font-size: 11px;
+      border: 1px solid var(--border);
+    }
+    #visit-widget .vw-label { color: var(--gray); }
+    #visit-widget .vw-count { font-weight: 700; color: var(--green-dark); }
+    #visit-widget .vw-sub { display: none; }
+    .badge-date {
+      font-family: 'Oswald', sans-serif;
+      font-size: clamp(18px, 3.5vw, 30px);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* 검색 영역 (헤더 안) */
+    .hd-search {
+      margin-top: 22px;
+    }
+    .search-box { position: relative; }
+    .search-ico {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 17px;
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-radius: 10px;
+      padding: 14px 18px 14px 46px;
+      font-size: 15px;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--black);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    #searchInput:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(232,0,90,0.15);
+    }
+    #searchInput::placeholder { color: #aaa; }
+
+    /* 팀 필터 */
+    .filter-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .filter-btn {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: rgba(255,255,255,0.75);
+      font-size: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover {
+      border-color: #6dffb0;
+      color: #6dffb0;
+    }
+    .filter-btn.active {
+      background: var(--white);
+      border-color: var(--white);
+      color: var(--green-dark);
+      font-weight: 700;
+    }
+
+    /* ── STATS ── */
+    .stats-row {
+      display: flex;
+      border-bottom: 2.5px solid var(--green);
+      background: var(--white);
+    }
+    .stat-item {
+      flex: 1;
+      padding: 16px 24px;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--green-dark);
+    }
+    .stat-label { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
+    /* ── RESULTS AREA ── */
+    .results-wrap {
+      max-width: 1120px;
+      margin: 28px auto 0;
+      padding: 0 24px;
+    }
+
+    /* 검색 전 안내 */
+    .prompt-state {
+      text-align: center;
+      padding: 56px 20px 40px;
+      color: var(--gray);
+    }
+    .prompt-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.25; }
+    .prompt-state h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--black);
+      margin-bottom: 8px;
+    }
+    .prompt-state p { font-size: 14px; color: var(--gray); line-height: 1.7; }
+
+    .results-meta {
+      font-size: 13px;
+      color: var(--gray);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .results-meta strong { color: var(--green-dark); font-weight: 700; }
+
+    #results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      animation: fadeUp 0.2s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .card:hover {
+      border-color: var(--green);
+      box-shadow: 0 4px 18px rgba(26,122,74,0.1);
+    }
+    .card-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--green);
+    }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-top: 4px;
+    }
+    .badge-team {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--green-light);
+      color: var(--green-dark);
+      border: 1px solid var(--green-mid);
+      border-radius: 6px;
+      padding: 3px 9px;
+      white-space: nowrap;
+    }
+    .badge-group {
+      font-size: 11px;
+      color: var(--gray);
+      background: var(--gray-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 9px;
+      text-align: right;
+      line-height: 1.4;
+    }
+    .pm-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .pm-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--green-dark);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pm-name { font-size: 19px; font-weight: 700; color: var(--black); line-height: 1.1; }
+    .pm-label { font-size: 11px; color: var(--gray); }
+
+    /* 팀장 영역 */
+    .leader-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 7px 10px;
+      background: var(--green-light);
+      border: 1px solid var(--green-mid);
+      border-radius: 8px;
+    }
+    .leader-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .leader-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--white);
+      background: var(--green-dark);
+      border-radius: 4px;
+      padding: 1px 6px;
+      white-space: nowrap;
+    }
+    .leader-name { font-size: 14px; font-weight: 700; color: var(--green-dark); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tag {
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--gray-light);
+      color: var(--gray);
+    }
+    .tag.match {
+      background: var(--pink-light);
+      border-color: var(--pink);
+      color: var(--pink);
+      font-weight: 700;
+    }
+    mark {
+      background: rgba(232,0,90,0.13);
+      color: var(--pink);
+      border-radius: 2px;
+      font-weight: 700;
+    }
+
+    /* 결과 없음 */
+    .empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 56px 20px;
+      color: var(--gray);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+    .empty p { font-size: 14px; line-height: 1.9; }
+    .empty strong { color: var(--red); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      header { padding: 20px 16px 16px; }
+      .hd-top { flex-wrap: nowrap; align-items: flex-start; gap: 12px; }
+      h1 { font-size: 22px; }
+      .hd-sub { font-size: 11px; }
+      .hd-badge { padding: 10px 14px; border-radius: 10px; gap: 4px; }
+      .badge-date { font-size: 16px; }
+      .badge-label { font-size: 9px; }
+      .dot { width: 8px; height: 8px; }
+      .hd-search { margin-top: 16px; }
+      #searchInput { font-size: 14px; padding: 12px 14px 12px 42px; }
+      .filter-row { gap: 6px; }
+      .filter-btn { font-size: 11px; padding: 4px 11px; }
+      .stats-row { display: none; }
+      .results-wrap { padding: 0 14px; }
+      #results { grid-template-columns: 1fr; }
+      .prompt-state { padding: 40px 16px 28px; }
+      .prompt-icon { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hd-top">
+    <div class="hd-left">
+      <div class="hd-eyebrow">유한양행 · 마케팅</div>
+      <h1>PM 품목 <em>검색</em></h1>
+      <p class="hd-sub">품목 또는 PM명을 입력하면<br>정보를 드립니다.</p>
+    </div>
+    <div class="hd-badge">
+      <div class="badge-dot-row">
+        <span class="dot"></span>
+        <span class="badge-label">기준일</span>
+      </div>
+      <div class="badge-date">2026년 4월 27일</div>
+    </div>
+  </div>
+
+  <div class="hd-search">
+    <div class="search-box">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="searchInput" placeholder="품목명 검색 (예: 자디앙, 렉라자, 로수바미브...)" autocomplete="off" />
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn active" data-team="전체">전체</button>
+      <button class="filter-btn" data-team="1팀">1팀</button>
+      <button class="filter-btn" data-team="2팀">2팀</button>
+      <button class="filter-btn" data-team="3팀">3팀</button>
+      <button class="filter-btn" data-team="4팀 (항암)">4팀 (항암)</button>
+      <button class="filter-btn" data-team="5팀">5팀</button>
+      <button class="filter-btn" data-team="디지털마케팅팀">디지털마케팅팀</button>
+    </div>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat-item">
+    <div class="stat-num">29</div>
+    <div class="stat-label">PM 인원</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">6</div>
+    <div class="stat-label">팀 수</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num" id="statProduct">—</div>
+    <div class="stat-label">총 품목 수</div>
+  </div>
+</div>
+
+<div class="results-wrap">
+  <div id="resultsMeta" class="results-meta" style="display:none">
+    총 <strong id="countDisplay">0</strong>명의 PM이 검색되었습니다
+  </div>
+  <div id="results"></div>
+</div>
+
+<script>
+const PM_DATA = [
+  { team:"1팀", group:"Immunology",         pm:"박재우", products:["제포시아"] },
+  { team:"1팀", group:"Immunology",         pm:"신경연", products:["소틱투"] },
+  { team:"1팀", group:"HBV",                pm:"박성준", products:["베믈리디","비리어드"] },
+  { team:"1팀", group:"항진균제, 항생제",     pm:"홍준영", products:["암비솜","마이카민","메로펜","팜빅스","큐라실"] },
+  { team:"1팀", group:"혈액질환 치료제",      pm:"정민혜", products:["글리벡","타시그나"] },
+  { team:"1팀", group:"혈액질환 치료제",      pm:"성현기", products:["레볼레이드","엑스자이드","아나그레","애니세프","유크라","유크라듀오","세프라딘","세파클러","올세프","키목신"] },
+  { team:"1팀", group:"HCV",                pm:"최진우", products:["엡클루사","보세비"] },
+
+  { team:"2팀", group:"순환기계",     pm:"박대일", products:["로수바미브","아토바미브","아토르바","모노로바","액티라제","메탈라제"] },
+  { team:"2팀", group:"순환기계",     pm:"조윤준", products:["로수바미브","아토바미브","아토르바","모노로바","클로그렐","아토바미브에이","피타바노","아스피린"] },
+  { team:"2팀", group:"순환기계",     pm:"이재신", products:["로수바미브","아토바미브","아토르바","모노로바","페노웰","로수암핀","티지웰"] },
+  { team:"2팀", group:"순환기계",     pm:"곽지연", products:["트루셋","트윈로우","트윈스타","미카클로","미카르디스"] },
+  { team:"2팀", group:"순환기계",     pm:"최재우", products:["트루셋","트윈로우","트윈스타","미카클로","미카르디스","듀오웰","다이크로짇","로자살탄","디오살탄","암로핀"] },
+  { team:"2팀", group:"상부위장관",   pm:"이욱현", products:["라베피드","에소피드","레코미드","알마겔","레바넥스","타가메트","큐자임"] },
+
+  { team:"3팀", group:"내분비계",          pm:"김기신", products:["에스글리토","자디앙","안플라그","프레가발린","소론도"] },
+  { team:"3팀", group:"내분비계",          pm:"민우식", products:["자디앙","트라젠타","트라듀오","산도스타틴","덴시본플러스","리스넬","덱사메타손"] },
+  { team:"3팀", group:"내분비계",          pm:"차승우", products:["자디앙","에스글리토","액피오","로수메트"] },
+  { team:"3팀", group:"내분비계",          pm:"문예은", products:["자디앙","글라디엠","글라포민","메트포르민","다이그린"] },
+  { team:"3팀", group:"호흡기계, 비뇨기계", pm:"차홍석", products:["리알트리스","나자케어","코푸","유한엔플루","카필리아","프라카논","싱카스트","뉴팩탄","레리진","아보테리드","타다포스","이디포스","탐스날","파나스카","자프로스티","페로시아"] },
+
+  { team:"4팀 (항암)", group:"항암제", pm:"구세진", products:["렉라자"] },
+  { team:"4팀 (항암)", group:"항암제", pm:"조민규", products:["렉라자","옥사플라","기타항암제","젬시빈","캠테칸","메토트렉세이트","도소텔주"] },
+  { team:"4팀 (항암)", group:"항암제", pm:"박태빈", products:["렉라자","페마라","타이커브"] },
+
+  { team:"5팀", group:"의료기기/신경계/근골격계", pm:"신재승", products:["유한리바록사반","알포아티린","메모패치","아리페질","뉴큅","트리돌","알모그란"] },
+  { team:"5팀", group:"의료기기/수액제",          pm:"이종찬", products:["큐어란","리쥬비넥스","수액제","진파인더","멜스몬","리포오란","액티비원","씨포텐","유한칼디페롤","삐콤헥사주"] },
+  { team:"5팀", group:"신경계/근골격계",           pm:"김형욱", products:["메모패치","메모큐"] },
+  { team:"5팀", group:"신경계/근골격계",           pm:"이주형", products:["메모패치","메모큐"] },
+
+  { team:"디지털마케팅팀", group:"디지털 콘텐츠/교육", pm:"김영민", products:["스튜디오 행사 진행 및 편집","약품사업본부 교육","미디어센터 관리"] },
+  { team:"디지털마케팅팀", group:"디지털 마케팅",      pm:"노윤선", products:["유메디","유레카","디지털 콘텐츠","디지털마케팅 기획"] },
+  { team:"디지털마케팅팀", group:"디지털 마케팅",      pm:"이유정", products:["유레카","Yuclip","디지털 콘텐츠","디지털 브로셔","웨비나 브로셔","뉴스레터"] },
+  { team:"디지털마케팅팀", group:"디지털 마케팅",      pm:"정연우", products:["유메디","유메디 플러스","유한 위키","스튜디오 행사 진행","디지털마케팅 활동 분석","키메시지 요약집"] },
+];
+
+const TEAM_LEADERS = {
+  "1팀":        "김민주",
+  "2팀":        "박준표",
+  "3팀":        "김종혁",
+  "4팀 (항암)": "소순용",
+  "5팀":        "김환구",
+  "디지털마케팅팀": "강영일",
+};
+
+const allProds = new Set();
+PM_DATA.forEach(d => d.products.forEach(p => allProds.add(p)));
+document.getElementById('statProduct').textContent = allProds.size;
+
+let currentTeam = '전체';
+let currentQuery = '';
+
+function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function hl(text, q) {
+  if (!q) return text;
+  return text.replace(new RegExp(`(${esc(q)})`,'gi'),'<mark>$1</mark>');
+}
+
+function render() {
+  const q = currentQuery.trim();
+  const el = document.getElementById('results');
+  const meta = document.getElementById('resultsMeta');
+  const ct = document.getElementById('countDisplay');
+
+  // 검색어도 없고 전체 탭이면 안내 화면
+  if (!q && currentTeam === '전체') {
+    meta.style.display = 'none';
+    el.innerHTML = '<div class="prompt-state">'
+      + '<div class="prompt-icon">🔍</div>'
+      + '<h2>품목명을 검색하거나 팀을 선택해 주세요</h2>'
+      + '<p>검색창에 품목명 또는 PM 이름을 입력하거나<br>상단의 팀 버튼을 클릭하면 해당 팀 PM 정보가 표시됩니다.</p>'
+      + '</div>';
+    return;
+  }
+
+  const list = PM_DATA.filter(d => {
+    if (currentTeam !== '전체' && d.team !== currentTeam) return false;
+    if (!q) return true;
+    return d.products.some(p => p.includes(q)) || d.pm.includes(q) || d.group.includes(q);
+  });
+
+  ct.textContent = list.length;
+  meta.style.display = 'block';
+
+  if (!list.length) {
+    const msg = q ? '"' + q + '"에 대한 결과가 없습니다.' : '해당 팀의 PM 정보가 없습니다.';
+    el.innerHTML = '<div class="empty"><div class="empty-icon">😕</div><p>' + msg + '</p></div>';
+    return;
+  }
+
+  el.innerHTML = list.map(d => {
+    const tags = d.products.map(p => {
+      const m = p.includes(q);
+      return `<span class="tag${m?' match':''}">${hl(p,q)}</span>`;
+    }).join('');
+    const leader = TEAM_LEADERS[d.team] || '';
+    const leaderHtml = leader
+      ? '<div class="leader-row">'
+        + '<div class="leader-avatar">' + leader.charAt(0) + '</div>'
+        + '<span class="leader-tag">팀장</span>'
+        + '<span class="leader-name">' + leader + '</span>'
+        + '</div>'
+      : '';
+    return `
+      <div class="card">
+        <div class="card-bar"></div>
+        <div class="card-top">
+          <span class="badge-team">${d.team}</span>
+          <span class="badge-group">${d.group}</span>
+        </div>
+        ${leaderHtml}
+        <div class="pm-row">
+          <div class="pm-avatar">${d.pm.charAt(0)}</div>
+          <div><div class="pm-name">${d.pm}</div><div class="pm-label">PM</div></div>
+        </div>
+        <div class="tags">${tags}</div>
+      </div>`;
+  }).join('');
+}
+
+let composing = false;
+const inp = document.getElementById('searchInput');
+inp.addEventListener('compositionstart', () => { composing = true; });
+inp.addEventListener('compositionend', e => { composing = false; currentQuery = e.target.value; render(); });
+inp.addEventListener('input', e => { if (!composing) { currentQuery = e.target.value; render(); } });
+inp.addEventListener('keyup', () => { currentQuery = inp.value; render(); });
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTeam = btn.dataset.team;
+    render();
+  });
+});
+
+render();
+
+// ── 금일 접속수 (한국시간 기준, Firebase transaction) ──
+(async function() {
+  const DB_URL = 'https://yuhan-pm-search-default-rtdb.asia-southeast1.firebasedatabase.app';
+  try {
+    const KST_OFFSET = 9 * 60;
+    const now = new Date();
+    const kstMs = now.getTime() + (now.getTimezoneOffset() + KST_OFFSET) * 60000;
+    const kstDate = new Date(kstMs);
+    const today = kstDate.getFullYear() + '-'
+      + String(kstDate.getMonth()+1).padStart(2,'0') + '-'
+      + String(kstDate.getDate()).padStart(2,'0');
+
+    const url = DB_URL + '/visits/' + today + '.json';
+
+    // Firebase REST transaction: 조건부 쓰기로 정확한 카운팅
+    let count = 1;
+    let success = false;
+    let attempts = 0;
+
+    while (!success && attempts < 10) {
+      attempts++;
+      // 1) 현재 값 + ETag 읽기
+      const getRes = await fetch(url, { headers: { 'X-Firebase-ETag': 'true' } });
+      const etag = getRes.headers.get('ETag');
+      const raw = await getRes.json();
+      const current = (typeof raw === 'number') ? raw : 0;
+      count = current + 1;
+
+      // 2) ETag 조건부 쓰기 (동시 접속 충돌 방지)
+      const putRes = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'if-match': etag
+        },
+        body: JSON.stringify(count)
+      });
+
+      if (putRes.status === 200) {
+        success = true;
+      } else if (putRes.status === 412) {
+        // 다른 사람이 먼저 썼으면 재시도
+        await new Promise(r => setTimeout(r, Math.random() * 200));
+      } else {
+        break;
+      }
+    }
+
+    const el = document.getElementById('visitCount');
+    if (el) el.textContent = count.toLocaleString() + '회';
+  } catch(e) {
+    const el = document.getElementById('visitCount');
+    if (el) el.textContent = '-';
+  }
+})();
+</script>
+<div id="visit-widget">
+  <span class="vw-label">금일 접속수 :</span>
+  <span class="vw-count"><span id="visitCount">-</span></span>
+</div>
+</body>
+</html>
