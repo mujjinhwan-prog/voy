@@ -1361,7 +1361,7 @@ const QL_DEFAULTS = [
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
-  { id: 'pm',       name: '품목 검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
+  { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1391,7 +1391,7 @@ function qlIconSVG(key, size) {
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
-const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
+const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
 /* 이름 안의 | 는 줄바꿈 (예: 건강의 벗|USE) */
 function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
