@@ -1376,27 +1376,41 @@ const QL = {
     if (!/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(u)) { const [path, rest = ''] = u.split(/(?=[?#])/); if (path.endsWith('/')) u = path + 'index.html' + rest; else if (!/\.[a-z0-9]{2,5}$/i.test(path.split('/').pop())) u = path + '/index.html' + rest; }
     try { return new URL(u, this.base).href; } catch (e) { return u; } },
   init(raw) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed); },
+  /* 빨간 점 기준 (이 기기·이 브라우저 기준으로 기억)
+     ① 관리자가 [업데이트 알림]을 누른 뒤 아직 안 열어봤으면 표시
+     ② 페이지 '내용'이 마지막으로 열어본 때와 달라졌으면 표시 — 파일 크기·ETag로 비교
+        (GitHub Pages는 아무 파일만 올려도 모든 파일의 수정시각이 바뀌어서, 수정시각만 보면 안 바뀐 메뉴도 빨간 점이 떴음)
+     ③ 한 번도 안 열어본 메뉴는 최근 3일 안에 바뀐 것만 표시 / VOY Research는 아직 안 한 설문이 있을 때 */
   seen() { try { return JSON.parse(localStorage.getItem('voy_ql_seen') || '{}'); } catch (e) { return {}; } },
-  markSeen(id) { const s = this.seen(); s[id] = Date.now(); try { localStorage.setItem('voy_ql_seen', JSON.stringify(s)); } catch (e) {} },
-  lastUpdate(l) { return Math.max(l.updated_at ? new Date(l.updated_at).getTime() : 0, this.auto[l.id] || 0); },
+  markSeen(id) { const s = this.seen(), a = this.auto[id]; s[id] = { t: Date.now(), fp: a && a.fp || '' }; try { localStorage.setItem('voy_ql_seen', JSON.stringify(s)); } catch (e) {} },
   isNew(l) {
     if (this.flags[l.id]) return true;
-    const lu = this.lastUpdate(l); if (!lu || !l.url) return false;
-    const seen = this.seen()[l.id];
-    return seen ? lu > seen : (Date.now() - lu < 7 * 86400e3);   // 처음 보는 사람은 최근 7일 이내 업데이트만 표시
+    if (!l.url) return false;
+    const sv = this.seen()[l.id], st = typeof sv === 'number' ? sv : sv ? sv.t : 0, sfp = sv && typeof sv === 'object' ? sv.fp : '';
+    const bump = l.updated_at ? new Date(l.updated_at).getTime() : 0, a = this.auto[l.id];
+    if (bump && bump > st) return true;                                   // ① 관리자 알림
+    if (!a || !a.fp) return false;
+    if (st) {                                                             // ② 열어본 적 있음 → 내용 지문 비교
+      if (sfp) return a.fp !== sfp;
+      this.markSeenFp(l.id, a.fp); return false;                          //   (예전 방식으로 기록된 경우: 지금 내용을 기준으로 맞춤)
+    }
+    return a.lm && Date.now() - a.lm < 3 * 86400e3;                        // ③ 처음 보는 메뉴
   },
+  markSeenFp(id, fp) { const s = this.seen(), v = s[id]; s[id] = { t: typeof v === 'number' ? v : v && v.t || Date.now(), fp }; try { localStorage.setItem('voy_ql_seen', JSON.stringify(s)); } catch (e) {} },
   /* 대상 사이트의 Last-Modified 자동 확인 (10분 캐시) */
   async checkAuto(onDone) {
     let cache = {}; try { cache = JSON.parse(sessionStorage.getItem('voy_ql_auto') || '{}'); } catch (e) {}
     const now = Date.now();
     await Promise.all(this.list.filter(l => l.auto && l.url && !l.url.startsWith('#')).map(async l => {
       const c = cache[l.url];
-      if (c && now - c.t < 600e3) { this.auto[l.id] = c.lm; return; }
+      if (c && now - c.t < 600e3 && c.fp !== undefined) { this.auto[l.id] = { lm: c.lm, fp: c.fp }; return; }
       try {
         const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 5000);
         const r = await fetch(this.resolve(l.url), { method: 'HEAD', cache: 'no-cache', signal: ctl.signal }); clearTimeout(tm);
+        if (!r.ok) return;
         const lm = Date.parse(r.headers.get('last-modified') || '') || 0;
-        this.auto[l.id] = lm; cache[l.url] = { t: now, lm };
+        const fp = r.headers.get('content-length') || (r.headers.get('etag') || '').replace(/^W\//, '') || String(lm || '');   // 내용 지문: 크기 우선
+        this.auto[l.id] = { lm, fp }; cache[l.url] = { t: now, lm, fp };
       } catch (e) { /* CORS 미지원 사이트 등은 관리자 '업데이트 알림'으로만 표시 */ }
     }));
     try { sessionStorage.setItem('voy_ql_auto', JSON.stringify(cache)); } catch (e) {}
@@ -2528,7 +2542,7 @@ function qlRows() { return A.qlEdit.map((l, i) => l.removed ? '' : `<div class="
     <div class="ql-prev">${qlIconSVG(l.icon, 52)}</div>
     <select class="qi">${Object.entries(QL_ICONS).map(([k, v]) => `<option value="${k}" ${l.icon === k ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
     <input class="qn" value="${esc(l.name)}" placeholder="메뉴 이름 (| 를 넣으면 줄바꿈)" title="| 를 넣으면 그 자리에서 줄이 바뀝니다. 예) 건강의 벗|USE">
-    <div><input class="qu" value="${esc(l.url)}" placeholder="폴더명/ (예: yhdbt/) · #/research = 커뮤니티 설문 · 비우면 '준비중'"><small>최근 업데이트: ${l.updated_at ? fmtDate(l.updated_at, true) : '수동 알림 없음'}${QL.auto[l.id] ? ` · 사이트 자동감지 ${fmtDate(new Date(QL.auto[l.id]).toISOString(), true)}` : ''}</small></div>
+    <div><input class="qu" value="${esc(l.url)}" placeholder="폴더명/ (예: yhdbt/) · #/research = 커뮤니티 설문 · 비우면 '준비중'"><small>최근 업데이트: ${l.updated_at ? fmtDate(l.updated_at, true) : '수동 알림 없음'}${QL.auto[l.id] && QL.auto[l.id].lm ? ` · 사이트 자동감지 ${fmtDate(new Date(QL.auto[l.id].lm).toISOString(), true)}` : ''}</small></div>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qo" ${l.on !== false ? 'checked' : ''}><span></span></label>표시</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qa" ${l.auto ? 'checked' : ''}><span></span></label>자동감지</label>
     <button class="btn sm" data-act="ql-bump" data-i="${i}" title="지금 업데이트했다고 표시 → 모든 회원에게 빨간 점">${I('bell', 14)} 업데이트 알림</button>
