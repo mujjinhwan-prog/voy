@@ -134,6 +134,7 @@ html.sv-open,html.sv-open body{overflow:hidden}
 .sv-body iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
 .sv-load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;color:#888;font-size:14px;z-index:1;background:var(--bg)}
 .sv-ext{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.72);color:#fff;font-size:12px;padding:8px 12px;border-radius:10px;z-index:2;pointer-events:none}
+.pop-media.clickable{cursor:pointer}
 
 body{min-height:100vh}
 .app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:150px;position:relative}
@@ -175,6 +176,29 @@ body{min-height:100vh}
 .avatar.lg{width:64px;height:64px;font-size:24px}
 .page{padding:14px 16px}
 /* feed */
+.top-row{gap:10px}
+.top-pill{flex:1 1 auto;min-width:0;max-width:300px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:7px 12px;border-radius:99px;font-size:12.5px;white-space:nowrap;overflow:hidden}
+.top-pill b{color:var(--point);overflow:hidden;text-overflow:ellipsis}
+.top-pill .tp-m{flex-shrink:0}
+@media(max-width:380px){.top-pill .tp-m{display:none}}
+.toolbar #fmonth{flex:0 0 auto;width:108px;min-width:0;padding:0 24px 0 12px;font-size:13px;background-position:right 9px center}
+.card-row{display:flex;gap:12px;align-items:flex-start}.card-txt{flex:1;min-width:0}
+.excerpt.one{-webkit-line-clamp:1;margin:0}
+.card-thumbs{display:flex;gap:6px;flex-shrink:0;margin-top:6px}
+.card-thumbs img,.pdf-th{width:58px;height:58px;border-radius:10px;object-fit:cover;border:1px solid var(--border);background:var(--surface2)}
+.pdf-th{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#d6336c}.pdf-th b{font-size:10.5px;letter-spacing:.04em}
+.link-mini{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:12px;color:var(--muted);max-width:60%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:middle}
+.link-card{display:flex;gap:12px;align-items:center;border:1px solid var(--border);background:var(--surface2);border-radius:14px;padding:12px 14px;margin-top:12px;text-decoration:none;color:var(--text)}
+.link-card:hover{border-color:var(--accent)}
+.lc-ic{width:36px;height:36px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);display:grid;place-items:center;flex-shrink:0}
+.lc-txt{min-width:0;flex:1}.lc-txt b{display:block;font-size:15px;font-weight:800;line-height:1.4;word-break:break-word}.lc-txt small{display:block;font-size:12px;color:var(--muted);word-break:break-all;margin-top:2px}
+.img-btn{position:relative;padding:0;border:0;background:none;cursor:zoom-in;display:block;width:100%}
+.img-btn img{width:100%;display:block}
+.img-dl{position:absolute;right:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.55);color:#fff;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:99px}
+.lightbox{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:14px}
+.lightbox img{max-width:100%;max-height:calc(100vh - 120px);object-fit:contain;border-radius:8px}
+.lb-x{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;border:0;background:rgba(255,255,255,.15);color:#fff;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.lb-bar{display:flex;gap:8px}.lb-bar .btn:not(.primary){background:rgba(255,255,255,.14);color:#fff;border-color:transparent}
 .month-pill{display:flex;gap:10px;align-items:center;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:9px 16px;border-radius:99px;font-size:13px;margin-bottom:12px}
 .month-pill b{color:var(--point)}
 .event-banner{display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
@@ -544,7 +568,7 @@ function shiftMonth(mk, delta) {
 }
 function recentMonths(n, from) { const a = []; let mk = from || curMonth(); for (let i = 0; i < n; i++) { a.push(mk); mk = shiftMonth(mk, -1); } return a; }
 function monthLabel(mk, short) { return short ? `${+mk.slice(2)}월` : `20${mk.slice(0, 2)}년 ${+mk.slice(2)}월`; }
-function postNo(p) { return p.month_key ? `${p.month_key}_${String(p.month_seq).padStart(2, '0')}` : '-'; }
+function postNo(p) { return p.month_key && p.month_seq ? `${p.month_key}_${String(p.month_seq).padStart(3, '0')}` : ''; }   // 2610_003 · 관리자 글은 번호 없음
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function timeAgo(iso) {
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -677,9 +701,9 @@ const Local = (() => {
     samples.forEach(([m, u, board, title, body, likes, cmts]) => {
       day -= (m === pm ? 4 : 2);
       const created = m === pm ? new Date(Date.now() - 86400e3 * (new Date(Date.now() + KST_OFFSET).getUTCDate() + day - 24)).toISOString() : new Date(Date.now() - 3600e3 * (day * 3 + 1)).toISOString();
-      const ck = 'p' + m; db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const ck = 'p' + m; if (!isAdminRole(u.role)) db.counters[ck] = (db.counters[ck] || 0) + 1;
       const p = { id: ++db.seq.post, user_id: u.id, board_id: board, title, body, link_url: board === 'notice' && m === pm ? 'https://notice.ourclinic.kr' : null,
-        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: isAdminRole(u.role) ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: created, updated_at: created };
       db.posts.push(p);
       const others = [admin, u1, u2, u3, u4].filter(x => x.id !== u.id);
@@ -880,14 +904,14 @@ const API = {
       const db = Local.db, u = db.users.find(x => x.id === this.uid), b = db.boards.find(x => x.id === d.board_id);
       if (u.status === 'blocked') throw new Error('글쓰기가 제한된 계정입니다');
       if (b?.admin_only && !isAdminRole(u.role)) throw new Error('관리자 전용 게시판입니다');
-      const mk = curMonth(), ck = 'p' + mk; db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, images: d.images || [], pdf: d.pdf || null,
-        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+      const mk = curMonth(), ck = 'p' + mk; if (!isAdmin) db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, images: d.images || [], pdf: d.pdf || null,
+        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: isAdmin ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       if (p.is_pinned && !keepPinned) db.posts.forEach(x => x.is_pinned = false);
       db.posts.push(p); Local.save(); return this._vis(p);
     }
-    const row = must(await sb.from('posts').insert({ user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null,
+    const row = must(await sb.from('posts').insert({ user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null,
       images: d.images || [], pdf: d.pdf || null, is_pinned: isAdmin && !!d.is_pinned }).select('id,is_pinned').single());
     if (row.is_pinned && !keepPinned) await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', row.id);
     return this.getPost(row.id);
@@ -911,7 +935,7 @@ const API = {
     const rows = must(await sb.from('posts').select('images,pdf').in('id', ids));
     must(await sb.from('posts').delete().in('id', ids));
     const paths = [];
-    rows.forEach(r => { (r.images || []).forEach(i => i.path && paths.push(i.path)); if (r.pdf?.path) paths.push(r.pdf.path); });
+    rows.forEach(r => { (r.images || []).forEach(i => { if (i.path) paths.push(i.path); if (i.orig_path) paths.push(i.orig_path); }); if (r.pdf?.path) paths.push(r.pdf.path); });
     if (paths.length) await sb.storage.from('voy-files').remove(paths);
   },
 
@@ -1007,7 +1031,23 @@ const API = {
 
   /* ---------- 첨부 업로드 ---------- */
   async upload(file, kind) {
-    if (kind === 'image') file = await compressImage(file, LOCAL ? 1000 : 1600, LOCAL ? 0.72 : 0.82);
+    if (kind === 'image') {   // 화면용(압축) + 원본(다운로드용) 함께 저장
+      const orig = file, small = await compressImage(file, LOCAL ? 1000 : 1600, LOCAL ? 0.72 : 0.82);
+      const r = await this._put(small, 'image');
+      if (!LOCAL && orig !== small && orig.size > small.size * 1.15 && orig.size <= 25 * 1048576) { try { const o = await this._put(orig, 'image'); r.orig = o.url; r.orig_path = o.path; r.orig_size = orig.size; r.name = orig.name; } catch (e) {} }
+      return r;
+    }
+    return this._put(file, kind);
+  },
+  /* 링크 페이지 제목 가져오기 (실패하면 빈 값 — 작성자가 직접 입력) */
+  async linkTitle(url) {
+    try {
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch('https://api.microlink.io/?url=' + encodeURIComponent(url), { signal: ctl.signal }); clearTimeout(tm);
+      const j = await r.json(); return (j && j.data && j.data.title || '').trim().slice(0, 140);
+    } catch (e) { return ''; }
+  },
+  async _put(file, kind) {
     if (kind === 'pdf') {
       if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) throw new Error('PDF 파일만 첨부할 수 있어요');
       if (file.size > 20 * 1048576) throw new Error('PDF는 20MB 이하만 첨부할 수 있어요');
@@ -1136,6 +1176,26 @@ const API = {
     return must(await sb.from('posts_v').select('id,mine').order('id', { ascending: false }).limit(n || 30));
   },
   /* 랭킹 (닉네임·점수만 — 계정·소속 정보 없음) */
+  /* ---------- 이달의 Voice 시상 (관리자 전용) ---------- */
+  async adminVoiceStats(mk) {
+    if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk }));
+    const db = Local.db, w = db.settings.score || { like: 3, comment: 1 }, sup = this.profile && this.profile.role === 'super', g = {};
+    const users = {}; db.users.forEach(u => users[u.id] = u);
+    const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
+    db.posts.filter(p => p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++; o.likes += p.like_count; o.comments_received += p.comment_count; });
+    db.comments.filter(c => c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
+    const aw = ((db.awards || {})[mk]) || {};
+    return Object.values(g).filter(o => users[o.uid] && users[o.uid].role === 'user').map(o => { const u = users[o.uid];
+      return { token: this._tok(mk, o.uid), nickname: u.nickname, posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
+        score: o.likes * w.like + o.comments_received * w.comment, real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null,
+        dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null, picked: ['big', 'popular', 'reaction'].filter(k => (aw[k] || []).includes(o.uid)) }; });
+  },
+  async adminSetAward(mk, cat, token, on) {
+    if (!LOCAL) { must(await sb.rpc('admin_set_award', { mk, cat, tok: token, on_: !!on })); return; }
+    const db = Local.db, u = db.users.find(x => this._tok(mk, x.id) === token); if (!u) throw new Error('대상 회원을 찾을 수 없습니다');
+    db.awards = db.awards || {}; const m = db.awards[mk] = db.awards[mk] || {}; const l = m[cat] = m[cat] || [];
+    if (on && !l.includes(u.id)) l.push(u.id); if (!on) m[cat] = l.filter(x => x !== u.id); Local.save();
+  },
   async ranking(mk) {
     if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '' }));
     const w = Local.db.settings.score || { like: 3, comment: 1 }, g = {};
@@ -1440,6 +1500,8 @@ function popupMediaHTML(p, thumb) {
   if (p.media_type === 'video') return `<video src="${esc(p.media_url)}" ${thumb ? 'muted preload="metadata"' : 'autoplay muted loop playsinline controls preload="auto"'}></video>`;
   return `<img src="${esc(p.media_url)}" alt="${esc(p.title || '팝업 이미지')}">`;
 }
+/* 팝업 링크: '#/post/123' 이면 VOY 게시글, 그 외는 외부 주소 */
+function popupPostId(p) { const m = String(p.link_url || '').match(/^#\/post\/(\d+)$/); return m ? +m[1] : 0; }
 function showPopups(list, opts = {}) {
   if (!list || !list.length) return;
   let i = 0;
@@ -1448,17 +1510,25 @@ function showPopups(list, opts = {}) {
   const onKey = e => { if (e.key === 'Escape') close(); if (e.key === 'ArrowRight') move(1); if (e.key === 'ArrowLeft') move(-1); };
   const move = d => { if (list.length < 2) return; i = (i + d + list.length) % list.length; render(); };
   function render() {
-    const p = list[i], link = p.link_url ? safeUrl(p.link_url) : '';
+    const p = list[i], post = popupPostId(p), link = post ? '' : (p.link_url ? safeUrl(p.link_url) : '');
+    const go = post || link ? `data-pop="go"` : '';
     wrap.innerHTML = `<div class="pop" role="dialog" aria-label="공지 팝업">
-      <div class="pop-media">${link && p.media_type !== 'video' ? `<a href="${esc(link)}" target="_blank" rel="noopener">${popupMediaHTML(p)}</a>` : popupMediaHTML(p)}
+      <div class="pop-media ${go ? 'clickable' : ''}" ${p.media_type !== 'video' ? go : ''}>${popupMediaHTML(p)}
         ${list.length > 1 ? `<button class="pop-nav prev" data-pop="prev" aria-label="이전">‹</button><button class="pop-nav next" data-pop="next" aria-label="다음">›</button>
           <div class="pop-dots">${list.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>
-      ${p.title || link ? `<div class="pop-info"><b>${esc(p.title || '')}</b>${link ? `<a class="btn primary sm" href="${esc(link)}" target="_blank" rel="noopener">자세히 보기 ›</a>` : ''}</div>` : ''}
+      ${p.title || go ? `<div class="pop-info"><b>${esc(p.title || '')}</b>${go ? `<button class="btn primary sm" data-pop="go">${post ? '게시글 보기 ›' : '자세히 보기 ↗'}</button>` : ''}</div>` : ''}
       <div class="pop-foot"><button data-pop="hide">${opts.preview ? '미리보기 닫기' : '오늘 하루 보지 않기'}</button><button data-pop="close">닫기</button></div></div>`;
   }
   wrap.addEventListener('click', e => {
     const b = e.target.closest('[data-pop]'); if (!b) return;
     const a = b.dataset.pop;
+    if (a === 'go') {   // 팝업 클릭: VOY 게시글로 이동 또는 새 창으로 외부 링크
+      const p = list[i], post = popupPostId(p);
+      if (opts.preview) { toast(post ? `미리보기: 게시글 #${post}로 이동합니다` : '미리보기: 새 창으로 링크가 열립니다'); return; }
+      if (post) { close(); if (typeof USER_PAGE_URL !== 'undefined' && /\/admin\//.test(location.pathname)) window.open(new URL(USER_PAGE_URL, location.href).href + '#/post/' + post, '_blank'); else location.hash = '#/post/' + post; }
+      else if (p.link_url) window.open(safeUrl(p.link_url), '_blank', 'noopener');
+      return;
+    }
     if (a === 'prev') move(-1); else if (a === 'next') move(1);
     else if (a === 'close') close();
     else if (a === 'hide') {
@@ -1648,7 +1718,7 @@ function route() {
   if (view === 'post' && arg) return viewPost(arg);
   if (view === 'write') return viewWrite();
   if (view === 'edit' && arg) return viewWrite(arg);
-  if (view === 'rank') return viewRank();
+  if (view === 'rank') return isAdminRole(S.me.role) ? viewRank() : go('#/feed');   // 랭킹은 관리자만
   if (view === 'me') return viewMe();
   if (view === 'myposts') return viewMyPosts();
   if (view === 'research' && arg) return viewSurvey(arg);
@@ -1662,6 +1732,7 @@ function shell(inner, tab, fab = true) {
   root.innerHTML = `<div class="app">
     <header class="top"><div class="top-row">
       <div class="brand" data-act="home"><div class="logo">V</div><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
+      <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth())}</span><b>${esc(me.nickname)}</b></div>
       <button class="avatar sm" style="background:${avColor(me.nickname)}" data-act="go" data-to="#/me" aria-label="내 정보">${esc(me.nickname[0])}</button></div>
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
     </header>
@@ -1669,7 +1740,7 @@ function shell(inner, tab, fab = true) {
     ${fab ? `<button class="fab" data-act="go" data-to="#/write" aria-label="글쓰기">${I('pen', 26)}</button>` : ''}
     <nav class="bnav">
       <a href="#/feed" class="${tab === 'feed' ? 'on' : ''}">${I('home', 22)}피드</a>
-      <a href="#/rank" class="${tab === 'rank' ? 'on' : ''}">${I('trophy', 22)}랭킹</a>
+      ${isAdminRole(me.role) ? `<a href="#/rank" class="${tab === 'rank' ? 'on' : ''}">${I('trophy', 22)}랭킹</a>` : ''}
       <a href="#/me" class="${tab === 'me' ? 'on' : ''}">${I('user', 22)}내 정보</a>
     </nav></div>`;
 }
@@ -1692,13 +1763,13 @@ function cardHTML(p) {
     <div class="post-head">
       <div class="avatar" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
       <div class="post-main">
-        <div class="meta"><span class="no">${postNo(p)}</span><b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}</div>
-        <h3 class="title">${esc(p.title)}</h3>
-        <p class="excerpt">${esc(p.body)}</p>
-        <div class="tags"><span class="tag" style="--c:${b.color}">${esc(b.name)}</span></div>
-        ${p.link_url ? `<div class="att">${I('link', 16)} ${esc(host)}</div>` : ''}
-        ${p.images && p.images.length ? `<div class="att">${I('image', 16)} 이미지 ${p.images.length}장 첨부</div>` : ''}
-        ${p.pdf ? `<div class="att pdf">${I('file', 16)} ${esc(p.pdf.name)}</div>` : ''}
+        <div class="meta">${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}</div>
+        <div class="card-row"><div class="card-txt">
+          <h3 class="title">${esc(p.title)}</h3>
+          <p class="excerpt one">${esc(String(p.body || '').split(/\n/).find(x => x.trim()) || '')}</p></div>
+          ${(p.images || []).length || p.pdf ? `<div class="card-thumbs">${(p.images || []).slice(0, 2).map(i => `<img src="${esc(i.url)}" alt="" loading="lazy">`).join('')}${p.pdf ? `<span class="pdf-th" title="${esc(p.pdf.name)}">${I('file', 18)}<b>PDF</b></span>` : ''}</div>` : ''}
+        </div>
+        <div class="tags"><span class="tag" style="--c:${b.color}">${esc(b.name)}</span>${p.link_url ? `<span class="link-mini">${I('link', 13)} ${esc(p.link_title || host)}</span>` : ''}</div>
         <div class="foot"><span>${timeAgo(p.created_at)}</span>
           <span class="stats"><span class="${S.react[p.id] === 'like' ? 'liked' : ''}">${I('heart', 16)} ${p.like_count}</span><span>${I('msg', 16)} ${p.comment_count}</span></span></div>
       </div>
@@ -1710,14 +1781,13 @@ function viewFeed() {
   const f = S.feed, me = S.me, cur = S.hidden.current;
   const months = recentMonths(12);
   shell(`<div class="page">
-    <div class="month-pill">${monthLabel(curMonth())} <b>${esc(me.nickname)}</b></div>
     ${cur && cur.active ? `<div class="event-banner"><div class="gi">${I('gift', 20)}</div><div>
       <b>N번째 주인공을 찾아라!</b><span>이번 달 <em>N번째</em> 글을 쓴 <em>${cur.total}명</em>의 주인공에게 특별한 선물이!! ${cur.found ? `(현재 ${cur.found}명 탄생)` : ''}</span></div></div>` : ''}
     ${pushPromptHTML()}
     ${researchBannerHTML()}
     <div class="toolbar">
       <div class="search">${I('search', 17)}<input id="fq" placeholder="검색…" value="${esc(f.q)}" enterkeyhint="search"></div>
-      <select id="fmonth" aria-label="기간"><option value="">누적</option>${months.map(m => `<option value="${m}" ${f.month === m ? 'selected' : ''}>${monthLabel(m, true)}${m === curMonth() ? ' (이번달)' : ''}</option>`).join('')}</select>
+      <select id="fmonth" aria-label="기간"><option value="">전체</option>${months.map(m => `<option value="${m}" ${f.month === m ? 'selected' : ''}>${+m.slice(2)}월${m === curMonth() ? '(현재)' : ''}</option>`).join('')}</select>
       <button class="icon-btn ${f.showPinned ? 'on' : ''}" data-act="toggle-pin" title="공지 보기/접기">${I('pin', 18)}</button>
     </div>
     <div class="chips"><button class="chip all ${!f.board ? 'active' : ''}" data-act="board" data-id="">전체</button>
@@ -1763,12 +1833,12 @@ async function viewPost(id) {
       ${p.is_pinned ? `<div class="badge-row pin">${I('pin', 15)} 공지</div>` : ''}
       ${win ? `<div class="badge-row win">${I('gift', 15)} 🎉 ${+p.month_key.slice(2)}월 이벤트 당첨! ${win.rank}번째 히든 보이스 주인공!</div>` : ''}
       <div class="meta"><div class="avatar xs" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
-        <span class="no">${postNo(p)}</span><b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}
+        ${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}
         <span class="spacer"></span><span class="muted" style="font-size:12px">${fmtDate(p.created_at, true)}</span></div>
       <h2 class="title">${esc(p.title)}</h2>
       <div class="body-full">${linkify(p.body)}</div>
-      ${p.link_url ? `<a class="att" href="${esc(safeUrl(p.link_url))}" target="_blank" rel="noopener">${I('link', 16)} ${esc(p.link_url)}</a>` : ''}
-      ${imgs.length ? `<div class="imgs ${imgs.length === 1 ? 'one' : ''}">${imgs.map(i => `<img src="${esc(i.url)}" alt="${esc(i.name || '첨부 이미지')}" data-act="zoom" loading="lazy">`).join('')}</div>` : ''}
+      ${p.link_url ? `<a class="link-card" href="${esc(safeUrl(p.link_url))}" target="_blank" rel="noopener"><span class="lc-ic">${I('link', 18)}</span><span class="lc-txt"><b>${esc(p.link_title || (() => { try { return new URL(safeUrl(p.link_url)).host; } catch (e) { return '첨부 링크'; } })())}</b><small>${esc(p.link_url)}</small></span></a>` : ''}
+      ${imgs.length ? `<div class="imgs ${imgs.length === 1 ? 'one' : ''}">${imgs.map((i, k) => `<button class="img-btn" data-act="lightbox" data-src="${esc(i.url)}" data-orig="${esc(i.orig || i.url)}" data-name="${esc(i.name || `voy_image_${p.id}_${k + 1}.jpg`)}" title="눌러서 크게 보기 · 원본 다운로드"><img src="${esc(i.url)}" alt="${esc(i.name || '첨부 이미지')}" loading="lazy"><span class="img-dl">${I('download', 14)} 원본</span></button>`).join('')}</div>` : ''}
       ${p.pdf ? `<a class="att pdf" href="${esc(p.pdf.url)}" target="_blank" rel="noopener" download="${esc(p.pdf.name)}">${I('file', 16)} ${esc(p.pdf.name)} <span class="muted">${fmtSize(p.pdf.size)}</span></a>` : ''}
       <div class="tags"><span class="tag" style="--c:${b.color}">${esc(b.name)}</span></div>
       <div class="react" id="react">${reactHTML(p)}</div>
@@ -1809,7 +1879,7 @@ function commentsHTML(list) {
   return list.map(c => `<div class="cmt"><div class="avatar xs" style="background:${avColor(c.author_nickname)}">${esc((c.author_nickname || '?')[0])}</div>
     <div class="cmt-body"><div class="cmt-meta"><b>${esc(c.author_nickname || '탈퇴회원')}</b>${deptHTML(c)}<span class="muted">· ${timeAgo(c.created_at)}</span></div>
     ${c.body ? `<div class="cmt-text">${linkify(c.body)}</div>` : ''}
-    ${(c.images || []).length ? `<div class="cmt-imgs">${c.images.map(i => `<img src="${esc(i.url)}" alt="${esc(i.name || '댓글 사진')}" data-act="zoom" loading="lazy">`).join('')}</div>` : ''}
+    ${(c.images || []).length ? `<div class="cmt-imgs">${c.images.map(i => `<img src="${esc(i.url)}" alt="${esc(i.name || '댓글 사진')}" data-act="lightbox" data-src="${esc(i.url)}" data-orig="${esc(i.orig || i.url)}" data-name="${esc(i.name || 'voy_comment.jpg')}" loading="lazy">`).join('')}</div>` : ''}
     ${(c.mine || admin) ? `<div class="cmt-act">${c.mine ? `<button data-act="edit-cmt" data-id="${c.id}" data-post="${c.post_id}">수정</button>` : ''}<button data-act="del-cmt" data-id="${c.id}" data-post="${c.post_id}">삭제</button></div>` : ''}
     </div></div>`).join('');
 }
@@ -1821,16 +1891,38 @@ async function refreshComments(pid) {
   S._cmts = list;
 }
 
+/* 이미지 크게 보기 + 원본 다운로드 */
+function openLightbox(src, orig, name) {
+  const el = document.createElement('div'); el.className = 'lightbox';
+  el.innerHTML = `<button class="lb-x" aria-label="닫기">${I('x', 22)}</button><img src="${esc(src)}" alt="">
+    <div class="lb-bar"><button class="btn primary" id="lbdl">${I('download', 17)} 원본 다운로드</button><a class="btn" href="${esc(orig)}" target="_blank" rel="noopener">새 창에서 보기</a></div>`;
+  document.body.appendChild(el);
+  const close = () => { el.remove(); document.removeEventListener('keydown', esc_); }, esc_ = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', esc_);
+  el.onclick = e => { if (e.target === el || e.target.closest('.lb-x')) close(); };
+  el.querySelector('#lbdl').onclick = async ev => {
+    const b = ev.currentTarget; busy(b, true, ' 받는 중');
+    try {
+      let href = orig;
+      if (!/^data:/.test(orig)) { const r = await fetch(orig); if (!r.ok) throw 0; href = URL.createObjectURL(await r.blob()); }
+      const a = document.createElement('a'); a.href = href; a.download = name || 'voy_image.jpg'; document.body.appendChild(a); a.click(); a.remove();
+      if (href !== orig) setTimeout(() => URL.revokeObjectURL(href), 4000);
+      toast('원본 이미지를 저장했어요');
+    } catch (e) { window.open(orig, '_blank'); toast('새 창에서 길게 누르거나 우클릭해 저장해 주세요'); }
+    busy(b, false);
+  };
+}
+
 /* ---------------- 글쓰기 / 수정 ---------------- */
 async function viewWrite(editId) {
   const admin = isAdminRole(S.me.role);
   if (S.me.status === 'blocked') { toast('글쓰기가 제한된 계정입니다', 'err'); return go('#/feed'); }
-  let W = { id: null, board: S.feed.board && (!boardOf(S.feed.board).admin_only || admin) ? S.feed.board : '', title: '', body: '', link: '', images: [], pdf: null, pin: true, keep: false, linkOpen: false };
+  let W = { id: null, board: S.feed.board && (!boardOf(S.feed.board).admin_only || admin) ? S.feed.board : '', title: '', body: '', link: '', linkTitle: '', images: [], pdf: null, pin: true, keep: false, linkOpen: false };
   if (editId) {
     try {
       const p = await API.getPost(editId);
       if (!p.mine && !admin) { toast('수정 권한이 없습니다', 'err'); return go('#/post/' + editId); }
-      W = { id: p.id, board: p.board_id, title: p.title, body: p.body, link: p.link_url || '', images: (p.images || []).slice(), pdf: p.pdf, pin: p.is_pinned, keep: true, linkOpen: !!p.link_url, wasPinned: p.is_pinned };
+      W = { id: p.id, board: p.board_id, title: p.title, body: p.body, link: p.link_url || '', linkTitle: p.link_title || '', images: (p.images || []).slice(), pdf: p.pdf, pin: p.is_pinned, keep: true, linkOpen: !!p.link_url, wasPinned: p.is_pinned };
     } catch (e) { toast(friendly(e), 'err'); return go('#/feed'); }
   }
   S.write = W;
@@ -1868,15 +1960,24 @@ function renderWriteParts() {
   const W = S.write, admin = isAdminRole(S.me.role);
   document.getElementById('wboards').innerHTML = S.boards.filter(b => !b.admin_only || admin)
     .map(b => `<button class="chip ${W.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="w-board" data-id="${b.id}">${esc(b.name)}</button>`).join('');
-  const nb = document.getElementById('wnotice'), isNotice = admin && boardOf(W.board).admin_only;
-  nb.innerHTML = isNotice ? `<div class="notice-box">
-    <div class="row"><div><b>📌 ${esc(boardOf(W.board).name)} 공지글로 작성됩니다</b><p>피드 맨 위에 공지로 고정합니다</p></div><label class="switch"><input type="checkbox" id="wpin" ${W.pin ? 'checked' : ''}><span></span></label></div>
-    ${W.pin && !(W.id && W.wasPinned) ? `<div class="row"><div><p><b style="font-size:13px">기존 공지 함께 유지</b><br>끄면 기존 공지를 내리고 새 공지로 교체합니다 (기본)</p></div><label class="switch"><input type="checkbox" id="wkeep" ${W.keep ? 'checked' : ''}><span></span></label></div>` : ''}
-  </div>` : (admin && W.id && W.wasPinned ? `<div class="notice-box"><div class="row"><div><b>📌 상단 공지 고정</b></div><label class="switch"><input type="checkbox" id="wpin" ${W.pin ? 'checked' : ''}><span></span></label></div></div>` : '');
+  const nb = document.getElementById('wnotice');
+  nb.innerHTML = admin ? `<div class="notice-box">
+    <div class="row"><div><b>📌 최상단 공지로 올리기</b><p>${W.pin ? '피드 맨 위에 공지로 고정됩니다' : '일반 글처럼 날짜순으로 보입니다'} · 나중에 [수정]에서 언제든 올리고 내릴 수 있어요</p></div><label class="switch"><input type="checkbox" id="wpin" ${W.pin ? 'checked' : ''}><span></span></label></div>
+    ${W.pin && !(W.id && W.wasPinned) ? `<div class="row"><div><p><b style="font-size:13px">기존 공지 함께 유지</b><br>끄면 기존 공지를 내리고 이 글로 교체합니다</p></div><label class="switch"><input type="checkbox" id="wkeep" ${W.keep ? 'checked' : ''}><span></span></label></div>` : ''}
+    <p class="hint" style="margin:6px 0 0">관리자 글은 글번호(YYMM_NNN)에 포함되지 않아요</p></div>` : '';
   const pin = document.getElementById('wpin'); if (pin) pin.onchange = () => { W.pin = pin.checked; renderWriteParts(); };
   const keep = document.getElementById('wkeep'); if (keep) keep.onchange = () => { W.keep = keep.checked; };
-  document.getElementById('wlinkbox').innerHTML = W.linkOpen ? `<input id="wlink" placeholder="https://" value="${esc(W.link)}" inputmode="url">` : '';
-  const li = document.getElementById('wlink'); if (li) li.oninput = () => W.link = li.value;
+  document.getElementById('wlinkbox').innerHTML = W.linkOpen ? `<input id="wlink" placeholder="https://" value="${esc(W.link)}" inputmode="url">
+    <label class="lbl" style="margin-top:8px">링크 제목 <small class="muted" style="font-weight:500">(주소를 넣으면 자동으로 채워져요 · 직접 고쳐도 돼요)</small></label>
+    <input id="wltitle" placeholder="페이지 제목" value="${esc(W.linkTitle || '')}" maxlength="140">` : '';
+  const li = document.getElementById('wlink'), lt = document.getElementById('wltitle');
+  if (li) {
+    li.oninput = () => { W.link = li.value; };
+    li.onchange = async () => { const u = safeUrl(li.value.trim()); if (!u || (lt.value.trim() && W.linkTitleAuto !== lt.value)) return;
+      lt.placeholder = '제목 가져오는 중…'; const t = await API.linkTitle(u); lt.placeholder = '페이지 제목';
+      if (t && (!lt.value.trim() || W.linkTitleAuto === lt.value)) { lt.value = t; W.linkTitle = t; W.linkTitleAuto = t; } };
+    lt.oninput = () => { W.linkTitle = lt.value; };
+  }
   document.getElementById('wthumbs').innerHTML = W.images.map((im, i) => `<div class="thumb"><img src="${esc(im.url)}" alt=""><button data-act="w-rmimg" data-i="${i}" aria-label="삭제">${I('x', 14)}</button></div>`).join('');
   document.getElementById('wpdf').innerHTML = W.pdf ? `<div class="pdf-chip">${I('file', 18)} ${esc(W.pdf.name)} <span class="muted">${fmtSize(W.pdf.size)}</span><button data-act="w-rmpdf" aria-label="삭제">${I('x', 14)}</button></div>` : '';
 }
@@ -1892,14 +1993,16 @@ async function submitPost(btn) {
     for (const im of W.images) images.push(im.file ? await API.upload(im.file, 'image') : im);
     const pdf = W.pdf && W.pdf.file ? await API.upload(W.pdf.file, 'pdf') : W.pdf;
     const link_url = W.linkOpen && W.link.trim() ? safeUrl(W.link) : null;
+    let link_title = link_url ? (W.linkTitle || '').trim() : null;
+    if (link_url && !link_title) link_title = await API.linkTitle(link_url) || null;
     const admin = isAdminRole(S.me.role);
-    const pinOn = admin && W.pin && (boardOf(W.board).admin_only || W.wasPinned);
+    const pinOn = admin && !!W.pin;
     let post;
     if (W.id) {
-      post = await API.updatePost(W.id, { board_id: W.board, title: W.title, body: W.body, link_url, images, pdf });
-      if (admin && pinOn !== !!W.wasPinned) await API.adminSetPinned(W.id, pinOn, true);
+      post = await API.updatePost(W.id, { board_id: W.board, title: W.title, body: W.body, link_url, link_title, images, pdf });
+      if (admin && pinOn !== !!W.wasPinned) await API.adminSetPinned(W.id, pinOn, pinOn ? !!W.keep : true);
     } else {
-      post = await API.createPost({ board_id: W.board, title: W.title, body: W.body, link_url, images, pdf, is_pinned: pinOn }, { keepPinned: W.keep });
+      post = await API.createPost({ board_id: W.board, title: W.title, body: W.body, link_url, link_title, images, pdf, is_pinned: pinOn }, { keepPinned: W.keep });
     }
     S.feed.items = []; await loadHidden();
     const win = S.winMap[post.id];
@@ -2220,6 +2323,7 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'zoom': window.open(t.src, '_blank'); break;
+    case 'lightbox': openLightbox(t.dataset.src, t.dataset.orig, t.dataset.name); break;
     case 'del-post':
       if (await confirmBox('이 글을 삭제할까요?\n삭제한 글은 복구할 수 없어요.', '삭제', true)) {
         try { await API.deletePosts([id]); toast('삭제되었어요'); await loadHidden(); go('#/feed'); } catch (er) { toast(friendly(er), 'err'); }
