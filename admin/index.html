@@ -1326,8 +1326,8 @@ const QL_DEFAULTS = [
   { id: 'dbt',      name: 'DailyBreakTalk',        url: 'yhdbt/',    icon: 'dbt',      auto: true, on: true, updated_at: null },
   { id: 'weekly',   name: 'WeeklyNews',            url: 'yhwn/',     icon: 'weekly',   auto: true, on: true, updated_at: null },
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
-  { id: 'health',   name: '건강의 벗',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
-  { id: 'soc',      name: '2026 국내·해외 학회정보', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
+  { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
+  { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목 검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -1358,9 +1358,13 @@ function qlIconSVG(key, size) {
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
+const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
+/* 이름 안의 | 는 줄바꿈 (예: 건강의 벗|USE) */
+function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
   if (!(Array.isArray(raw) && raw.length)) return QL_DEFAULTS.map(l => ({ ...l }));
   const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
+  out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name; });
   QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
   return out;
 }
@@ -1399,9 +1403,9 @@ const QL = {
     onDone && onDone();
   },
   tile(l, cls) {
-    return `<a class="ql-tile ${cls || ''} ${l.url ? '' : 'soon'}" href="#" role="button" data-ql="${esc(l.id)}" title="${esc(l.name)}${l.url ? '' : ' (준비 중)'}">
+    return `<a class="ql-tile ${cls || ''} ${l.url ? '' : 'soon'}" href="#" role="button" data-ql="${esc(l.id)}" title="${esc(String(l.name).replace(/\|/g, ' '))}${l.url ? '' : ' (준비 중)'}">
       <span class="ql-ic">${qlIconSVG(l.icon, cls === 'mini' ? 46 : 45)}${this.isNew(l) ? '<i class="ql-dot" aria-label="업데이트"></i>' : ''}${l.url ? '' : '<em class="ql-soon">준비중</em>'}</span>
-      <span class="ql-name">${esc(l.name)}</span></a>`;
+      <span class="ql-name">${qlName(l.name)}</span></a>`;
   },
   railHTML() { return `<div class="ql-rail-in"><div class="ql-head">바로가기</div><div class="ql-grid">${this.list.map(l => this.tile(l)).join('')}</div></div>`; },
   stripHTML() { return `<div class="ql-strip-in">${this.list.map(l => this.tile(l, 'mini')).join('')}</div>`; },
@@ -1411,10 +1415,10 @@ const QL = {
       const a = e.target.closest('[data-ql]'); if (!a) return;
       const l = this.list.find(x => x.id === a.dataset.ql); if (!l) return;
       e.preventDefault();
-      if (!l.url) { toast(`${l.name}은(는) 준비 중입니다`); return; }
+      if (!l.url) { toast(`${String(l.name).replace(/\|/g, ' ')}은(는) 준비 중입니다`); return; }
       if (l.url.startsWith('#')) { closeSiteViewer(); location.hash = l.url; return; }   // 커뮤니티 안 메뉴 (예: #/research)
       this.markSeen(l.id); document.querySelectorAll(`[data-ql="${CSS.escape(l.id)}"] .ql-dot`).forEach(d => d.remove());
-      openSiteViewer(l.name, this.resolve(l.url), l.icon);
+      openSiteViewer(String(l.name).replace(/\|/g, ' '), this.resolve(l.url), l.icon);
     });
   }
 };
@@ -2523,7 +2527,7 @@ function rsPrint(sv) {
 function qlRows() { return A.qlEdit.map((l, i) => l.removed ? '' : `<div class="ql-row" data-i="${i}">
     <div class="ql-prev">${qlIconSVG(l.icon, 52)}</div>
     <select class="qi">${Object.entries(QL_ICONS).map(([k, v]) => `<option value="${k}" ${l.icon === k ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
-    <input class="qn" value="${esc(l.name)}" placeholder="메뉴 이름">
+    <input class="qn" value="${esc(l.name)}" placeholder="메뉴 이름 (| 를 넣으면 줄바꿈)" title="| 를 넣으면 그 자리에서 줄이 바뀝니다. 예) 건강의 벗|USE">
     <div><input class="qu" value="${esc(l.url)}" placeholder="폴더명/ (예: yhdbt/) · #/research = 커뮤니티 설문 · 비우면 '준비중'"><small>최근 업데이트: ${l.updated_at ? fmtDate(l.updated_at, true) : '수동 알림 없음'}${QL.auto[l.id] ? ` · 사이트 자동감지 ${fmtDate(new Date(QL.auto[l.id]).toISOString(), true)}` : ''}</small></div>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qo" ${l.on !== false ? 'checked' : ''}><span></span></label>표시</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qa" ${l.auto ? 'checked' : ''}><span></span></label>자동감지</label>
