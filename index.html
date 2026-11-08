@@ -9,8 +9,8 @@
 <script>/* 설치 가능 신호를 놓치지 않도록 가장 먼저 받아 둠 */
 window.__bip=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bip=e;dispatchEvent(new Event('voy-installable'));});
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(function(){});</script>
-<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
 <meta name="application-name" content="VOY™">
 <meta name="apple-mobile-web-app-title" content="VOY™">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1784,7 +1784,7 @@ const Inst = {
     const e = this.env(), one = !!window.__bip, g = one ? null : this.guide(e);
     const el = document.createElement('div'); el.className = 'inst-sheet' + (g && e.mob && g.arrow && g.arrow.startsWith('bottom') ? ' up' : '');
     el.innerHTML = `<div class="inst-card"><button class="inst-x" aria-label="닫기">${I('x', 18)}</button>
-      <div class="inst-top"><img src="icons/voy-192.png" alt="VOY™"><div><b>VOY™ 앱 설치</b><small>${one ? '버튼 한 번이면 홈 화면·바탕화면에 아이콘이 생겨요' : esc(g.title)}</small></div></div>
+      <div class="inst-top"><img src="icons/voy-192.png?v=2" alt="VOY™"><div><b>VOY™ 앱 설치</b><small>${one ? '버튼 한 번이면 홈 화면·바탕화면에 아이콘이 생겨요' : esc(g.title)}</small></div></div>
       ${one ? `<button class="btn primary block inst-go">${I('download', 17)} 설치하기</button>`
         : `<ol class="inst-steps">${g.steps.map((s, i) => `<li><i>${i + 1}</i><span>${s}</span></li>`).join('')}</ol>${g.note ? `<p class="hint" style="margin:6px 0 0">${g.note}</p>` : ''}
            ${e.inApp && (e.kakao || e.line || e.android) ? `<button class="btn primary block inst-ext" style="margin-top:10px">브라우저로 바로 열기</button>` : ''}`}
@@ -1812,13 +1812,13 @@ const Inst = {
 function installCardHTML() {
   if (isStandalone()) return '';
   const mob = Inst.env().mob;
-  return `<button class="install" data-act="install" type="button"><img src="icons/voy-192.png" alt="VOY™ 아이콘">
+  return `<button class="install" data-act="install" type="button"><img src="icons/voy-192.png?v=2" alt="VOY™ 아이콘">
     <div><b>VOY™ 바로가기 아이콘 설치</b><small>${mob ? '홈 화면에 아이콘을 추가하고 앱처럼 바로 열어보세요' : 'PC 바탕화면·작업표시줄에 아이콘을 추가하고 바로 열어보세요'}</small></div><span class="go">설치</span></button>`;
 }
 function doInstall() { return Inst.run(); }
 function installGuide(title, steps, note) {
   openModal(`<div class="modal-head"><h3>${title}</h3><button class="icon-x" data-close>${I('x')}</button></div>
-    <div class="modal-body"><div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><img src="icons/voy-192.png" alt="" style="width:56px;height:56px;border-radius:14px;box-shadow:0 3px 10px rgba(0,0,0,.12)"><div><b style="font-size:16px">VOY™</b><div class="hint" style="margin:0">설치하면 이 아이콘으로 바로 열려요</div></div></div>
+    <div class="modal-body"><div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><img src="icons/voy-192.png?v=2" alt="" style="width:56px;height:56px;border-radius:14px;box-shadow:0 3px 10px rgba(0,0,0,.12)"><div><b style="font-size:16px">VOY™</b><div class="hint" style="margin:0">설치하면 이 아이콘으로 바로 열려요</div></div></div>
     <ol class="steps">${steps.map(s => `<li><span>${s}</span></li>`).join('')}</ol>${note ? `<p class="hint">${note}</p>` : ''}</div>
     <div class="modal-foot"><button class="btn primary block" data-close>확인</button></div>`);
 }
@@ -1859,7 +1859,7 @@ function renderGate() {
   else if (android) steps = [`아래 <b>[VOY™ 앱 설치]</b> 버튼 (또는 Chrome <span class="k">⋮</span> → <span class="k">앱 설치</span>)`, '홈 화면의 <b>VOY™</b> 아이콘으로 열기'];
   else steps = [`아래 <b>[VOY™ 앱 설치]</b> 버튼 (또는 주소창 오른쪽 <span class="k">⊕ 설치</span>)`, '설치하면 주소창 없는 VOY™ 창이 바로 열려요', `이미 설치했다면 주소창 오른쪽 <span class="k">앱에서 열기</span> 또는 바탕화면·시작메뉴의 <b>VOY™</b>`];
   root.innerHTML = `<div class="auth"><div class="auth-card gate">
-    <img src="icons/voy-192.png" alt="VOY™" class="gate-ic">
+    <img src="icons/voy-192.png?v=2" alt="VOY™" class="gate-ic">
     <h1>VOY™ 앱에서 열어주세요</h1>
     <p class="muted">익명 게시판 보호를 위해 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>에서만 볼 수 있어요.<br>휴대폰(삼성·아이폰)과 PC 모두 같은 방법입니다.</p>
     <div class="box" style="text-align:left;margin-top:16px"><ol class="steps">${steps.map(x => `<li><span>${x}</span></li>`).join('')}</ol></div>

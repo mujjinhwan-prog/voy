@@ -93,6 +93,7 @@ create table if not exists public.posts (
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
+alter table public.posts add column if not exists link_title text;   -- 첨부 링크의 페이지 제목
 create index if not exists posts_month_idx on public.posts(month_key, month_seq);
 create index if not exists posts_user_idx  on public.posts(user_id);
 
@@ -369,9 +370,13 @@ begin
   new.author_dept := coalesce(nullif(pr.org_branch, ''), pr.dept);
   new.author_role := case when pr.role in ('admin','super') then 'admin' else 'user' end;
   new.month_key := mk;
-  insert into public.counters(key, val) values ('p' || mk, 1)
-    on conflict (key) do update set val = public.counters.val + 1
-    returning val into new.month_seq;
+  if pr.role in ('admin','super') then
+    new.month_seq := null;   -- 관리자 글은 글번호(YYMM_NNN)에 포함하지 않음
+  else
+    insert into public.counters(key, val) values ('p' || mk, 1)
+      on conflict (key) do update set val = public.counters.val + 1
+      returning val into new.month_seq;
+  end if;
   new.like_count := 0; new.dislike_count := 0; new.comment_count := 0;
   new.created_at := now(); new.updated_at := now();
   if pr.role not in ('admin','super') then new.is_pinned := false; end if;
@@ -385,7 +390,7 @@ create trigger posts_before_insert before insert on public.posts
 create or replace function public.posts_before_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if not public.is_privileged() then
+  if auth.uid() is not null and not public.is_privileged() then   -- SQL Editor(관리 작업)에서는 제한 없음
     new.user_id := old.user_id; new.month_key := old.month_key; new.month_seq := old.month_seq;
     new.author_nickname := old.author_nickname; new.author_dept := old.author_dept; new.author_role := old.author_role;
     new.like_count := old.like_count; new.dislike_count := old.dislike_count; new.comment_count := old.comment_count;
@@ -838,7 +843,7 @@ create policy sresp_delete  on public.survey_responses for delete to authenticat
 --    · 화면은 posts_v / comments_v 뷰를 사용: 본인 글 여부(mine)만 알려주고, 계정·소속은 admin에게만 채워줌
 -- =====================================================================
 revoke select on public.posts from anon, authenticated;
-grant select (id, board_id, title, body, link_url, images, pdf, is_pinned, month_key, month_seq, author_nickname, author_role,
+grant select (id, board_id, title, body, link_url, link_title, images, pdf, is_pinned, month_key, month_seq, author_nickname, author_role,
               like_count, dislike_count, comment_count, created_at, updated_at) on public.posts to authenticated;
 revoke select on public.comments from anon, authenticated;
 grant select (id, post_id, body, images, month_key, month_seq, author_nickname, author_role, created_at, updated_at) on public.comments to authenticated;
@@ -848,7 +853,8 @@ create or replace view public.posts_v as
          p.author_nickname, p.author_role, p.like_count, p.dislike_count, p.comment_count, p.created_at, p.updated_at,
          (p.user_id = auth.uid()) as mine,
          case when s.sup then p.user_id end as user_id,
-         case when s.sup then coalesce(nullif(concat_ws(' ', pr.org_branch, pr.work_branch), ''), p.author_dept) end as author_dept   -- 예) Clinic3부 서부지점 · 최고관리자 외에는 관리자 글 포함 항상 null
+         case when s.sup then coalesce(nullif(concat_ws(' ', pr.org_branch, pr.work_branch), ''), p.author_dept) end as author_dept,   -- 예) Clinic3부 서부지점 · 최고관리자 외에는 관리자 글 포함 항상 null
+         p.link_title
   from public.posts p cross join (select public.is_super() as sup) s
   left join public.profiles pr on s.sup and pr.id = p.user_id
   where auth.uid() is not null;
@@ -861,6 +867,15 @@ create or replace view public.comments_v as
   left join public.profiles pr on s.sup and pr.id = c.user_id
   where auth.uid() is not null;
 revoke all on public.posts_v, public.comments_v from anon;
+
+-- 관리자 글은 글번호에서 제외 (이미 올라간 관리자 글의 번호도 지움 · 회원 글 번호는 히든보이스 이벤트 보호를 위해 그대로 유지)
+update public.posts set month_seq = null where author_role = 'admin' and month_seq is not null;
+-- [선택] 이번 달 회원 글 번호를 001부터 빈칸 없이 다시 매기려면, 아래 4줄 맨 앞의 '-- ' 를 지우고 그 4줄만 선택해서 실행
+--        ※ 히든보이스 당첨 번호가 바뀔 수 있으니 이벤트 진행 중인 달에는 실행하지 마세요
+-- with r as (select id, row_number() over (order by id) n from public.posts where month_key = public.kst_month() and author_role <> 'admin')
+-- update public.posts p set month_seq = r.n from r where p.id = r.id;
+-- insert into public.counters(key, val) select 'p' || public.kst_month(), coalesce(max(month_seq), 0) from public.posts where month_key = public.kst_month()
+--   on conflict (key) do update set val = excluded.val;
 grant select on public.posts_v, public.comments_v to authenticated;
 
 -- 설문 응답도 익명: 누가 어떤 답을 했는지(user_id)는 조회 불가, 답변 내용만 집계용으로 조회
@@ -879,10 +894,187 @@ language sql stable security definer set search_path = public as $$
   select g.nickname, g.posts, g.likes, g.comments,
          (g.likes * coalesce(w.lw, 3) + g.comments * coalesce(w.cw, 1))::bigint, g.user_id = auth.uid()
   from g left join w on true
-  where auth.uid() is not null
+  where public.is_admin()          -- 랭킹은 관리자만 (일반 회원 화면에는 집계 노출 안 함)
   order by 5 desc, 2 desc
 $$;
 revoke execute on function public.get_ranking(text) from anon;
+
+-- ---------- 이달의 Voice 시상 ----------
+--  심사 시상(본사 심의): grand 최우수 · excellent 우수 · merit 장려  — 관리자가 '글'에서 선정
+--  결과 시상(집계)    : popular 인기 · reaction 리액션 · big Big Voice
+--  이벤트            : nth N번째 Voice(히든보이스) · survey 설문 이벤트 당첨
+--  한 항목에 여러 명 선정 가능 · 관리자가 [게시]해야 회원 화면에 '닉네임만' 공개
+create table if not exists public.voice_awards (
+  month_key  text not null,
+  category   text not null,
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (month_key, category, user_id)
+);
+alter table public.voice_awards add column if not exists post_id  bigint references public.posts(id) on delete set null;
+alter table public.voice_awards add column if not exists nickname text;   -- 그 달의 닉네임 (선정 시점에 고정)
+alter table public.voice_awards add column if not exists note     text;   -- 예) 설문 제목
+alter table public.voice_awards drop constraint if exists voice_awards_category_check;
+alter table public.voice_awards add constraint voice_awards_category_check
+  check (category in ('grand','excellent','merit','popular','reaction','big','nth','survey'));
+alter table public.voice_awards enable row level security;
+drop policy if exists va_none on public.voice_awards;
+create policy va_none on public.voice_awards for select using (false);   -- 직접 조회 금지 (아래 함수로만)
+revoke all on public.voice_awards from anon, authenticated;
+
+create table if not exists public.voice_award_pub (
+  month_key    text primary key,
+  published    boolean not null default false,
+  published_at timestamptz
+);
+alter table public.voice_award_pub enable row level security;
+drop policy if exists vap_none on public.voice_award_pub;
+create policy vap_none on public.voice_award_pub for select using (false);
+revoke all on public.voice_award_pub from anon, authenticated;
+
+-- 그 달에 쓰던 닉네임
+create or replace function public.month_nickname(uid uuid, mk text) returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce((select h.nickname from public.nickname_history h where h.user_id = uid and h.month_key = mk order by h.created_at desc limit 1),
+                  (select p.author_nickname from public.posts p where p.user_id = uid and p.month_key = mk order by p.id desc limit 1),
+                  (select c.author_nickname from public.comments c where c.user_id = uid and c.month_key = mk order by c.id desc limit 1),
+                  (select nickname from public.profiles where id = uid));
+$$;
+revoke execute on function public.month_nickname(uuid, text) from anon, authenticated;
+
+-- 결과 시상 후보 집계: 계정 id 대신 토큰(md5)을 주고, 실명·사번·소속은 최고관리자에게만
+drop function if exists public.admin_voice_stats(text);
+create or replace function public.admin_voice_stats(mk text)
+returns table(token text, nickname text, posts bigint, comments_written bigint, likes bigint, comments_received bigint, score bigint,
+              real_name text, emp_no text, dept text, picked text[])
+language plpgsql stable security definer set search_path = public as $$
+declare sup boolean := public.is_super(); lw int; cw int;
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  select coalesce((value->>'like')::int, 3), coalesce((value->>'comment')::int, 1) into lw, cw from public.settings where key = 'score';
+  lw := coalesce(lw, 3); cw := coalesce(cw, 1);
+  return query
+  with pp as (select x.user_id uid, count(*) pn, coalesce(sum(x.like_count), 0) pl, coalesce(sum(x.comment_count), 0) pc
+              from public.posts x where x.month_key = mk and coalesce(x.author_role, 'user') <> 'admin' and x.user_id is not null group by x.user_id),
+       cc as (select y.user_id uid, count(*) cn from public.comments y
+              where y.month_key = mk and coalesce(y.author_role, 'user') <> 'admin' and y.user_id is not null group by y.user_id),
+       uu as (select pp.uid from pp union select cc.uid from cc)
+  select md5(mk || uu.uid::text), public.month_nickname(uu.uid, mk),
+         coalesce(pp.pn, 0)::bigint, coalesce(cc.cn, 0)::bigint, coalesce(pp.pl, 0)::bigint, coalesce(pp.pc, 0)::bigint,
+         (coalesce(pp.pl, 0) * lw + coalesce(pp.pc, 0) * cw)::bigint,
+         case when sup then pr.real_name end, case when sup then pr.emp_no end,
+         case when sup then nullif(concat_ws(' ', pr.org_branch, pr.work_branch), '') end,
+         coalesce((select array_agg(a.category order by a.category) from public.voice_awards a where a.month_key = mk and a.user_id = uu.uid), '{}'::text[])
+  from uu join public.profiles pr on pr.id = uu.uid
+  left join pp on pp.uid = uu.uid left join cc on cc.uid = uu.uid
+  where pr.role = 'user';
+end $$;
+revoke execute on function public.admin_voice_stats(text) from anon;
+
+-- 이벤트 시상 후보: 그 달 닉네임이 있는 회원 전체 + 설문 당첨 이력
+create or replace function public.admin_award_candidates(mk text)
+returns table(token text, nickname text, survey_wins text[], real_name text, emp_no text, dept text)
+language plpgsql stable security definer set search_path = public as $$
+declare sup boolean := public.is_super();
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  return query
+  select md5(mk || pr.id::text), public.month_nickname(pr.id, mk),
+         coalesce((select array_agg(s.title order by d.drawn_at) from public.survey_draws d join public.surveys s on s.id = d.survey_id
+                   where pr.id = any(d.winner_ids) and to_char(d.drawn_at at time zone 'Asia/Seoul', 'YYMM') >= mk), '{}'::text[]),
+         case when sup then pr.real_name end, case when sup then pr.emp_no end,
+         case when sup then nullif(concat_ws(' ', pr.org_branch, pr.work_branch), '') end
+  from public.profiles pr where pr.role = 'user' and pr.status <> 'deleted';
+end $$;
+revoke execute on function public.admin_award_candidates(text) from anon;
+
+-- 선정/해제 (회원 토큰으로)
+drop function if exists public.admin_set_award(text, text, text, boolean);
+create or replace function public.admin_set_award(mk text, cat text, tok text, on_ boolean, note_ text default null)
+returns void language plpgsql security definer set search_path = public as $$
+declare uid uuid;
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  if cat not in ('grand','excellent','merit','popular','reaction','big','nth','survey') then raise exception '잘못된 시상 항목'; end if;
+  select id into uid from public.profiles where md5(mk || id::text) = tok;
+  if uid is null then raise exception '대상 회원을 찾을 수 없습니다'; end if;
+  if on_ then
+    insert into public.voice_awards(month_key, category, user_id, nickname, note) values (mk, cat, uid, public.month_nickname(uid, mk), note_)
+      on conflict (month_key, category, user_id) do update set note = coalesce(excluded.note, public.voice_awards.note);
+  else delete from public.voice_awards where month_key = mk and category = cat and user_id = uid; end if;
+end $$;
+revoke execute on function public.admin_set_award(text, text, text, boolean, text) from anon;
+
+-- 선정/해제 (게시글로 — 심사 시상·N번째 Voice)
+create or replace function public.admin_set_award_post(mk text, cat text, pid bigint, on_ boolean)
+returns void language plpgsql security definer set search_path = public as $$
+declare po public.posts;
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  if cat not in ('grand','excellent','merit','popular','reaction','big','nth','survey') then raise exception '잘못된 시상 항목'; end if;
+  select * into po from public.posts where id = pid;
+  if po.id is null or po.user_id is null then raise exception '게시글(작성자)을 찾을 수 없습니다'; end if;
+  if on_ then
+    insert into public.voice_awards(month_key, category, user_id, post_id, nickname) values (mk, cat, po.user_id, po.id, coalesce(po.author_nickname, public.month_nickname(po.user_id, mk)))
+      on conflict (month_key, category, user_id) do update set post_id = excluded.post_id, nickname = excluded.nickname;
+  else delete from public.voice_awards where month_key = mk and category = cat and (post_id = pid or (post_id is null and user_id = po.user_id)); end if;
+end $$;
+revoke execute on function public.admin_set_award_post(text, text, bigint, boolean) from anon;
+
+-- 관리자용 선정 목록
+create or replace function public.admin_get_awards(mk text)
+returns table(category text, token text, nickname text, post_id bigint, post_title text, note text, real_name text, emp_no text, dept text, published boolean, published_at timestamptz)
+language plpgsql stable security definer set search_path = public as $$
+declare sup boolean := public.is_super();
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  return query
+  select a.category, md5(mk || a.user_id::text), a.nickname, a.post_id, po.title, a.note,
+         case when sup then pr.real_name end, case when sup then pr.emp_no end,
+         case when sup then nullif(concat_ws(' ', pr.org_branch, pr.work_branch), '') end,
+         coalesce(pb.published, false), pb.published_at
+  from public.voice_awards a join public.profiles pr on pr.id = a.user_id
+  left join public.posts po on po.id = a.post_id
+  left join public.voice_award_pub pb on pb.month_key = a.month_key
+  where a.month_key = mk order by a.category, a.created_at;
+end $$;
+revoke execute on function public.admin_get_awards(text) from anon;
+
+create or replace function public.admin_award_pub_state(mk text) returns json
+language sql stable security definer set search_path = public as $$
+  select case when not public.has_perm('rank') then null else
+    coalesce((select json_build_object('published', published, 'published_at', published_at) from public.voice_award_pub where month_key = mk), json_build_object('published', false)) end
+$$;
+revoke execute on function public.admin_award_pub_state(text) from anon;
+
+-- 게시 / 게시 취소
+create or replace function public.admin_publish_awards(mk text, on_ boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.has_perm('rank') then raise exception '순위·점수 관리 권한이 없습니다'; end if;
+  insert into public.voice_award_pub(month_key, published, published_at) values (mk, on_, case when on_ then now() end)
+    on conflict (month_key) do update set published = excluded.published, published_at = excluded.published_at;
+end $$;
+revoke execute on function public.admin_publish_awards(text, boolean) from anon;
+
+-- 회원 화면용: 게시된 달의 결과만, 닉네임으로만 (계정·실명·소속 없음)
+create or replace function public.voice_awards_public(mk text)
+returns table(category text, nickname text, post_id bigint, post_title text, note text)
+language sql stable security definer set search_path = public as $$
+  select a.category, a.nickname, a.post_id, po.title, a.note
+  from public.voice_awards a
+  join public.voice_award_pub pb on pb.month_key = a.month_key and pb.published
+  left join public.posts po on po.id = a.post_id
+  where a.month_key = mk and auth.uid() is not null
+  order by a.category, a.created_at
+$$;
+revoke execute on function public.voice_awards_public(text) from anon;
+
+create or replace function public.voice_award_months() returns setof text
+language sql stable security definer set search_path = public as $$
+  select month_key from public.voice_award_pub where published and auth.uid() is not null order by month_key desc
+$$;
+revoke execute on function public.voice_award_months() from anon;
 
 -- ---------- 첨부파일 Storage (게시글 사진 2장·PDF 20MB, 팝업 이미지 10MB·동영상 50MB) ----------
 insert into storage.buckets (id, name, public, file_size_limit)
