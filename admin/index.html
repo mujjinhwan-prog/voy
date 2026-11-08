@@ -316,6 +316,24 @@ td.tt span{cursor:pointer}
 .rs-resp{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);cursor:pointer;color:var(--text)}
 .rs-resp:hover{border-color:var(--accent)}.rs-resp small{color:var(--muted);font-size:11.5px}
 #printArea{display:none}
+.mem-stats{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.mem-stats .ms{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 14px;color:var(--text2);font-size:13px;font-weight:600}
+.mem-stats .ms svg{color:var(--muted)}.mem-stats .ms b{margin-left:auto;font-size:20px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums}.mem-stats .ms small{color:var(--muted)}
+.mem-stats .ms.warn b{color:var(--point)}
+.mem-compact{padding-top:16px}
+.mem-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.mem-head h2{margin:0;font-size:17px}.mem-head small{color:var(--muted);font-size:12px}
+.mem-btns{display:flex;gap:6px;flex-wrap:wrap}
+.mem-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.mem-like{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);margin-left:auto}.mem-like select{width:auto;min-width:130px;height:36px;font-size:13px;padding-top:0;padding-bottom:0;line-height:34px}
+.mem-compact .dt-search{margin-bottom:6px}.mem-compact .dt-search input{height:36px;font-size:13px}
+.mem-compact table{font-size:13px}
+.mem-compact th{font-size:12px;padding:8px 8px;line-height:1.25;vertical-align:middle}
+.mem-compact td{padding:8px 8px}
+.mem-compact .th-sub{font-weight:500;color:var(--muted);font-size:10.5px}
+.mem-compact .pst,.mem-compact .status-blocked{white-space:nowrap;font-size:11.5px}
+.dt2{display:inline-block;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap}.dt2 small{color:var(--muted);font-size:11.5px}
+
 .aw-pub{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1.5px dashed var(--border);margin-bottom:12px;background:var(--surface2)}
 .aw-pub.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
 .aw-pub b{display:block;font-size:14.5px}.aw-pub small{color:var(--muted);font-size:12px}
@@ -1775,6 +1793,8 @@ document.addEventListener('input', e => {
 const SUP = () => A.me && A.me.role === 'super';
 const supOnly = cols => cols.filter(c => !c.sup || SUP());
 const pill = v => v ? `<span class="dept-pill">${esc(v)}</span>` : '<span class="dim">-</span>';
+ /* 26.11.08 ⏎ 12:18 (좁은 표용) */
+const dtCell2 = iso => { if (!iso) return '<span class="dim">-</span>'; const t = fmtDT(iso), [d, h] = t.split(' '); return `<span class="dt2" title="${esc(timeAgo(iso))}">${esc((d || '').slice(2))}<br><small>${esc(h || '')}</small></span>`; };
 const dtCell = iso => iso ? `<span class="nowrap" title="${esc(timeAgo(iso))}">${fmtDT(iso)}</span>` : '<span class="dim">-</span>';
 const P_ = id => pmap()[id] || {};
 
@@ -1868,21 +1888,22 @@ function pageMembers(c) {
   const t = dtHTML('members', rows, supOnly([
     { k: 'nickname', l: '닉네임', v: p => p.nickname, cls: 'b nowrap' },
     ...detailCols().slice(0, 2),
-    { k: 'email', l: '이메일(로그인)', v: p => p.email, cls: 'mono dim' },
+    { k: 'email', l: `이메일<br><small class="th-sub">(@${COMPANY_DOMAIN})</small>`, v: p => p.email, cls: 'mono dim', r: p => esc(String(p.email || '').endsWith('@' + COMPANY_DOMAIN) ? p.email.slice(0, -(COMPANY_DOMAIN.length + 1)) : p.email || '') },
     ...detailCols().slice(2).filter(c => c.k !== 'sales_office'),   // 영업소 열은 목록에서 숨김 (회원 정보·엑셀에는 그대로 저장)
-    { k: 'status', l: '상태', v: p => p.status === 'blocked' ? '이용 제한' : p.must_change_pw ? '비밀번호 미변경' : '정상', r: p => p.status === 'blocked' ? '<span class="status-blocked">이용 제한</span>' : p.must_change_pw ? '<span class="pst wait">비번 미변경</span>' : '<span class="pst on">정상</span>' },
-    { k: 'created', l: '가입일', v: p => p.created_at, s: p => fmtDT(p.created_at), r: p => dtCell(p.created_at) },
-    { k: 'seen', l: '최근접속', v: p => p.last_seen, s: p => fmtDT(p.last_seen), r: p => dtCell(p.last_seen) },
+    { k: 'status', l: '상태', v: p => p.status === 'blocked' ? '이용 제한' : p.must_change_pw ? '비밀번호 미변경' : '정상', r: p => p.status === 'blocked' ? '<span class="status-blocked">이용 제한</span>' : p.must_change_pw ? '<span class="pst wait" title="비밀번호 미변경">미변경</span>' : '<span class="pst on">정상</span>' },
+    { k: 'created', l: '가입일', v: p => p.created_at, s: p => fmtDT(p.created_at), r: p => dtCell2(p.created_at) },
+    { k: 'seen', l: '최근접속', v: p => p.last_seen, s: p => fmtDT(p.last_seen), r: p => dtCell2(p.last_seen) },
     { k: 'posts', l: '게시글 🔒', sup: true, v: p => pc[p.id] || 0, cls: 'num', ns: true },
     { k: 'cmts', l: '댓글 🔒', sup: true, v: p => cc[p.id] || 0, cls: 'num', ns: true },
     { k: 'likes', l: `${I('heart', 14)} 누른 좋아요<br><small style="font-weight:500">${f.likeMonth ? monthLabel(f.likeMonth, true) : '누적'}</small>`, v: p => likesOf(p.id, f.likeMonth), cls: 'num c-like', ns: true },
     { k: 'act', l: '관리', nosort: true, ns: true, v: () => '', r: p => `<div class="acts"><button class="ib" data-act="edit-member" data-id="${p.id}" title="회원 수정">${I('edit', 16)}</button></div>` }
   ]), { empty: '회원이 없습니다. [엑셀 일괄 등록]으로 회원 명단을 올려주세요.' });
-  c.innerHTML = `<div class="cards3">${stat('전체 회원', users.length, '명', 'users')}${stat('비밀번호 미변경', users.filter(p => p.must_change_pw).length, '명', 'lock')}${stat('이번 달 신규', users.filter(p => monthKeyOf(p.created_at) === mk).length, '명', 'userplus')}</div>
-  <div class="panel"><div class="panel-head"><div><h2>회원 목록</h2><p>로그인은 회사 이메일 + 비밀번호(초기값 = 사번, 첫 로그인 시 변경). 관리자 계정은 [관리자 계정] 메뉴에서 관리합니다.</p></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="xls-template">${I('download', 15)} 엑셀 양식</button><button class="btn sm primary" data-act="xls-upload">${I('plus', 15)} 엑셀 일괄 등록</button><button class="btn sm" data-act="mem-new">${I('userplus', 15)} 회원 추가</button><button class="btn sm" data-act="csv" data-t="members">${I('download', 15)} 엑셀(CSV)</button></div></div>
-    <div class="filters"><div class="pills">${[['', '전체'], ['active', '정상'], ['pw', '비밀번호 미변경'], ['blocked', '이용 제한']].map(([k, t]) => `<button class="${f.role === k ? 'on' : ''}" data-act="mrole" data-v="${k}">${t}</button>`).join('')}</div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);margin-left:auto">${I('heart', 15)} 누른 좋아요 기준월 <select data-f="likeMonth" style="min-width:140px">${monthOpts(f.likeMonth).replace('전체 기간', '누적 전체')}</select></label></div>
+  const nPw = users.filter(p => p.must_change_pw).length, nNew = users.filter(p => monthKeyOf(p.created_at) === mk).length;
+  c.innerHTML = `<div class="mem-stats"><div class="ms">${I('users', 17)}<span>전체 회원</span><b>${users.length}</b><small>명</small></div><div class="ms ${nPw ? 'warn' : ''}">${I('lock', 17)}<span>비밀번호 미변경</span><b>${nPw}</b><small>명</small></div><div class="ms">${I('userplus', 17)}<span>이번 달 신규</span><b>${nNew}</b><small>명</small></div></div>
+  <div class="panel mem-compact"><div class="mem-head"><div><h2>회원 목록</h2><small>로그인: 회사 이메일 + 비밀번호(초기값 사번) · 관리자 계정은 [관리자 계정] 메뉴</small></div>
+      <div class="mem-btns"><button class="btn sm" data-act="xls-template">${I('download', 15)} 엑셀 양식</button><button class="btn sm primary" data-act="xls-upload">${I('plus', 15)} 엑셀 일괄 등록</button><button class="btn sm" data-act="mem-new">${I('userplus', 15)} 회원 추가</button><button class="btn sm" data-act="csv" data-t="members">${I('download', 15)} CSV</button></div></div>
+    <div class="mem-filters"><div class="pills">${[['', '전체'], ['active', '정상'], ['pw', '비밀번호 미변경'], ['blocked', '이용 제한']].map(([k, t]) => `<button class="${f.role === k ? 'on' : ''}" data-act="mrole" data-v="${k}">${t}</button>`).join('')}</div>
+      <label class="mem-like">${I('heart', 15)} 누른 좋아요 기준월 <select data-f="likeMonth">${monthOpts(f.likeMonth).replace('전체 기간', '누적 전체')}</select></label></div>
     ${t.html}</div><input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" hidden>`;
   document.getElementById('xlsFile').onchange = e => { const f0 = e.target.files[0]; e.target.value = ''; if (f0) xlsImport(f0); };
   bindFilters('members');
