@@ -1220,16 +1220,19 @@ const API = {
       if (!u) {
         const pw = String(r.password || r.emp_no || '').trim();
         if (pw.length < 4) { res.push({ email: em, status: 'error', msg: '초기 비밀번호 또는 사번이 필요합니다' }); continue; }
-        const nu = { id: Local.uuid(), login_id: em, email: em, pw: Local.hash(pw), role: 'user', perms: [], must_change_pw: true, status: 'active', nickname: Local.uniqueNick(), nickname_month: null,
+        const want = String(r.nickname || '').trim(), okNick = want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want);
+        const nu = { id: Local.uuid(), login_id: em, email: em, pw: Local.hash(pw), role: 'user', perms: [], must_change_pw: true, status: 'active', nickname: okNick ? want : Local.uniqueNick(), nickname_month: null,
           created_at: new Date().toISOString(), last_seen: null };
         MEMBER_FIELDS.forEach(([k]) => nu[k] = r[k] || ''); nu.dept = nu.org_branch;
         db.users.push(nu); db.history.push({ id: db.history.length + 1, user_id: nu.id, nickname: nu.nickname, month_key: curMonth(), created_at: nu.created_at });
-        res.push({ email: em, status: 'created' });
+        res.push({ email: em, status: 'created', msg: want && !okNick ? `닉네임 [${want}] 사용 불가 → 자동 생성` : null });
       } else if (isAdminRole(u.role)) res.push({ email: em, status: 'error', msg: '관리자 계정은 [관리자 계정] 메뉴에서 수정하세요' });
       else {
         MEMBER_FIELDS.forEach(([k]) => { if (r[k]) u[k] = r[k]; }); u.dept = u.org_branch;
         if (r.reset_pw) { u.pw = Local.hash(r.password || u.emp_no); u.must_change_pw = true; }
-        res.push({ email: em, status: 'updated' });
+        const want = String(r.nickname || '').trim(); let msg = null;
+        if (want && want !== u.nickname) { if (want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want)) { u.nickname = want; db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: want, month_key: curMonth(), created_at: new Date().toISOString() }); } else msg = `닉네임 [${want}] 사용 불가 → 기존 유지`; }
+        res.push({ email: em, status: 'updated', msg });
       }
     }
     Local.save(); return res;
@@ -2081,13 +2084,13 @@ function viewPrivacy() {
         '<b>성명·사번</b>: 회원 명단 관리 및 본인 확인 (사번은 최초 비밀번호로만 사용)',
         '<b>비밀번호</b>: 암호화(해시)해서 저장하며, 원문은 보관하지 않습니다',
         '<b>소속 정보</b>(구분·조직지점·근무지점·영업소·직위·직책): 설문 대상 지정 및 운영 통계',
-        '<b>닉네임</b>: 익명 활동을 위한 표시명 (매월 자동 갱신)',
+        '<b>닉네임</b>: 익명 활동을 위한 표시명 (가입 시 자동 부여 또는 기존 사용 닉네임 연계, 한 달에 1번 본인 변경 가능)',
         '<b>이용 기록</b>: 가입일·최근 접속 시각, 월별 좋아요 누른 횟수(어느 글인지는 기록하지 않음), 새 글 알림을 켠 경우 알림 수신 정보'])}
       <h4>2. 개인정보의 이용 목적</h4><p>수집된 정보는 다음의 목적으로만 이용됩니다.</p>
       ${li(['회원 인증 및 로그인 세션 관리', '익명 게시판 서비스 제공 (게시글 작성, 댓글, 좋아요)', '월간 시상·히든보이스 이벤트 운영 및 당첨자 안내', '설문조사(VOY Research) 대상 지정 및 결과 집계', '새 글 알림 발송 (알림을 켠 경우에만)'])}
       <h4>3. 개인정보의 보유 및 파기</h4><p>개인정보는 서비스 이용 기간 동안 보유하며, 퇴사 또는 회원 삭제 시 지체 없이 파기합니다. 삭제된 회원이 작성한 글·댓글은 '탈퇴회원'으로 표시되며 작성자 정보와의 연결이 끊어집니다. 비밀번호는 단방향 해시로 저장되어 원문 복원이 불가능합니다.</p>
       <h4>4. 익명성 보장</h4><p>VOY는 익명 커뮤니티로서 다음과 같은 익명성 보장 정책을 운영합니다.</p>
-      ${li(['게시글·댓글에는 이름·사번·소속이 아닌 <b>월별 닉네임</b>만 표시됩니다.', '닉네임은 매월 1일 자동으로 새로 부여되며, 월 1회 수동 변경이 가능합니다.',
+      ${li(['게시글·댓글에는 이름·사번·소속이 아닌 <b>닉네임</b>만 표시됩니다.', '닉네임은 한 달에 1번 본인이 바꿀 수 있으며, 변경 기회는 매월 1일 다시 생깁니다.',
         '다른 회원과 일반 관리자는 게시글·댓글 작성자의 실제 신원을 <b>확인할 수 없습니다</b>. (서버에서 작성자 정보를 아예 보내지 않도록 막혀 있습니다)',
         '단, 가이드라인 위반 대응·이벤트 당첨자 안내 등 운영상 꼭 필요한 경우에 한해 <b>최고관리자 1인</b>만 작성자를 확인할 수 있으며, 이 정보는 다른 목적으로 이용하거나 공개하지 않습니다.'])}
       <h4>5. 제3자 제공</h4><p>VOY는 수집된 개인정보를 외부 제3자에게 제공하지 않습니다. 다만, 법령에 의한 요청이 있는 경우 관련 법률에 따라 제공될 수 있습니다. 서비스 운영을 위해 데이터는 클라우드 데이터베이스(Supabase)에 암호화된 연결로 저장됩니다.</p>
@@ -2498,15 +2501,16 @@ const Badge = {
 /* ---------------- 로그인 ---------------- */
 async function renderAuth() {
   root.innerHTML = `<div class="auth"><div class="auth-card">
-    <div class="auth-hero"><div class="logo">V</div><h1>Voice of YUHAN</h1><p>현장의 목소리를 거침없이 — 익명 커뮤니티</p></div>
+    <div class="auth-hero"><div class="logo">V</div><h1>Voice of YUHAN</h1><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
     <form class="box" id="authform" autocomplete="on">
-      <label class="lbl" style="margin-top:0">회사 이메일</label>
+      <label class="lbl" style="margin-top:0">ID (회사 이메일)</label>
       <input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@${COMPANY_DOMAIN}" required>
-      <p class="hint">@${COMPANY_DOMAIN} 앞부분만 입력해도 돼요 · 관리자는 관리자 아이디 입력</p>
+      <p class="hint">@${COMPANY_DOMAIN} 앞부분만 입력해도 됩니다.</p>
       <label class="lbl">비밀번호</label><input id="apw" type="password" autocomplete="current-password" required>
+      <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.</p>
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
-      <p class="hint" style="text-align:center;margin-top:12px">로그인 후 게시판은 <b>VOY™ 앱 창</b>(주소창 없음)에서 열립니다.<br>처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
+      <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
     </form>
     ${installCardHTML()}
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
