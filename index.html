@@ -221,6 +221,30 @@ body{min-height:100vh}
 .pol-card.doc li::before{content:'';position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
 .pol-card.doc li b{display:inline;font-size:inherit;color:var(--text)}
 .pol-date{font-size:12px!important;color:var(--muted)!important}
+.v-banner{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,#f59f00 9%,var(--surface));border:1px solid color-mix(in srgb,#f59f00 35%,var(--border));border-radius:18px;padding:16px;margin-bottom:12px}
+.v-banner.pub{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+.v-bi{width:42px;height:42px;border-radius:12px;background:color-mix(in srgb,#f59f00 18%,transparent);color:#b26a00;display:grid;place-items:center;flex-shrink:0;font-size:22px}
+.v-banner.pub .v-bi{background:color-mix(in srgb,var(--accent) 15%,transparent)}
+.v-banner b{display:block;font-size:15.5px;margin-bottom:3px}.v-banner p{margin:0;font-size:13px;color:var(--text2);line-height:1.6}
+.v-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px}
+.v-card h4{display:flex;align-items:center;gap:7px;margin:0 0 12px;font-size:15px}
+.v-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.v-head small{color:var(--muted);font-size:12.5px}
+.v-stage{flex-shrink:0;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-size:12px;font-weight:800;padding:5px 10px;border-radius:99px}
+.v-steps{display:grid;gap:8px}
+.v-step{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface2)}
+.v-step.on{border-color:#7c5cff;background:color-mix(in srgb,#7c5cff 8%,var(--surface))}.v-step.done{opacity:.7}
+.v-si{width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);display:grid;place-items:center;color:var(--muted);flex-shrink:0}
+.v-step.on .v-si{color:#7c5cff;border-color:#7c5cff}
+.v-step b{font-size:14px}.v-step b em{font-style:normal;font-size:11px;background:#7c5cff;color:#fff;border-radius:99px;padding:2px 8px;margin-left:4px;vertical-align:1px}
+.v-step b em.ok{background:var(--accent)}.v-step small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}.v-step p{margin:6px 0 0;font-size:12.5px;color:var(--text2);line-height:1.6}
+.v-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.v-tiles.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.v-tile{border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;background:var(--surface2);min-width:0}
+.v-tile .v-e{font-size:24px;display:block}.v-tile b{display:block;font-size:13.5px;margin:4px 0 2px;color:var(--text)}.v-tile>small{display:block;font-size:11.5px;color:var(--muted);line-height:1.45}
+.v-review b{color:var(--point)}.v-tile.has{background:color-mix(in srgb,var(--point) 7%,var(--surface));border-color:color-mix(in srgb,var(--point) 35%,var(--border))}
+.v-wins{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.v-win{display:block;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 6px;font-size:12px;font-weight:800;color:var(--accent);word-break:break-all;line-height:1.35}
+.v-win[data-act]{cursor:pointer}.v-win small{display:block;font-weight:500;color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-rule{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;border-bottom:1px solid var(--border);font-size:14px}.v-rule span{display:flex;align-items:center;gap:6px}.v-rule b{color:var(--accent)}
 .month-pill{display:flex;gap:10px;align-items:center;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:9px 16px;border-radius:99px;font-size:13px;margin-bottom:12px}
 .month-pill b{color:var(--point)}
 .event-banner{display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
@@ -508,6 +532,8 @@ const ICONS = {
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/>',
   palette: '<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.4-.7-.4-1.1 0-1 .8-1.7 1.7-1.7H16a6 6 0 0 0 6-6c0-4.4-4.5-8.3-10-8.3Z"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  megaphone: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11l2 2 4-4M9 17h6"/>',
   printer: '<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/>'
 };
@@ -592,6 +618,30 @@ function shiftMonth(mk, delta) {
 }
 function recentMonths(n, from) { const a = []; let mk = from || curMonth(); for (let i = 0; i < n; i++) { a.push(mk); mk = shiftMonth(mk, -1); } return a; }
 function monthLabel(mk, short) { return short ? `${+mk.slice(2)}월` : `20${mk.slice(0, 2)}년 ${+mk.slice(2)}월`; }
+/* ---------- 이달의 Voice: 항목 · 일정 (회원/관리자 공통) ---------- */
+const VOICE_CATS = [
+  { k: 'grand',     g: 'review', t: '최우수 Voice', e: '🏆', d: '본사 심의로 선정' },
+  { k: 'excellent', g: 'review', t: '우수 Voice',   e: '🥈', d: '본사 심의로 선정' },
+  { k: 'merit',     g: 'review', t: '장려 Voice',   e: '🥉', d: '본사 심의로 선정' },
+  { k: 'popular',   g: 'result', t: '인기 Voice',   e: '🔥', d: '받은 좋아요·댓글 점수 1위권' },
+  { k: 'reaction',  g: 'result', t: '리액션 Voice', e: '💬', d: '댓글을 가장 많이 쓴 회원' },
+  { k: 'big',       g: 'result', t: 'Big Voice',    e: '📣', d: '글을 가장 많이 쓴 회원' },
+  { k: 'nth',       g: 'event',  t: 'N번째 Voice',  e: '🎁', d: '히든보이스 이벤트 당첨' },
+  { k: 'survey',    g: 'event',  t: '설문 이벤트 당첨', e: '📋', d: 'VOY Research 참여 추첨' }
+];
+const VOICE_GROUPS = { review: '심사 시상 · 본사 심의 후 선정', result: '결과 시상 · 한 달 집계 결과대로', event: '이벤트 당첨' };
+const voiceCat = k => VOICE_CATS.find(c => c.k === k) || { k, t: k, e: '🏅', d: '' };
+function prevMonth(mk) { let y = 2000 + +mk.slice(0, 2), m = +mk.slice(2) - 1; if (m < 1) { m = 12; y--; } return String(y).slice(2) + String(m).padStart(2, '0'); }
+function nextMonth(mk) { let y = 2000 + +mk.slice(0, 2), m = +mk.slice(2) + 1; if (m > 12) { m = 1; y++; } return String(y).slice(2) + String(m).padStart(2, '0'); }
+/* 대상 월(mk) 글에 대한 발표일: 다음 달 11일, 주말이면 다음 월요일 (공휴일은 관리자가 게시 시점으로 조정) */
+function voiceAnnounceDate(mk) { const n = nextMonth(mk), y = 2000 + +n.slice(0, 2), m = +n.slice(2); const d = new Date(Date.UTC(y, m - 1, 11)); while ([0, 6].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1); return d; }
+function voiceStage(mk) {   // 오늘 기준, 대상 월 mk 시상의 진행 단계
+  const now = new Date(Date.now() + KST_OFFSET), cm = String(now.getUTCFullYear()).slice(2) + String(now.getUTCMonth() + 1).padStart(2, '0'), d = now.getUTCDate();
+  if (cm <= mk) return 'write';
+  if (cm !== nextMonth(mk)) return 'done';
+  const ad = voiceAnnounceDate(mk).getUTCDate();
+  return d <= 7 ? 'vote' : d < ad ? 'review' : 'done';
+}
 function postNo(p) { return p.month_key && p.month_seq ? `${p.month_key}_${String(p.month_seq).padStart(3, '0')}` : ''; }   // 2610_003 · 관리자 글은 번호 없음
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function timeAgo(iso) {
@@ -1200,25 +1250,71 @@ const API = {
     return must(await sb.from('posts_v').select('id,mine').order('id', { ascending: false }).limit(n || 30));
   },
   /* 랭킹 (닉네임·점수만 — 계정·소속 정보 없음) */
-  /* ---------- 이달의 Voice 시상 (관리자 전용) ---------- */
+  /* ---------- 이달의 Voice 시상 ----------
+     심사(grand 최우수·excellent 우수·merit 장려) · 결과(popular·reaction·big) · 이벤트(nth·survey)
+     회원에게는 관리자가 [게시]한 달의 '닉네임'만 공개 */
+  _aw(mk) { const db = Local.db; db.vawards = db.vawards || {}; return db.vawards[mk] = db.vawards[mk] || { items: [], published: false, published_at: null }; },
+  _monthNick(uid, mk) { const db = Local.db, u = db.users.find(x => x.id === uid) || {};
+    const h = (db.history || []).filter(x => x.user_id === uid && x.month_key === mk).pop(); if (h) return h.nickname;
+    const p = db.posts.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (p) return p.author_nickname;
+    const c = db.comments.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (c) return c.author_nickname;
+    return u.nickname; },
+  _supRow(u) { const sup = this.profile && this.profile.role === 'super';
+    return { real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null, dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null }; },
   async adminVoiceStats(mk) {
     if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk }));
-    const db = Local.db, w = db.settings.score || { like: 3, comment: 1 }, sup = this.profile && this.profile.role === 'super', g = {};
+    const db = Local.db, w = db.settings.score || { like: 3, comment: 1 }, g = {};
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
     db.posts.filter(p => p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++; o.likes += p.like_count; o.comments_received += p.comment_count; });
     db.comments.filter(c => c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
-    const aw = ((db.awards || {})[mk]) || {};
+    const items = this._aw(mk).items;
     return Object.values(g).filter(o => users[o.uid] && users[o.uid].role === 'user').map(o => { const u = users[o.uid];
-      return { token: this._tok(mk, o.uid), nickname: u.nickname, posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
-        score: o.likes * w.like + o.comments_received * w.comment, real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null,
-        dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null, picked: ['big', 'popular', 'reaction'].filter(k => (aw[k] || []).includes(o.uid)) }; });
+      return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
+        score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
-  async adminSetAward(mk, cat, token, on) {
-    if (!LOCAL) { must(await sb.rpc('admin_set_award', { mk, cat, tok: token, on_: !!on })); return; }
-    const db = Local.db, u = db.users.find(x => this._tok(mk, x.id) === token); if (!u) throw new Error('대상 회원을 찾을 수 없습니다');
-    db.awards = db.awards || {}; const m = db.awards[mk] = db.awards[mk] || {}; const l = m[cat] = m[cat] || [];
-    if (on && !l.includes(u.id)) l.push(u.id); if (!on) m[cat] = l.filter(x => x !== u.id); Local.save();
+  async adminAwardCandidates(mk) {
+    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk }));
+    const db = Local.db;
+    return db.users.filter(u => u.role === 'user').map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
+      survey_wins: (db.surveyDraws || []).filter(d => (d.winner_ids || []).includes(u.id) && monthKeyOf(d.drawn_at) >= mk)
+        .map(d => (db.surveys.find(x => x.id === d.survey_id) || {}).title || '설문'), ...this._supRow(u) }));
+  },
+  async adminSetAward(mk, cat, token, on, note) {
+    if (!LOCAL) { must(await sb.rpc('admin_set_award', { mk, cat, tok: token, on_: !!on, note_: note || null })); return; }
+    const u = Local.db.users.find(x => this._tok(mk, x.id) === token); if (!u) throw new Error('대상 회원을 찾을 수 없습니다');
+    const A = this._aw(mk); A.items = A.items.filter(a => !(a.category === cat && a.user_id === u.id));
+    if (on) A.items.push({ category: cat, user_id: u.id, post_id: null, nickname: this._monthNick(u.id, mk), note: note || null, created_at: new Date().toISOString() });
+    Local.save();
+  },
+  async adminSetAwardPost(mk, cat, pid, on) {
+    if (!LOCAL) { must(await sb.rpc('admin_set_award_post', { mk, cat, pid: +pid, on_: !!on })); return; }
+    const po = Local.db.posts.find(x => x.id === +pid); if (!po || !po.user_id) throw new Error('게시글(작성자)을 찾을 수 없습니다');
+    const A = this._aw(mk); A.items = A.items.filter(a => !(a.category === cat && (a.post_id === po.id || a.user_id === po.user_id)));
+    if (on) A.items.push({ category: cat, user_id: po.user_id, post_id: po.id, nickname: po.author_nickname || this._monthNick(po.user_id, mk), note: null, created_at: new Date().toISOString() });
+    Local.save();
+  },
+  async adminGetAwards(mk) {
+    if (!LOCAL) {
+      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk }).then(must), sb.rpc('admin_award_pub_state', { mk }).then(must)]);
+      return { list: list || [], published: !!(st && st.published), published_at: st && st.published_at };
+    }
+    const A = this._aw(mk), db = Local.db;
+    return { published: A.published, published_at: A.published_at, list: A.items.map(a => { const u = db.users.find(x => x.id === a.user_id) || {}, po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null;
+      return { category: a.category, token: this._tok(mk, a.user_id), nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note, ...this._supRow(u) }; }) };
+  },
+  async adminPublishAwards(mk, on) {
+    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on })); return; }
+    const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
+  },
+  async voiceAwardsPublic(mk) {
+    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk })) || [];
+    const A = this._aw(mk), db = Local.db; if (!A.published) return [];
+    return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note }; });
+  },
+  async voiceAwardMonths() {
+    if (!LOCAL) return (must(await sb.rpc('voice_award_months')) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
+    return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published).map(([k]) => k).sort().reverse();
   },
   async ranking(mk) {
     if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '' }));
@@ -1770,7 +1866,7 @@ function route() {
   if (view === 'post' && arg) return viewPost(arg);
   if (view === 'write') return viewWrite();
   if (view === 'edit' && arg) return viewWrite(arg);
-  if (view === 'rank') return isAdminRole(S.me.role) ? viewRank() : go('#/feed');   // 랭킹은 관리자만
+  if (view === 'rank') return viewRank();   // 이달의 Voice (실시간 순위는 관리자 콘솔에서만)
   if (view === 'me') return viewMe();
   if (view === 'guide') return viewGuide();
   if (view === 'privacy') return viewPrivacy();
@@ -1794,7 +1890,7 @@ function shell(inner, tab, fab = true) {
     ${fab ? `<button class="fab" data-act="go" data-to="#/write" aria-label="글쓰기">${I('pen', 26)}</button>` : ''}
     <nav class="bnav">
       <a href="#/feed" class="${tab === 'feed' ? 'on' : ''}">${I('home', 22)}피드</a>
-      ${isAdminRole(me.role) ? `<a href="#/rank" class="${tab === 'rank' ? 'on' : ''}">${I('trophy', 22)}랭킹</a>` : ''}
+      <a href="#/rank" class="${tab === 'rank' ? 'on' : ''}">${I('trophy', 22)}랭킹</a>
       <a href="#/me" class="${tab === 'me' ? 'on' : ''}">${I('user', 22)}내 정보</a>
     </nav></div>`;
 }
@@ -2110,40 +2206,47 @@ async function submitPost(btn) {
   } catch (e) { toast(friendly(e), 'err'); busy(btn, false); }
 }
 
-/* ---------------- 랭킹 ---------------- */
-let RANK = { month: curMonth(), tab: 'user' };
+/* ---------------- 랭킹 = 이달의 Voice (일정 · 시상 소개 · 게시된 결과는 닉네임만) ----------------
+   실시간 순위·점수 집계는 관리자 콘솔에서만 볼 수 있음 */
+let RANK = { month: null };
 async function viewRank() {
-  const w = S.settings.score;
-  shell(`<div class="page">
-    <div class="toolbar"><select id="rmonth" style="flex:1">${recentMonths(12).map(m => `<option value="${m}" ${RANK.month === m ? 'selected' : ''}>${monthLabel(m)}${m === curMonth() ? ' (이번달)' : ''}</option>`).join('')}<option value="" ${!RANK.month ? 'selected' : ''}>누적 전체</option></select></div>
-    <div class="seg"><button class="${RANK.tab === 'user' ? 'on' : ''}" data-act="rtab" data-tab="user">작성자 랭킹</button><button class="${RANK.tab === 'post' ? 'on' : ''}" data-act="rtab" data-tab="post">인기글</button></div>
-    <p class="rule">점수 = 좋아요 ×${w.like} + 댓글 ×${w.comment} · 관리자 공지는 제외</p>
-    <div id="rbody"><div class="loading">집계 중…</div></div></div>`, 'rank');
-  document.getElementById('rmonth').onchange = e => { RANK.month = e.target.value; loadRank(); };
-  loadRank();
-}
-async function loadRank() {
-  const el = document.getElementById('rbody'); if (!el) return;
-  const w = S.settings.score;
-  try {
-    if (RANK.tab === 'post') {
-      const posts = (await API.allPosts({ month: RANK.month })).filter(p => p.author_role !== 'admin');
-      if (!posts.length) { el.innerHTML = `<div class="empty">아직 집계할 글이 없어요</div>`; return; }
-      const top = posts.map(p => ({ ...p, score: scoreOf(p, w) })).sort((a, b) => b.score - a.score || b.id - a.id).slice(0, 20);
-      el.innerHTML = `<div class="rlist">${top.map((p, i) => `<div class="ritem" data-act="open" data-id="${p.id}" style="cursor:pointer">
-        <span class="rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><div class="rmain"><b>${esc(p.title)}</b><small>${esc(p.author_nickname || '')} · ♡${p.like_count} · 댓글 ${p.comment_count}</small></div><span class="rsc">${p.score}점</span></div>`).join('')}</div>`;
-      return;
-    }
-    const list = await API.ranking(RANK.month);   // 닉네임·점수만 (작성자 계정·소속은 서버에서 아예 내려오지 않음)
-    if (!list.length) { el.innerHTML = `<div class="empty">아직 집계할 글이 없어요</div>`; return; }
-    const myIdx = list.findIndex(x => x.is_me), pod = list.slice(0, 3), order = [1, 0, 2];
-    el.innerHTML = `${pod.length >= 3 ? `<div class="podium">${order.map(i => { const u = pod[i]; return `<div class="pod p${i + 1}"><div class="medal">${['🥇', '🥈', '🥉'][i]}</div>
-        <div class="avatar sm" style="background:${avColor(u.nickname)}">${esc((u.nickname || '?')[0])}</div><b>${esc(u.nickname)}</b><div class="sc">${u.score}</div></div>`; }).join('')}</div>` : ''}
-      ${myIdx >= 0 ? `<p class="rule">내 순위: <b style="color:var(--accent)">${myIdx + 1}위</b> / ${list.length}명 · ${list[myIdx].score}점</p>` : ''}
-      <div class="rlist">${list.slice(0, 50).map((u, i) => `<div class="ritem ${u.is_me ? 'me' : ''}"><span class="rk">${i + 1}</span>
-        <div class="avatar xs" style="background:${avColor(u.nickname)}">${esc((u.nickname || '?')[0])}</div>
-        <div class="rmain"><b>${esc(u.nickname)}</b><small>글 ${u.posts} · ♡${u.likes} · 댓글 ${u.comments}</small></div><span class="rsc">${u.score}점</span></div>`).join('')}</div>`;
-  } catch (e) { el.innerHTML = `<div class="empty">${esc(friendly(e))}</div>`; }
+  const target = prevMonth(curMonth());
+  shell(`<div class="page voice"><div id="vbody"><div class="loading">불러오는 중…</div></div></div>`, 'rank');
+  let months = [];
+  try { months = await API.voiceAwardMonths(); } catch (e) {}
+  const opts = [...new Set([target, ...months])].sort().reverse();
+  const mk = RANK.month && opts.includes(RANK.month) ? RANK.month : target;
+  let list = [];
+  try { list = await API.voiceAwardsPublic(mk); } catch (e) {}
+  const el = document.getElementById('vbody'); if (!el) return;
+  const pub = list.length > 0, w = S.settings.score, admin = isAdminRole(S.me.role);
+  const ad = voiceAnnounceDate(mk), adTxt = `${ad.getUTCDate()}일(${'일월화수목금토'[ad.getUTCDay()]})`, am = +nextMonth(mk).slice(2), tm = +mk.slice(2);
+  const st = pub ? 'pub' : voiceStage(mk);
+  const steps = [
+    { k: 'write', t: '글게시', when: `${tm}월 1일 ~ 말일`, d: '', ic: 'edit' },
+    { k: 'vote', t: '투표(추가)', when: `${am}월 1일 ~ 7일`, d: '지난달의 보석찾기 (투표 독려)<br>"우수 Tip에 투표해주세요"<br>게시판에서 투표 독려글 게시', ic: 'megaphone' },
+    { k: 'review', t: '본사심의', when: `${am}월 8일 ~ 10일`, d: '', ic: 'clipboard' },
+    { k: 'done', t: '최종 발표', when: `${am}월 ${adTxt}`, d: '11일이 주말이면 다음 첫 평일에 발표합니다.', ic: 'trophy' }
+  ];
+  const cur = st === 'pub' ? 'done' : st, stName = st === 'pub' ? '발표 완료' : (steps.find(x => x.k === cur) || {}).t || '';
+  const winners = k => list.filter(a => a.category === k);
+  const tile = c => { const ws = winners(c.k); return `<div class="v-tile v-${c.g} ${ws.length ? 'has' : ''}"><span class="v-e">${c.e}</span><b>${c.t}</b>
+      ${ws.length ? `<div class="v-wins">${ws.map(a => `<span class="v-win" ${a.post_id ? `data-act="open" data-id="${a.post_id}" title="${esc(a.post_title || '')}"` : ''}>${esc(a.nickname || '')}${a.note ? `<small>${esc(a.note)}</small>` : ''}</span>`).join('')}</div>` : `<small>${pub ? '해당자 없음' : esc(c.d)}</small>`}</div>`; };
+  const group = g => `<section class="v-card"><h4>${g === 'review' ? I('trophy', 18) : g === 'result' ? I('trend', 18) : I('gift', 18)} ${VOICE_GROUPS[g]}</h4><div class="v-tiles ${g === 'event' ? 'two' : ''}">${VOICE_CATS.filter(c => c.g === g).map(tile).join('')}</div></section>`;
+  el.innerHTML = `
+    ${opts.length > 1 ? `<div class="toolbar"><select id="vmonth" style="flex:1">${opts.map(m => `<option value="${m}" ${m === mk ? 'selected' : ''}>${monthLabel(m)} Voice${m === target ? ' (이번 발표)' : ''}</option>`).join('')}</select></div>` : ''}
+    <section class="v-banner ${pub ? 'pub' : ''}"><span class="v-bi">${pub ? '🎉' : I('clock', 22)}</span><div>
+      <b>${pub ? `${tm}월 이달의 Voice 발표!` : `${tm}월 Voice는 발표 전입니다`}</b>
+      <p>${pub ? '축하합니다! 선정된 분들의 닉네임을 공개합니다. 닉네임을 누르면 선정된 글을 볼 수 있어요.' : '아래 일정에 따라 글게시, 투표, 본사심의가 순차적으로 진행되며, 최종 결과는 발표 단계와 관리자 최종 게시 이후에만 공개됩니다.'}</p></div></section>
+    <section class="v-card"><div class="v-head"><div><h4 style="margin:0">이달의 Voice 운영 일정</h4><small>${am}월 발표 예정일은 ${adTxt}입니다.</small></div><span class="v-stage">현재 단계: ${stName}</span></div>
+      <div class="v-steps">${steps.map(x => { const on = x.k === cur, done = steps.findIndex(y => y.k === x.k) < steps.findIndex(y => y.k === cur) || st === 'pub';
+        return `<div class="v-step ${on ? 'on' : ''} ${done ? 'done' : ''}"><span class="v-si">${I(x.ic, 18)}</span><div><b>${x.t}${on && st !== 'pub' ? ' <em>진행 중</em>' : ''}${done ? ' <em class="ok">완료</em>' : ''}</b><small>${x.when}</small>${x.d ? `<p>${x.d}</p>` : ''}</div></div>`; }).join('')}</div></section>
+    ${group('review')}${group('result')}${group('event')}
+    <section class="v-card"><h4>${I('trend', 18)} 점수 산정 기준 <small style="font-weight:500;color:var(--muted)">(결과 시상 기준)</small></h4>
+      <div class="v-rule"><span>${I('heart', 16)} 좋아요 받기</span><b>+${w.like}점</b></div><div class="v-rule"><span>${I('msg', 16)} 댓글 받기</span><b>+${w.comment}점</b></div>
+      <p class="hint" style="margin:8px 0 0">관리자 공지글은 집계에서 제외됩니다. 작성자 순위·점수는 공개하지 않고, 발표 시 선정자의 <b>닉네임만</b> 공개합니다.</p></section>
+    ${admin ? `<a class="btn block" href="${ADMIN_PAGE_URL}#/rank" style="margin-top:4px">${I('shield', 16)} 관리자 콘솔에서 실시간 순위·선정 관리</a>` : ''}`;
+  const sel = document.getElementById('vmonth'); if (sel) sel.onchange = e => { RANK.month = e.target.value; viewRank(); };
 }
 
 /* ---------------- 리서치 (설문) — 닉네임 입력 없이 로그인 계정으로 1인 1회 ---------------- */
@@ -2446,7 +2549,6 @@ document.addEventListener('click', async e => {
     case 'w-rmimg': e.stopPropagation(); S.write.images.splice(+t.dataset.i, 1); renderWriteParts(); break;
     case 'w-rmpdf': e.stopPropagation(); S.write.pdf = null; renderWriteParts(); break;
     case 'submit-post': submitPost(t); break;
-    case 'rtab': RANK.tab = t.dataset.tab; document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b === t)); loadRank(); break;
     case 'nick': nickModal(); break;
     case 'pw': pwModal(); break;
     case 'theme': setTheme(t.dataset.v); document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('on', b === t)); break;

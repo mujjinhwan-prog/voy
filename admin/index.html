@@ -316,6 +316,22 @@ td.tt span{cursor:pointer}
 .rs-resp{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);cursor:pointer;color:var(--text)}
 .rs-resp:hover{border-color:var(--accent)}.rs-resp small{color:var(--muted);font-size:11.5px}
 #printArea{display:none}
+.aw-pub{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;border:1.5px dashed var(--border);margin-bottom:12px;background:var(--surface2)}
+.aw-pub.on{border-style:solid;border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.aw-pub b{display:block;font-size:14.5px}.aw-pub small{color:var(--muted);font-size:12px}
+.aw-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px;padding:10px 4px 14px;border-bottom:1px solid var(--border);margin-bottom:6px}
+@media(max-width:1100px){.aw-sum{grid-template-columns:1fr}}
+.aw-sum-row{display:flex;gap:10px;align-items:flex-start;min-width:0}.aw-sum-t{flex:0 0 130px;font-weight:800;font-size:13px;padding-top:4px}
+.aw-sum-chips{display:flex;flex-wrap:wrap;gap:5px;min-width:0}
+.aw-chip2{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px 6px 3px 10px;font-size:12.5px;font-weight:700}
+.aw-chip2 small{font-weight:500;color:var(--muted)}.aw-chip2 button{border:0;background:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0 3px}.aw-chip2 button:hover{color:var(--danger)}
+.aw-sec{margin-top:18px}.aw-sec h3{font-size:15.5px;margin:0 0 10px}.aw-sec h3 small{font-size:12px;color:var(--muted);font-weight:500;margin-left:6px}
+.aw-tbl td.tt span{cursor:pointer}.aw-tbl td.tt span:hover{text-decoration:underline}
+.aw-ev{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}@media(max-width:1000px){.aw-ev{grid-template-columns:1fr}}
+.aw-add{margin-top:12px;padding:12px 14px;border:1px solid var(--border);border-radius:14px}
+.aw-addlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.aw-addbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:6px 12px;font-size:13px;cursor:pointer}
+.aw-addbtn:hover{border-color:var(--accent);color:var(--accent)}
+
 .dt-search{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:0 12px;margin-bottom:10px;color:var(--muted);max-width:560px}
 .dt-search:focus-within{border-color:var(--accent);color:var(--accent)}
 .dt-search input{border:0!important;background:transparent!important;box-shadow:none!important;height:42px;flex:1;min-width:0;padding:0!important;font-size:14px}
@@ -454,6 +470,8 @@ const ICONS = {
   bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/>',
   palette: '<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.4-.7-.4-1.1 0-1 .8-1.7 1.7-1.7H16a6 6 0 0 0 6-6c0-4.4-4.5-8.3-10-8.3Z"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  megaphone: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 9a3 3 0 0 1 0 6M18 6a7 7 0 0 1 0 12"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   clipboard: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11l2 2 4-4M9 17h6"/>',
   printer: '<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/>'
 };
@@ -538,6 +556,30 @@ function shiftMonth(mk, delta) {
 }
 function recentMonths(n, from) { const a = []; let mk = from || curMonth(); for (let i = 0; i < n; i++) { a.push(mk); mk = shiftMonth(mk, -1); } return a; }
 function monthLabel(mk, short) { return short ? `${+mk.slice(2)}월` : `20${mk.slice(0, 2)}년 ${+mk.slice(2)}월`; }
+/* ---------- 이달의 Voice: 항목 · 일정 (회원/관리자 공통) ---------- */
+const VOICE_CATS = [
+  { k: 'grand',     g: 'review', t: '최우수 Voice', e: '🏆', d: '본사 심의로 선정' },
+  { k: 'excellent', g: 'review', t: '우수 Voice',   e: '🥈', d: '본사 심의로 선정' },
+  { k: 'merit',     g: 'review', t: '장려 Voice',   e: '🥉', d: '본사 심의로 선정' },
+  { k: 'popular',   g: 'result', t: '인기 Voice',   e: '🔥', d: '받은 좋아요·댓글 점수 1위권' },
+  { k: 'reaction',  g: 'result', t: '리액션 Voice', e: '💬', d: '댓글을 가장 많이 쓴 회원' },
+  { k: 'big',       g: 'result', t: 'Big Voice',    e: '📣', d: '글을 가장 많이 쓴 회원' },
+  { k: 'nth',       g: 'event',  t: 'N번째 Voice',  e: '🎁', d: '히든보이스 이벤트 당첨' },
+  { k: 'survey',    g: 'event',  t: '설문 이벤트 당첨', e: '📋', d: 'VOY Research 참여 추첨' }
+];
+const VOICE_GROUPS = { review: '심사 시상 · 본사 심의 후 선정', result: '결과 시상 · 한 달 집계 결과대로', event: '이벤트 당첨' };
+const voiceCat = k => VOICE_CATS.find(c => c.k === k) || { k, t: k, e: '🏅', d: '' };
+function prevMonth(mk) { let y = 2000 + +mk.slice(0, 2), m = +mk.slice(2) - 1; if (m < 1) { m = 12; y--; } return String(y).slice(2) + String(m).padStart(2, '0'); }
+function nextMonth(mk) { let y = 2000 + +mk.slice(0, 2), m = +mk.slice(2) + 1; if (m > 12) { m = 1; y++; } return String(y).slice(2) + String(m).padStart(2, '0'); }
+/* 대상 월(mk) 글에 대한 발표일: 다음 달 11일, 주말이면 다음 월요일 (공휴일은 관리자가 게시 시점으로 조정) */
+function voiceAnnounceDate(mk) { const n = nextMonth(mk), y = 2000 + +n.slice(0, 2), m = +n.slice(2); const d = new Date(Date.UTC(y, m - 1, 11)); while ([0, 6].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1); return d; }
+function voiceStage(mk) {   // 오늘 기준, 대상 월 mk 시상의 진행 단계
+  const now = new Date(Date.now() + KST_OFFSET), cm = String(now.getUTCFullYear()).slice(2) + String(now.getUTCMonth() + 1).padStart(2, '0'), d = now.getUTCDate();
+  if (cm <= mk) return 'write';
+  if (cm !== nextMonth(mk)) return 'done';
+  const ad = voiceAnnounceDate(mk).getUTCDate();
+  return d <= 7 ? 'vote' : d < ad ? 'review' : 'done';
+}
 function postNo(p) { return p.month_key && p.month_seq ? `${p.month_key}_${String(p.month_seq).padStart(3, '0')}` : ''; }   // 2610_003 · 관리자 글은 번호 없음
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function timeAgo(iso) {
@@ -1146,25 +1188,71 @@ const API = {
     return must(await sb.from('posts_v').select('id,mine').order('id', { ascending: false }).limit(n || 30));
   },
   /* 랭킹 (닉네임·점수만 — 계정·소속 정보 없음) */
-  /* ---------- 이달의 Voice 시상 (관리자 전용) ---------- */
+  /* ---------- 이달의 Voice 시상 ----------
+     심사(grand 최우수·excellent 우수·merit 장려) · 결과(popular·reaction·big) · 이벤트(nth·survey)
+     회원에게는 관리자가 [게시]한 달의 '닉네임'만 공개 */
+  _aw(mk) { const db = Local.db; db.vawards = db.vawards || {}; return db.vawards[mk] = db.vawards[mk] || { items: [], published: false, published_at: null }; },
+  _monthNick(uid, mk) { const db = Local.db, u = db.users.find(x => x.id === uid) || {};
+    const h = (db.history || []).filter(x => x.user_id === uid && x.month_key === mk).pop(); if (h) return h.nickname;
+    const p = db.posts.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (p) return p.author_nickname;
+    const c = db.comments.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (c) return c.author_nickname;
+    return u.nickname; },
+  _supRow(u) { const sup = this.profile && this.profile.role === 'super';
+    return { real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null, dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null }; },
   async adminVoiceStats(mk) {
     if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk }));
-    const db = Local.db, w = db.settings.score || { like: 3, comment: 1 }, sup = this.profile && this.profile.role === 'super', g = {};
+    const db = Local.db, w = db.settings.score || { like: 3, comment: 1 }, g = {};
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
     db.posts.filter(p => p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++; o.likes += p.like_count; o.comments_received += p.comment_count; });
     db.comments.filter(c => c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
-    const aw = ((db.awards || {})[mk]) || {};
+    const items = this._aw(mk).items;
     return Object.values(g).filter(o => users[o.uid] && users[o.uid].role === 'user').map(o => { const u = users[o.uid];
-      return { token: this._tok(mk, o.uid), nickname: u.nickname, posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
-        score: o.likes * w.like + o.comments_received * w.comment, real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null,
-        dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null, picked: ['big', 'popular', 'reaction'].filter(k => (aw[k] || []).includes(o.uid)) }; });
+      return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
+        score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
-  async adminSetAward(mk, cat, token, on) {
-    if (!LOCAL) { must(await sb.rpc('admin_set_award', { mk, cat, tok: token, on_: !!on })); return; }
-    const db = Local.db, u = db.users.find(x => this._tok(mk, x.id) === token); if (!u) throw new Error('대상 회원을 찾을 수 없습니다');
-    db.awards = db.awards || {}; const m = db.awards[mk] = db.awards[mk] || {}; const l = m[cat] = m[cat] || [];
-    if (on && !l.includes(u.id)) l.push(u.id); if (!on) m[cat] = l.filter(x => x !== u.id); Local.save();
+  async adminAwardCandidates(mk) {
+    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk }));
+    const db = Local.db;
+    return db.users.filter(u => u.role === 'user').map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
+      survey_wins: (db.surveyDraws || []).filter(d => (d.winner_ids || []).includes(u.id) && monthKeyOf(d.drawn_at) >= mk)
+        .map(d => (db.surveys.find(x => x.id === d.survey_id) || {}).title || '설문'), ...this._supRow(u) }));
+  },
+  async adminSetAward(mk, cat, token, on, note) {
+    if (!LOCAL) { must(await sb.rpc('admin_set_award', { mk, cat, tok: token, on_: !!on, note_: note || null })); return; }
+    const u = Local.db.users.find(x => this._tok(mk, x.id) === token); if (!u) throw new Error('대상 회원을 찾을 수 없습니다');
+    const A = this._aw(mk); A.items = A.items.filter(a => !(a.category === cat && a.user_id === u.id));
+    if (on) A.items.push({ category: cat, user_id: u.id, post_id: null, nickname: this._monthNick(u.id, mk), note: note || null, created_at: new Date().toISOString() });
+    Local.save();
+  },
+  async adminSetAwardPost(mk, cat, pid, on) {
+    if (!LOCAL) { must(await sb.rpc('admin_set_award_post', { mk, cat, pid: +pid, on_: !!on })); return; }
+    const po = Local.db.posts.find(x => x.id === +pid); if (!po || !po.user_id) throw new Error('게시글(작성자)을 찾을 수 없습니다');
+    const A = this._aw(mk); A.items = A.items.filter(a => !(a.category === cat && (a.post_id === po.id || a.user_id === po.user_id)));
+    if (on) A.items.push({ category: cat, user_id: po.user_id, post_id: po.id, nickname: po.author_nickname || this._monthNick(po.user_id, mk), note: null, created_at: new Date().toISOString() });
+    Local.save();
+  },
+  async adminGetAwards(mk) {
+    if (!LOCAL) {
+      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk }).then(must), sb.rpc('admin_award_pub_state', { mk }).then(must)]);
+      return { list: list || [], published: !!(st && st.published), published_at: st && st.published_at };
+    }
+    const A = this._aw(mk), db = Local.db;
+    return { published: A.published, published_at: A.published_at, list: A.items.map(a => { const u = db.users.find(x => x.id === a.user_id) || {}, po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null;
+      return { category: a.category, token: this._tok(mk, a.user_id), nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note, ...this._supRow(u) }; }) };
+  },
+  async adminPublishAwards(mk, on) {
+    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on })); return; }
+    const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
+  },
+  async voiceAwardsPublic(mk) {
+    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk })) || [];
+    const A = this._aw(mk), db = Local.db; if (!A.published) return [];
+    return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note }; });
+  },
+  async voiceAwardMonths() {
+    if (!LOCAL) return (must(await sb.rpc('voice_award_months')) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
+    return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published).map(([k]) => k).sort().reverse();
   },
   async ranking(mk) {
     if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '' }));
@@ -1672,6 +1760,8 @@ function dtHTML(k, rows, cols, o = {}) {
   return { html: `<div class="dt-search">${I('search', 17)}<input class="tf" data-tf="${k}" data-k="_all" value="${esc(st.f._all || '')}" placeholder="통합 검색 — ${esc(lbl)} 등 모든 항목에서 찾아요" aria-label="통합 검색"></div><div class="dt-meta">${list.length.toLocaleString()}건${anyF ? ` <button class="linkbtn" data-act="dt-clear" data-t="${k}">검색 초기화</button>` : ''}${st.sort ? ` · 정렬: ${esc(String(cols.find(c => c.k === st.sort)?.l || '').replace(/<[^>]+>/g, ''))} ${st.dir > 0 ? '오름차순' : '내림차순'}` : ''}</div><div class="tbl-wrap"><table><thead>${head}</thead><tbody>${body}</tbody></table></div>${pg}`, list, view };
 }
 document.addEventListener('input', e => {
+  if (['awQ', 'awAddQ'].includes(e.target.id)) { const el = e.target; clearTimeout(el._t); el._t = setTimeout(() => { A[el.id] = el.value; const pos = el.selectionStart; renderPage(); const n = document.getElementById(el.id); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }, 250); return; }
+  if (e.target.id === 'awAddNote') { A.awAddNote = e.target.value; return; }
   const el = e.target; if (!el.dataset || !el.dataset.tf) return;
   clearTimeout(el._t); el._t = setTimeout(() => { const st = tsOf(el.dataset.tf); st.f[el.dataset.k] = el.value; st.page = 1; renderPage(); }, 250);
 });
@@ -2043,8 +2133,7 @@ function pageRank(c) {
     { k: 'cmts', l: I('msg', 16), v: o => o.comments, cls: 'num c-cmt', ns: true },
     { k: 'score', l: '점수', v: o => o.score, cls: 'num', ns: true, r: o => `<span class="score">${o.score}점</span>` }
   ]), { per: 100, empty: '집계할 글이 없습니다' });
-  const amk = f.month || curMonth(); A.awardCache = A.awardCache || {};
-  if (!A.awardCache[amk]) { A.awardCache[amk] = 'loading'; API.adminVoiceStats(amk).then(r => { A.awardCache[amk] = r || []; if (A.page === 'rank') renderPage(); }).catch(e => { A.awardCache[amk] = []; toast(friendly(e), 'err'); }); }
+  const amk = A.awMonth || (A.awMonth = prevMonth(curMonth())); awLoad(amk);
   c.innerHTML = `${awardsHTML(amk)}<div class="panel"><div class="panel-head"><div><h2>${I('settings', 19)} 점수 산정 기준</h2><p>게시글 점수 = 좋아요 × A + 댓글 수 × B · 좋아요는 1인 1회(최고관리자만 무제한)${canW ? ' · 저장 즉시 랭킹·피드에 반영됩니다' : ' · 변경은 설정 권한이 필요합니다'}</p></div></div>
     <div class="w-grid"><div><label class="lbl">좋아요 1개당 (A)</label><input type="number" id="wl" value="${w.like}" step="1" ${canW ? '' : 'disabled'}></div>
       <div><label class="lbl">댓글 1개당 (B)</label><input type="number" id="wc" value="${w.comment}" step="1" ${canW ? '' : 'disabled'}></div>
@@ -2056,30 +2145,77 @@ function pageRank(c) {
   bindFilters('rank');
 }
 
-/* ---------------- 이달의 Voice 시상 ---------------- */
+/* ---------------- 이달의 Voice 시상 · 선정 → 저장 → 게시 ---------------- */
 const AWARDS = [
   { k: 'popular',  t: '인기 Voice',   e: '🔥', d: '받은 좋아요·댓글 점수가 가장 높은 회원', v: o => o.score, u: '점', sub: o => `좋아요 ${o.likes} · 받은 댓글 ${o.comments_received}` },
   { k: 'reaction', t: '리액션 Voice', e: '💬', d: '댓글을 가장 많이 쓴 회원', v: o => o.comments_written, u: '개', sub: o => `글 ${o.posts}개` },
   { k: 'big',      t: 'Big Voice',    e: '📣', d: '글을 가장 많이 쓴 회원', v: o => o.posts, u: '개', sub: o => `점수 ${o.score}점` }
 ];
+function awLoad(mk, force) {
+  A.awardCache = A.awardCache || {};
+  if (A.awardCache[mk] && !force) return;
+  if (!A.awardCache[mk]) A.awardCache[mk] = 'loading';
+  Promise.all([API.adminVoiceStats(mk), API.adminAwardCandidates(mk), API.adminGetAwards(mk)])
+    .then(([stats, cands, aw]) => { A.awardCache[mk] = { stats: stats || [], cands: cands || [], list: aw.list || [], published: aw.published, published_at: aw.published_at }; if (A.page === 'rank') renderPage(); })
+    .catch(e => { A.awardCache[mk] = { stats: [], cands: [], list: [], published: false }; toast(friendly(e), 'err'); if (A.page === 'rank') renderPage(); });
+}
 function awardsHTML(mk) {
-  const data = A.awardCache && A.awardCache[mk], sup = SUP(), canPick = hasPerm(A.me, 'rank');
-  const body = data === 'loading' || !data ? '<div class="loading" style="grid-column:1/-1">집계 중…</div>' : AWARDS.map(a => {
-    const list = data.filter(o => a.v(o) > 0).sort((x, y) => a.v(y) - a.v(x) || y.score - x.score).slice(0, 10);
-    const picked = data.filter(o => (o.picked || []).includes(a.k));
+  const D = A.awardCache && A.awardCache[mk], sup = SUP(), can = hasPerm(A.me, 'rank'), w = W();
+  const months = recentMonths(12);
+  const ad = voiceAnnounceDate(mk), adTxt = `${ad.getUTCMonth() + 1}월 ${ad.getUTCDate()}일(${'일월화수목금토'[ad.getUTCDay()]})`;
+  const head = `<div class="panel-head"><div><h2>${I('trophy', 19)} 이달의 Voice 시상 · 선정·게시</h2>
+      <p>대상: <b>${monthLabel(mk)}</b> 글·활동 · 발표 예정일 ${adTxt} · 체크하면 바로 저장되고, <b>[회원 화면에 게시]</b>를 눌러야 회원에게 닉네임만 공개돼요</p></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="awMonth" style="width:auto">${months.map(m => `<option value="${m}" ${m === mk ? 'selected' : ''}>${monthLabel(m)}${m === prevMonth(curMonth()) ? ' (이번 발표 대상)' : m === curMonth() ? ' (진행 중)' : ''}</option>`).join('')}</select>
+      <button class="btn sm" data-act="aw-csv" data-mk="${mk}">${I('download', 15)} 엑셀(CSV)</button></div></div>`;
+  if (!D || D === 'loading') return `<div class="panel">${head}<div class="loading">집계 중…</div></div>`;
+  const picked = (cat, pred) => D.list.some(a => a.category === cat && pred(a));
+  const byCat = k => D.list.filter(a => a.category === k);
+  /* 게시 상태 + 선정 요약 */
+  const pubBar = `<div class="aw-pub ${D.published ? 'on' : ''}"><div><b>${D.published ? '✅ 회원 화면에 게시됨' : '📝 아직 게시 전 (회원에게 안 보임)'}</b><small>${D.published ? `${fmtDT(D.published_at)} 게시 · 지금 바꾸는 선정도 바로 반영돼요` : '선정을 마친 뒤 게시하세요 · 선정 ' + D.list.length + '건'}</small></div>
+    ${can ? (D.published ? `<button class="btn sm" data-act="aw-pub" data-mk="${mk}" data-on="0">게시 취소</button>` : `<button class="btn sm primary" data-act="aw-pub" data-mk="${mk}" data-on="1" ${D.list.length ? '' : 'disabled'}>${I('send', 15)} 회원 화면에 게시</button>`) : ''}</div>`;
+  const summary = `<div class="aw-sum">${VOICE_CATS.map(c => { const l = byCat(c.k); return `<div class="aw-sum-row"><span class="aw-sum-t">${c.e} ${c.t}</span><div class="aw-sum-chips">${l.length ? l.map(a => `<span class="aw-chip2">${esc(a.nickname || '-')}${a.post_title ? `<small>· ${esc(a.post_title.slice(0, 18))}</small>` : ''}${a.note ? `<small>· ${esc(a.note)}</small>` : ''}${sup && a.real_name ? `<small>🔒 ${esc(a.real_name)}</small>` : ''}${can ? `<button data-act="aw-rm" data-mk="${mk}" data-cat="${c.k}" data-tok="${esc(a.token)}" data-pid="${a.post_id || ''}" aria-label="선정 취소">×</button>` : ''}</span>`).join('') : '<span class="dim">-</span>'}</div></div>`; }).join('')}</div>`;
+  /* ① 심사 시상: 그 달 회원 글에서 선정 */
+  const mposts = A.posts.filter(p => p.month_key === mk && p.author_role !== 'admin').map(p => ({ p, sc: scoreOf(p, w) }));
+  const q = (A.awQ || '').trim().toLowerCase();
+  const plist = mposts.filter(({ p }) => !q || [postNo(p), p.title, p.body, p.author_nickname].join(' ').toLowerCase().includes(q)).sort((a, b) => b.sc - a.sc || b.p.id - a.p.id);
+  const P = pmap(), rv = VOICE_CATS.filter(c => c.g === 'review');
+  const review = `<div class="aw-sec"><h3>① 심사 시상 <small>본사 심의 후 글을 보고 선정 · 한 항목에 여러 명 가능</small></h3>
+    <div class="dt-search" style="max-width:420px">${I('search', 17)}<input id="awQ" value="${esc(A.awQ || '')}" placeholder="글번호·제목·본문·닉네임으로 찾기"></div>
+    <div class="table-wrap"><table class="dt aw-tbl"><thead><tr><th>글번호</th><th>제목</th><th>닉네임</th>${sup ? '<th>성명 🔒</th>' : ''}<th class="num">♥</th><th class="num">💬</th><th class="num">점수</th>${rv.map(c => `<th class="num">${c.e} ${c.t.replace(' Voice', '')}</th>`).join('')}</tr></thead>
+    <tbody>${plist.slice(0, A.awMore ? 500 : 30).map(({ p, sc }) => `<tr><td><span class="no-chip">${postNo(p) || '-'}</span></td><td class="tt"><span data-act="preview" data-id="${p.id}">${esc(p.title)}</span></td><td class="b nowrap">${esc(p.author_nickname || '')}</td>${sup ? `<td class="nowrap">${esc((P[p.user_id] || {}).real_name || '')}</td>` : ''}
+      <td class="num">${p.like_count}</td><td class="num">${p.comment_count}</td><td class="num b">${sc}</td>
+      ${rv.map(c => `<td class="num"><input type="checkbox" class="ck" data-awp="${c.k}" data-pid="${p.id}" data-mk="${mk}" ${picked(c.k, a => a.post_id === p.id) ? 'checked' : ''} ${can ? '' : 'disabled'}></td>`).join('')}</tr>`).join('') || `<tr><td colspan="9"><div class="empty">${monthLabel(mk)}에 회원이 쓴 글이 없습니다</div></td></tr>`}</tbody></table></div>
+    ${plist.length > 30 && !A.awMore ? `<button class="btn sm ghost" data-act="aw-more" style="margin-top:8px">전체 ${plist.length}건 모두 보기</button>` : ''}</div>`;
+  /* ② 결과 시상 */
+  const result = `<div class="aw-sec"><h3>② 결과 시상 <small>한 달 집계 결과 · 상위 10명 중 체크</small></h3><div class="aw-grid">${AWARDS.map(a => {
+    const list = D.stats.filter(o => a.v(o) > 0).sort((x, y) => a.v(y) - a.v(x) || y.score - x.score).slice(0, 10);
     return `<div class="aw-card aw-${a.k}"><div class="aw-head"><span class="aw-e">${a.e}</span><div><b>${a.t}</b><small>${a.d}</small></div></div>
-      <div class="aw-picked">${picked.length ? picked.map(o => `<span class="aw-chip">🏆 ${esc(o.nickname)}</span>`).join('') : '<span class="hint" style="margin:0">아직 선정하지 않았어요 · 아래에서 체크하세요</span>'}</div>
-      ${list.length ? `<ol class="aw-list">${list.map((o, i) => `<li class="${(o.picked || []).includes(a.k) ? 'on' : ''}"><label>
-          <input type="checkbox" class="ck" data-award="${a.k}" data-tok="${esc(o.token)}" data-mk="${mk}" ${(o.picked || []).includes(a.k) ? 'checked' : ''} ${canPick ? '' : 'disabled'}>
-          <span class="aw-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
-          <span class="aw-who"><b>${esc(o.nickname)}</b><small>${a.sub(o)}${sup && (o.real_name || o.dept) ? ` · 🔒 ${esc([o.real_name, o.emp_no, o.dept].filter(Boolean).join(' · '))}` : ''}</small></span>
-          <span class="aw-v">${a.v(o)}<small>${a.u}</small></span></label></li>`).join('')}</ol>` : '<p class="hint">해당하는 회원이 없습니다</p>'}</div>`;
-  }).join('');
-  return `<div class="panel"><div class="panel-head"><div><h2>${I('trophy', 19)} 이달의 Voice 시상 · ${monthLabel(mk)}</h2>
-      <p>한 달 기준 상위 10명 · 체크하면 바로 선정 저장됩니다 (관리자 글 제외)${sup ? '' : ' · 🔒 실명·소속은 최고관리자만'}</p></div>
-      <button class="btn sm" data-act="aw-csv" data-mk="${mk}">${I('download', 15)} 엑셀(CSV)</button></div>
-    <div class="aw-grid">${body}</div>
-    <p class="hint" style="margin:10px 0 0">랭킹·시상은 회원 화면에 공개되지 않고 관리자 페이지에서만 볼 수 있어요. 위 [월] 선택을 바꾸면 그 달 기준으로 다시 집계됩니다.</p></div>`;
+      ${list.length ? `<ol class="aw-list">${list.map((o, i) => { const on = picked(a.k, x => x.token === o.token); return `<li class="${on ? 'on' : ''}"><label>
+        <input type="checkbox" class="ck" data-award="${a.k}" data-tok="${esc(o.token)}" data-mk="${mk}" ${on ? 'checked' : ''} ${can ? '' : 'disabled'}>
+        <span class="aw-rk">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span>
+        <span class="aw-who"><b>${esc(o.nickname)}</b><small>${a.sub(o)}${sup && (o.real_name || o.dept) ? ` · 🔒 ${esc([o.real_name, o.emp_no, o.dept].filter(Boolean).join(' · '))}` : ''}</small></span>
+        <span class="aw-v">${a.v(o)}<small>${a.u}</small></span></label></li>`; }).join('')}</ol>` : '<p class="hint">해당하는 회원이 없습니다</p>'}</div>`; }).join('')}</div></div>`;
+  /* ③ 이벤트: N번째 Voice(히든보이스 당첨 글) · 설문 당첨 */
+  const ev = A.events.find(e => e.month_key === mk), nums = ev ? ev.numbers || [] : [];
+  const nthPosts = A.posts.filter(p => p.month_key === mk && p.author_role !== 'admin' && nums.includes(p.month_seq)).sort((a, b) => a.month_seq - b.month_seq);
+  const swin = D.cands.filter(o => (o.survey_wins || []).length);
+  const aq = (A.awAddQ || '').trim().toLowerCase();
+  const addList = aq ? D.cands.filter(o => (o.nickname || '').toLowerCase().includes(aq) || (sup && (o.real_name || '').toLowerCase().includes(aq))).slice(0, 12) : [];
+  const evHTML = `<div class="aw-sec"><h3>③ 이벤트 당첨 <small>그 달 닉네임이 있는 회원을 체크해 선정</small></h3><div class="aw-ev">
+    <div class="aw-card aw-big"><div class="aw-head"><span class="aw-e">🎁</span><div><b>N번째 Voice</b><small>${ev ? `히든보이스 당첨 번호 ${nums.length}개 · 해당 글을 쓴 회원` : `${monthLabel(mk)} 히든보이스 이벤트가 없습니다`}</small></div></div>
+      ${nthPosts.length ? `<ol class="aw-list">${nthPosts.map(p => { const on = picked('nth', a => a.post_id === p.id); return `<li class="${on ? 'on' : ''}"><label><input type="checkbox" class="ck" data-awp="nth" data-pid="${p.id}" data-mk="${mk}" ${on ? 'checked' : ''} ${can ? '' : 'disabled'}>
+        <span class="aw-rk">${p.month_seq}번</span><span class="aw-who"><b>${esc(p.author_nickname || '')}</b><small>${esc(p.title)}${sup && (P[p.user_id] || {}).real_name ? ` · 🔒 ${esc(P[p.user_id].real_name)}` : ''}</small></span></label></li>`; }).join('')}</ol>` : `<p class="hint">${ev ? '아직 당첨 번호에 해당하는 글이 없습니다' : '이벤트 관리 메뉴에서 히든보이스를 설정하면 여기에 당첨 글이 나와요'}</p>`}</div>
+    <div class="aw-card aw-reaction"><div class="aw-head"><span class="aw-e">📋</span><div><b>설문 이벤트 당첨</b><small>VOY Research 추첨 당첨자 · 아래에서 닉네임으로 직접 추가도 가능</small></div></div>
+      ${swin.length ? `<ol class="aw-list">${swin.map(o => { const on = picked('survey', a => a.token === o.token); return `<li class="${on ? 'on' : ''}"><label><input type="checkbox" class="ck" data-award="survey" data-tok="${esc(o.token)}" data-note="${esc(o.survey_wins[o.survey_wins.length - 1])}" data-mk="${mk}" ${on ? 'checked' : ''} ${can ? '' : 'disabled'}>
+        <span class="aw-who"><b>${esc(o.nickname)}</b><small>${esc(o.survey_wins.join(', '))} 당첨${sup && o.real_name ? ` · 🔒 ${esc(o.real_name)}` : ''}</small></span></label></li>`; }).join('')}</ol>` : '<p class="hint">이 달 이후 진행된 설문 추첨 당첨자가 없습니다</p>'}
+    </div></div>
+    <div class="aw-add"><b>회원 직접 추가</b> <span class="hint" style="margin:0">닉네임${sup ? '·성명' : ''}으로 찾아 N번째 Voice·설문 당첨 등에 추가</span>
+      <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap"><div class="dt-search" style="margin:0;flex:1;min-width:220px">${I('search', 17)}<input id="awAddQ" value="${esc(A.awAddQ || '')}" placeholder="${monthLabel(mk)} 닉네임으로 찾기"></div>
+        <select id="awAddCat" style="width:auto">${VOICE_CATS.filter(c => c.g !== 'review').map(c => `<option value="${c.k}" ${A.awAddCat === c.k ? 'selected' : ''}>${c.e} ${c.t}</option>`).join('')}</select>
+        <input id="awAddNote" value="${esc(A.awAddNote || '')}" placeholder="메모 (예: 11월 만족도 설문)" style="width:220px"></div>
+      ${addList.length ? `<div class="aw-addlist">${addList.map(o => `<button class="aw-addbtn" data-act="aw-add" data-mk="${mk}" data-tok="${esc(o.token)}">${I('plus', 14)} ${esc(o.nickname)}${sup && o.real_name ? ` <small>🔒 ${esc(o.real_name)}</small>` : ''}</button>`).join('')}</div>` : aq ? '<p class="hint">찾는 회원이 없습니다</p>' : ''}</div></div>`;
+  return `<div class="panel">${head}${pubBar}${summary}${review}${result}${evHTML}
+    <p class="hint" style="margin:12px 0 0">🔒 회원 화면에는 게시한 달의 <b>닉네임(그 달 기준)</b>만 보입니다. 실명·사번·소속은 최고관리자에게만 보여요.</p></div>`;
 }
 
 /* ---------------- 이벤트(히든보이스) 관리 ---------------- */
@@ -2684,10 +2820,16 @@ document.addEventListener('click', async e => {
       busy(t, true);
       try { await API.adminSaveSurvey({ ...sv, result_count: v === '' ? null : +v }); await loadResearch(true); renderPage(); toast(v === '' ? '실제 응답 수로 되돌렸습니다' : `설문조사 인원을 ${v}명으로 조정했습니다`); }
       catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
-    case 'aw-csv': { const mk = t.dataset.mk, data = A.awardCache[mk]; if (!Array.isArray(data)) break; const sup = SUP();
-      csv(`VOY_이달의Voice_${mk}.csv`, [['닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '글 수', '쓴 댓글', '받은 좋아요', '받은 댓글', '인기 점수', '선정'],
-        ...data.sort((a, b) => b.score - a.score).map(o => [o.nickname, ...(sup ? [o.real_name, o.emp_no, o.dept] : []), o.posts, o.comments_written, o.likes, o.comments_received, o.score,
-          (o.picked || []).map(k => AWARDS.find(a => a.k === k).t).join(', ')])]); break; }
+    case 'aw-csv': { const mk = t.dataset.mk, D = A.awardCache[mk]; if (!D || D === 'loading') break; const sup = SUP();
+      csv(`VOY_이달의Voice_${mk}.csv`, [['시상', '닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '선정 글', '메모', '게시'],
+        ...D.list.map(a => [voiceCat(a.category).t, a.nickname, ...(sup ? [a.real_name, a.emp_no, a.dept] : []), a.post_title || '', a.note || '', D.published ? '게시됨' : '미게시'])]); break; }
+    case 'aw-pub': { const mk = t.dataset.mk, on = t.dataset.on === '1';
+      if (!(await confirmBox(on ? `${monthLabel(mk)} 이달의 Voice 결과를 회원 화면에 게시할까요?\n회원에게는 닉네임만 공개됩니다.` : '게시를 취소하면 회원 화면에서 결과가 사라집니다. 취소할까요?', on ? '게시' : '게시 취소', !on))) break;
+      try { await API.adminPublishAwards(mk, on); toast(on ? '🎉 회원 화면에 게시했습니다' : '게시를 취소했습니다'); awLoad(mk, true); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'aw-rm': { const d = t.dataset; try { if (d.pid) await API.adminSetAwardPost(d.mk, d.cat, d.pid, false); else await API.adminSetAward(d.mk, d.cat, d.tok, false); toast('선정 취소'); awLoad(d.mk, true); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'aw-more': A.awMore = true; renderPage(); break;
+    case 'aw-add': { const d = t.dataset, cat = (document.getElementById('awAddCat') || {}).value || 'survey', note = ((document.getElementById('awAddNote') || {}).value || '').trim();
+      try { await API.adminSetAward(d.mk, cat, d.tok, true, note || null); toast(`${voiceCat(cat).t} 선정`); A.awAddQ = ''; awLoad(d.mk, true); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'rs-cand-all': A.rsCtx.off = {}; renderPage(); break;
     case 'rs-cand-none': A.rsCtx.cand.forEach(k => A.rsCtx.off[k.token] = false); renderPage(); break;
     case 'rs-rpage': A.rsCtx.page = +t.dataset.p; renderPage(); break;
@@ -2721,11 +2863,12 @@ document.addEventListener('click', async e => {
   }
 });
 document.addEventListener('change', async e => {
-  if (e.target.matches('[data-award]')) { const el = e.target, d = el.dataset, on = el.checked; el.disabled = true;
-    try { await API.adminSetAward(d.mk, d.award, d.tok, on); const o = (A.awardCache[d.mk] || []).find(x => x.token === d.tok);
-      if (o) o.picked = on ? [...new Set([...(o.picked || []), d.award])] : (o.picked || []).filter(k => k !== d.award);
-      toast(`${AWARDS.find(a => a.k === d.award).t} ${on ? '선정' : '선정 취소'}: ${o ? o.nickname : ''}`); renderPage(); }
+  if (e.target.matches('[data-award],[data-awp]')) { const el = e.target, d = el.dataset, on = el.checked, cat = d.award || d.awp; el.disabled = true;
+    try { if (d.awp) await API.adminSetAwardPost(d.mk, cat, d.pid, on); else await API.adminSetAward(d.mk, cat, d.tok, on, d.note || null);
+      toast(`${voiceCat(cat).t} ${on ? '선정' : '선정 취소'}`); awLoad(d.mk, true); }
     catch (er) { el.checked = !on; el.disabled = false; toast(friendly(er), 'err'); } return; }
+  if (e.target.id === 'awMonth') { A.awMonth = e.target.value; A.awMore = false; renderPage(); return; }
+  if (e.target.id === 'awAddCat') { A.awAddCat = e.target.value; return; }
   if (e.target.matches('[data-og-check],[data-og-rep],[data-cand]')) { rsAnalysisAct(e.target); return; }
   if (e.target.matches('[data-og-label]')) { const k = e.target.dataset.ogLabel, i = k.indexOf(':'), qid = k.slice(0, i), gid = k.slice(i + 1), an = A.rsCtx.analysis[qid], g = an && an.groups.find(x => x.id === gid);
     if (g) { g.label = e.target.value.trim(); if (g.label) g.rep = null; rsPersist(); renderPage(); } return; }
