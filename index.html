@@ -260,6 +260,8 @@ body{min-height:100vh}
 .icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;color:var(--muted);flex-shrink:0}
 .icon-btn.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+@media(min-width:700px){.chips:not(.wrap){flex-wrap:wrap;overflow:visible}}   /* PC: 카테고리 줄바꿈으로 모두 표시 · 모바일: 옆으로 밀어서 보기 */
+.chip.notice{font-weight:800}
 .chips::-webkit-scrollbar{display:none}
 .chips.wrap{flex-wrap:wrap;overflow:visible}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;border:1px solid color-mix(in srgb,var(--c,var(--muted)) 45%,transparent);background:color-mix(in srgb,var(--c,var(--muted)) 10%,transparent);color:var(--c,var(--text2));font-size:13px;font-weight:700;white-space:nowrap;transition:.15s}
@@ -1941,7 +1943,7 @@ function viewFeed() {
       <button class="icon-btn ${f.showPinned ? 'on' : ''}" data-act="toggle-pin" title="공지 보기/접기">${I('pin', 18)}</button>
     </div>
     <div class="chips"><button class="chip all ${!f.board ? 'active' : ''}" data-act="board" data-id="">전체</button>
-      ${S.boards.map(b => `<button class="chip ${f.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="board" data-id="${b.id}">${esc(b.name)}</button>`).join('')}</div>
+      ${[...S.boards.filter(b => b.admin_only), ...S.boards.filter(b => !b.admin_only)].map(b => `<button class="chip ${b.admin_only ? 'notice' : ''} ${f.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="board" data-id="${b.id}">${b.admin_only ? I('pin', 13) + ' ' : ''}${esc(b.name)}</button>`).join('')}</div>
     <div id="pinned"></div><div id="list"><div class="loading">불러오는 중…</div></div><div id="more"></div>
   </div>`, 'feed');
   const q = document.getElementById('fq'); let t;
