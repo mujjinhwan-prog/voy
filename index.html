@@ -255,6 +255,7 @@ body{min-height:100vh}
 .v-how-row.main{font-size:13.5px}.v-how-row.main em b{color:var(--point)}
 .v-how p,.v-note{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.55}
 .v-anon{font-size:12px;color:var(--muted);text-align:center;margin:4px 0 12px}
+.ver-tag{text-align:center;font-size:10.5px;color:var(--muted);opacity:.6;margin:6px 0 0;font-variant-numeric:tabular-nums}
 .month-pill{display:flex;gap:10px;align-items:center;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:9px 16px;border-radius:99px;font-size:13px;margin-bottom:12px}
 .month-pill b{color:var(--point)}
 .event-banner{display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
@@ -899,7 +900,7 @@ const API = {
     } else {
       let d = null, err = null;
       for (const email of cands) { const r = await sb.auth.signInWithPassword({ email, password: pw }); if (!r.error) { d = r.data; break; } err = r.error; }
-      if (!d) throw new Error(/Invalid login/i.test(err?.message || '') ? '이메일(아이디) 또는 비밀번호가 올바르지 않습니다.' : friendly(err));
+      if (!d) throw new Error(/Invalid login/i.test(err?.message || '') ? '이메일(아이디) 또는 비밀번호가 올바르지 않습니다. 첫 로그인이라면 사번 8자리를 입력하세요.' : friendly(err));
       this.uid = d.user.id;
     }
     this.profile = await this.me();
@@ -2528,16 +2529,19 @@ async function renderAuth() {
       <label class="lbl" style="margin-top:0">ID (회사 이메일)</label>
       <input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@${COMPANY_DOMAIN}" required>
       <p class="hint">@${COMPANY_DOMAIN} 앞부분만 입력해도 됩니다.</p>
-      <label class="lbl">비밀번호</label><input id="apw" type="password" autocomplete="current-password" required>
-      <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.</p>
+      <label class="lbl">비밀번호</label><span class="pw-wrap"><input id="apw" type="password" autocomplete="current-password" required data-eye="1"><button type="button" class="pw-eye" id="apwEye" tabindex="-1" aria-label="비밀번호 보기" title="비밀번호 보기">${I('eye', 19)}</button></span>
+      <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>(사번은 사번 숫자 전체 <b>8자리</b>입니다.)</p>
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
+      <p class="ver-tag">v261108.1330</p>
     </form>
     ${installCardHTML()}
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
   Inst.auto();
+  const ae = document.getElementById('apwEye'), ap = document.getElementById('apw');
+  ae.onclick = () => { const show = ap.type === 'password'; ap.type = show ? 'text' : 'password'; ae.innerHTML = I(show ? 'eyeoff' : 'eye', 19); ae.title = show ? '비밀번호 숨기기' : '비밀번호 보기'; ap.focus(); };
   document.getElementById('authform').onsubmit = async e => {
     e.preventDefault(); const btn = document.getElementById('asub'), err = document.getElementById('aerr'); err.textContent = '';
     const pw = document.getElementById('apw').value;
