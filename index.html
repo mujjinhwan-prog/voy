@@ -1517,6 +1517,7 @@ const QL_DEFAULTS = [
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
+  { id: 'rest',     name: '쉬는시간|놀이터',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1541,6 +1542,11 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
+  rest: { name: '쉬는시간 놀이터 (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
+    '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
+    '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
+    '<circle cx="44" cy="22" r="7.5" fill="#fff"/><text x="44" y="25.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#E8590C">7</text>' +
+    '<circle cx="45" cy="42" r="9.5" fill="#E8590C" stroke="#fff" stroke-width="2.6"/><text x="45" y="46.4" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="12" fill="#fff">45</text>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -1755,8 +1761,18 @@ function refreshQL() { const r = document.getElementById('qlRail'), s = document
    · Chrome / Edge / 삼성인터넷 (안드로이드·PC): [설치] 한 번 → 브라우저 확인창 → 끝 (메뉴 안 열어도 됨)
    · 카카오톡·네이버 등 앱 안의 브라우저: 자동으로 Chrome/Safari로 다시 열기
    · 아이폰(Safari·Chrome·Edge): 애플이 자동 설치를 막아 두어, 눌러야 할 버튼 위치를 화살표로 직접 가리켜 안내 */
-window.addEventListener('appinstalled', () => { window.__bip = null; document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); toast('VOY™ 아이콘이 설치되었어요! 홈 화면(바탕화면)의 VOY™로 열어주세요'); });
-function isStandalone() { return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: window-controls-overlay)').matches || navigator.standalone === true; }
+window.addEventListener('appinstalled', () => { markAppInstalled(); window.__bip = null; document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); toast('VOY™ 아이콘이 설치되었어요! 홈 화면(바탕화면)의 VOY™로 열어주세요'); });
+/* 앱(아이콘)으로 열었는지 — 브라우저·기기마다 신호가 달라 여러 가지를 함께 확인 */
+function isStandalone() {
+  const mm = q => { try { return matchMedia(q).matches; } catch (e) { return false; } };
+  const app = mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)') || mm('(display-mode: minimal-ui)') || mm('(display-mode: window-controls-overlay)')
+    || navigator.standalone === true || /^android-app:\/\//.test(document.referrer || '') || /[?&]app=1(&|$)/.test(location.search);
+  if (app) markAppInstalled();
+  return app;
+}
+/* 이 기기에 VOY™ 아이콘을 설치했는지 기억 — 설치 후에는 설치 안내·팝업을 다시 띄우지 않음 */
+function markAppInstalled() { try { localStorage.setItem('voy_app_ok', '1'); } catch (e) {} }
+function appInstalledHere() { try { return localStorage.getItem('voy_app_ok') === '1'; } catch (e) { return false; } }
 const Inst = {
   env() {
     const ua = navigator.userAgent, ios = isIOS(), android = /Android/i.test(ua);
@@ -1803,7 +1819,7 @@ const Inst = {
   close() { document.querySelectorAll('.inst-sheet,.inst-arrow').forEach(el => el.remove()); },
   /* 아래에서 올라오는 설치 카드 (auto=true: 자동으로 띄운 것) */
   sheet(auto) {
-    if (isStandalone()) return; this.close();
+    if (isStandalone() || (auto && appInstalledHere())) return; this.close();
     const e = this.env(), one = !!window.__bip, g = one ? null : this.guide(e);
     const el = document.createElement('div'); el.className = 'inst-sheet' + (g && e.mob && g.arrow && g.arrow.startsWith('bottom') ? ' up' : '');
     el.innerHTML = `<div class="inst-card"><button class="inst-x" aria-label="닫기">${I('x', 18)}</button>
@@ -1822,7 +1838,7 @@ const Inst = {
   },
   /* 로그인·앱 안내 화면에서 자동으로: 설치 가능해지면 바로 카드 띄우기 */
   auto() {
-    if (isStandalone() || this._autoDone) return; this._autoDone = true;
+    if (isStandalone() || appInstalledHere() || this._autoDone) return; this._autoDone = true;
     const e = this.env();
     if (e.inApp) { let once = false; try { once = sessionStorage.getItem('voy_ext_try'); sessionStorage.setItem('voy_ext_try', '1'); } catch (x) {} if (!once && (e.kakao || e.line)) { this.openExternal(e); return; } }
     if (this.hidden()) return;
@@ -1833,7 +1849,7 @@ const Inst = {
   }
 };
 function installCardHTML() {
-  if (isStandalone()) return '';
+  if (isStandalone() || appInstalledHere()) return '';
   const mob = Inst.env().mob;
   return `<button class="install" data-act="install" type="button"><img src="icons/voy-192.png?v=2" alt="VOY™ 아이콘">
     <div><b>VOY™ 바로가기 아이콘 설치</b><small>${mob ? '홈 화면에 아이콘을 추가하고 앱처럼 바로 열어보세요' : 'PC 바탕화면·작업표시줄에 아이콘을 추가하고 바로 열어보세요'}</small></div><span class="go">설치</span></button>`;
@@ -1867,7 +1883,7 @@ window.addEventListener('hashchange', () => { if (S.me) route(); });
 
 /* ---------------- 앱 전용 모드: 게시판은 주소창 없는 VOY™ 앱 창에서만 ---------------- */
 function needAppGate() {
-  if (S.settings.app_only === false || isStandalone() || S.gateBypass) return false;
+  if (S.settings.app_only === false || isStandalone() || appInstalledHere() || S.gateBypass) return false;
   try { if (sessionStorage.getItem('voy_gate_bypass')) return false; } catch (e) {}
   return true;
 }
@@ -1887,7 +1903,8 @@ function renderGate() {
     <p class="muted">익명 게시판 보호를 위해 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>에서만 볼 수 있어요.<br>휴대폰(삼성·아이폰)과 PC 모두 같은 방법입니다.</p>
     <div class="box" style="text-align:left;margin-top:16px"><ol class="steps">${steps.map(x => `<li><span>${x}</span></li>`).join('')}</ol></div>
     <button class="btn primary block" id="gateInstall" style="margin-top:4px">${I('download', 17)} ${inApp ? '브라우저로 열어서 설치' : ios ? '설치 방법 보기 (버튼 위치 안내)' : 'VOY™ 앱 설치'}</button>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <button class="btn block ghost" data-act="app-done" style="margin-top:10px">이미 설치했어요 · 이 기기에서 다시 안 보기</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn block ghost" data-act="logout-gate">로그아웃</button>
       ${S.me && S.me.role === 'super' || LOCAL ? `<button class="btn block ghost" data-act="gate-bypass">${LOCAL ? '데모: 브라우저에서 계속' : '관리자: 브라우저에서 계속'}</button>` : ''}
     </div></div></div>`;
@@ -2534,7 +2551,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261108.1330</p>
+      <p class="ver-tag">v261110.0617</p>
     </form>
     ${installCardHTML()}
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
@@ -2601,6 +2618,7 @@ document.addEventListener('click', async e => {
     case 'theme': setTheme(t.dataset.v); document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('on', b === t)); break;
     case 'logout': if (await confirmBox('로그아웃할까요?', '로그아웃')) { await API.signOut(); S.me = null; location.hash = ''; document.body.classList.remove('has-bnav'); renderAuth(); } break;
     case 'logout-gate': await API.signOut(); S.me = null; renderAuth(); break;
+    case 'app-done': markAppInstalled(); document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); route(); maybeShowPopups(); break;
     case 'gate-bypass': S.gateBypass = true; try { sessionStorage.setItem('voy_gate_bypass', '1'); } catch (er) {} route(); maybeShowPopups(); break;
     case 'push-on': try { await enablePush(); document.getElementById('pushPrompt')?.remove(); } catch (er) { toast(friendly(er), 'err'); } break;
     case 'push-later': try { localStorage.setItem('voy_push_prompt_off', '1'); } catch (er) {} document.getElementById('pushPrompt')?.remove(); break;

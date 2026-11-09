@@ -1464,6 +1464,7 @@ const QL_DEFAULTS = [
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
+  { id: 'rest',     name: '쉬는시간|놀이터',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1488,6 +1489,11 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
+  rest: { name: '쉬는시간 놀이터 (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
+    '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
+    '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
+    '<circle cx="44" cy="22" r="7.5" fill="#fff"/><text x="44" y="25.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#E8590C">7</text>' +
+    '<circle cx="45" cy="42" r="9.5" fill="#E8590C" stroke="#fff" stroke-width="2.6"/><text x="45" y="46.4" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="12" fill="#fff">45</text>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -1716,7 +1722,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261108.1330</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261110.0617</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 최고관리자 <b>admin / admin1234</b> · 일반관리자 <b>manager / manager1234</b></p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;

@@ -3,7 +3,7 @@
   "short_name": "VOY™",
   "description": "Voice of YUHAN — 현장의 목소리를 거침없이, 익명 커뮤니티",
   "id": "./",
-  "start_url": "./",
+  "start_url": "./?app=1",
   "scope": "./",
   "display": "standalone",
   "display_override": [
