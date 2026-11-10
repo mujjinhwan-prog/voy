@@ -198,6 +198,9 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
   .mbox{zoom:1.15}
 }
 @media (min-width:820px) and (max-height:860px){ .view{zoom:1} }
+
+/* 로또번호 생성기 화면은 한 번 더 80%로 */
+#v-lotto .wrap{zoom:.8}
 </style>
 </head>
 <body>
@@ -211,7 +214,7 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
       </button>
       <div class="logo">
         <h1><span class="v">Fun</span>펀!!</h1><br>
-        <span class="tag">무엇인가 결정하기 어려울 때도<br>답이 보이(VOY)죠?</span>
+        <span class="tag">무엇인가 결정하기 어려울 때<br>답이 보이(VOY)는 곳 !!!</span>
       </div>
       <button class="iconbtn sndBtn" aria-label="소리"></button>
     </div>
@@ -226,7 +229,7 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
 <section class="view" id="v-roulette">
   <div class="gbar"><div class="in">
     <button class="iconbtn back" aria-label="뒤로"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <div class="gtitle">점심메뉴 룰렛<small>오늘 뭐 먹지? 돌리면 끝!</small></div>
+    <div class="gtitle">룰렛 다트<small>항목 넣고 돌리면 끝!</small></div>
     <button class="iconbtn sndBtn" aria-label="소리"></button>
   </div></div>
   <main class="wrap">
@@ -234,16 +237,16 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
       <svg class="pointer" id="pointer" viewBox="0 0 58 66"><path d="M8 8h42L29 60z" fill="#ff4d4d" stroke="#2b2f3a" stroke-width="6" stroke-linejoin="round"/><circle cx="29" cy="20" r="6" fill="#fff" stroke="#2b2f3a" stroke-width="3"/></svg>
       <canvas id="wheel" width="720" height="720"></canvas>
     </div>
-    <button class="btn full r outline-s" id="spinBtn" style="font-size:24px;margin-bottom:21px">돌려! 🍽️</button>
+    <button class="btn full r outline-s" id="spinBtn" style="font-size:24px;margin-bottom:21px">돌려! 🎯</button>
     <div class="panel">
-      <div class="ptitle">🍱 메뉴판 <span class="cnt" id="menuCnt"></span></div>
+      <div class="ptitle">🎯 룰렛 칸 <span class="cnt" id="menuCnt"></span></div>
       <div class="chips" id="menuChips"></div>
       <div class="row" style="gap:6.5px">
-        <input class="inp" id="menuInp" maxlength="12" placeholder="메뉴 추가 (예: 마라탕)">
+        <input class="inp" id="menuInp" maxlength="12" placeholder="칸 추가 (예: 1번, 당첨)">
         <button class="btn sm y" id="menuAdd" style="flex:0 0 auto">추가</button>
       </div>
       <div class="presets" id="presets"></div>
-      <div class="hint">메뉴는 2~16개까지 넣을 수 있어요. 이 기기에 자동 저장돼요.</div>
+      <div class="hint">칸은 2~16개까지 넣을 수 있어요. 이 기기에 자동 저장돼요.</div>
     </div>
   </main>
 </section>
@@ -289,7 +292,7 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
 <section class="view" id="v-lotto">
   <div class="gbar"><div class="in">
     <button class="iconbtn back" aria-label="뒤로"><svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <div class="gtitle">로또번호 생성기<small>이번 주 1등은 우리 팀?!</small></div>
+    <div class="gtitle">VOY 6/45<small>이번 주 1등은 우리 팀?!</small></div>
     <button class="iconbtn sndBtn" aria-label="소리"></button>
   </div></div>
   <main class="wrap">
@@ -426,7 +429,7 @@ function wheelArt(){
   ${s}
   <circle cx="${cx}" cy="${cy}" r="12" fill="#fff" stroke="${INK}" stroke-width="5"/>
   <path d="M88 10h24l-12 26z" fill="#ff4d4d" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
-  <text x="26" y="44" font-size="26">🍜</text><text x="152" y="120" font-size="24">🍙</text></svg>`;
+  <text x="22" y="46" font-size="26">🎯</text></svg>`;
 }
 function ladderArt(){
   const rails=[45,85,125,165], rungs=[[0,55],[1,82],[2,62],[0,108],[2,114],[1,132]];
@@ -473,15 +476,15 @@ function drawArt(){
   <path d="M172 104l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="#fff"/></svg>`;
 }
 const GAMES=[
-  {id:'roulette',name:'점심메뉴<br>룰렛',bg:'#ffa94d',art:wheelArt,badge:'HOT!'},
+  {id:'roulette',name:'룰렛<br>다트',bg:'#ffa94d',art:wheelArt,badge:'HOT!'},
   {id:'ladder',name:'사다리<br>타기',bg:'#40c47c',art:ladderArt},
-  {id:'lotto',name:'로또번호<br>생성기',bg:'#8466e8',art:lottoArt},
+  {id:'lotto',name:'VOY<br>6/45',bg:'#8466e8',art:lottoArt},
   {id:'draw',name:'랜덤<br>뽑기',bg:'#2fa8e0',art:drawArt,badge:'NEW!'}
 ];
 $('#cards').innerHTML=GAMES.map(g=>`<div class="cw">${g.badge?`<div class="badge">${g.badge}</div>`:''}<button class="card" style="--bg:${g.bg}" data-go="${g.id}">${g.art()}<div class="label outline">${g.name}</div></button></div>`).join('');
 $$('[data-go]').forEach(b=>b.onclick=()=>{beep(700,.06);location.replace('#'+b.dataset.go)});
 if($('#randomGame'))$('#randomGame').onclick=()=>{const g=GAMES[rnd(GAMES.length)];beep(700,.06);toast(`오늘은 ${g.name.replace('<br>',' ')}! 🎲`);setTimeout(()=>location.replace('#'+g.id),400)};
-$('#helpBtn').onclick=()=>modal({emoji:'🤔',title:'이렇게 써요',html:`<div style="text-align:left;font-size:13px;line-height:1.7;margin-top:6.5px">🍽️ <b>점심 룰렛</b> 메뉴 넣고 돌리기<br>🪜 <b>사다리</b> 커피 내기·당번 정하기<br>🎱 <b>로또</b> 이번 주 행운 번호<br>🎁 <b>랜덤 뽑기</b> 당첨자·발표 순서<br><span style="color:#6c7a8c;font-size:12px">입력한 내용은 이 기기에만 저장돼요.</span></div>`});
+$('#helpBtn').onclick=()=>modal({emoji:'🤔',title:'이렇게 써요',html:`<div style="text-align:left;font-size:13px;line-height:1.7;margin-top:6.5px">🎯 <b>룰렛 다트</b> 칸 넣고 돌리기<br>🪜 <b>사다리</b> 커피 내기·당번 정하기<br>🎱 <b>VOY 6/45</b> 이번 주 행운 번호<br>🎁 <b>랜덤 뽑기</b> 당첨자·발표 순서<br><span style="color:#6c7a8c;font-size:12px">입력한 내용은 이 기기에만 저장돼요.</span></div>`});
 $$('.back').forEach(b=>b.onclick=()=>{location.replace('#home')});
 
 /* ---------- router ---------- */
@@ -495,19 +498,20 @@ function route(){
 addEventListener('hashchange',route);
 
 /* =========================================================
-   1. 점심메뉴 룰렛
+   1. 룰렛 다트
 ========================================================= */
 const PRESETS={
-  '기본':['김치찌개','된장찌개','제육볶음','돈까스','짜장면','짬뽕','국밥','비빔밥','쌀국수','햄버거','초밥','칼국수'],
-  '한식':['김치찌개','된장찌개','순두부','제육볶음','불고기','비빔밥','국밥','냉면','부대찌개','칼국수'],
-  '가볍게':['샐러드','김밥','샌드위치','포케','떡볶이','라면','우동','토스트'],
-  '회식':['삼겹살','치킨','족발','회','곱창','양꼬치','소고기','감자탕']
+  '1~6':['1','2','3','4','5','6'],
+  '1~10':['1','2','3','4','5','6','7','8','9','10'],
+  'A~F':['A','B','C','D','E','F'],
+  'O · X':['O','X'],
+  '당첨 · 꽝':['당첨','꽝','꽝','꽝','꽝','꽝']
 };
-let menu=store.get('menu',PRESETS['기본'].slice()), wAngle=0, spinning=false;
+let menu=store.get('wheelItems',PRESETS['1~6'].slice()), wAngle=0, spinning=false;
 $('#presets').innerHTML=Object.keys(PRESETS).map(k=>`<button class="btn sm w" data-p="${k}">${k}</button>`).join('');
-$$('[data-p]').forEach(b=>b.onclick=()=>{if(spinning)return;menu=PRESETS[b.dataset.p].slice();renderMenu();toast(`${b.dataset.p} 메뉴로 바꿨어요`)});
+$$('[data-p]').forEach(b=>b.onclick=()=>{if(spinning)return;menu=PRESETS[b.dataset.p].slice();renderMenu();toast(`${b.dataset.p} 룰렛으로 바꿨어요`)});
 function renderMenu(){
-  store.set('menu',menu);
+  store.set('wheelItems',menu);
   $('#menuChips').innerHTML=menu.map((m,i)=>`<span class="chip" style="--c:${PAL[i%PAL.length]}">${esc(m)}<button data-del="${i}" aria-label="삭제">✕</button></span>`).join('');
   $('#menuCnt').textContent=`${menu.length}개`;
   $$('[data-del]').forEach(b=>b.onclick=()=>{if(spinning)return;if(menu.length<=2){toast('최소 2개는 있어야 해요');return}menu.splice(+b.dataset.del,1);renderMenu()});
@@ -516,7 +520,7 @@ function renderMenu(){
 function addMenu(){
   const v=$('#menuInp').value.trim(); if(!v)return;
   if(menu.length>=16){toast('최대 16개까지예요');return}
-  if(menu.includes(v)){toast('이미 있는 메뉴예요');return}
+  
   menu.push(v);$('#menuInp').value='';renderMenu();beep(660,.05);
 }
 $('#menuAdd').onclick=addMenu;
@@ -561,8 +565,8 @@ function spin(){
     else{
       wAngle=fin%TAU;drawWheel();spinning=false;$('#spinBtn').disabled=false;
       const m=menu[idx];fanfare();confetti();
-      modal({emoji:'🎉',label:'오늘 점심은 바로~',title:esc(m)+'!',sub:'맛있게 드세요 😋',buttons:[
-        {t:'공유',cls:'w',fn:()=>copyText(`오늘 점심은 ${m}! 🍽️ (VOY Fun펀!! 룰렛)`)},
+      modal({emoji:'🎯',label:'룰렛이 멈춘 곳은~',title:esc(m)+'!',sub:'답이 보이(VOY)죠? 😉',buttons:[
+        {t:'공유',cls:'w',fn:()=>copyText(`룰렛 결과: ${m}! 🎯 (VOY FunVOY!! 룰렛 다트)`)},
         {t:'한 번 더!',cls:'r',fn:()=>setTimeout(spin,250)}]});
     }
   })(t0);
@@ -673,7 +677,7 @@ $('#lAll').onclick=async()=>{
 renderLadSetup();
 
 /* =========================================================
-   3. 로또번호 생성기
+   3. VOY 6/45
 ========================================================= */
 const ballColor=n=>n<=10?'#fbc400':n<=20?'#69c8f2':n<=30?'#ff7272':n<=40?'#aaaaaa':'#b0d840';
 const ballHTML=(n,small)=>`<div class="ball outline-s${small?' s':''}" style="--c:${ballColor(n)}">${n}</div>`;
