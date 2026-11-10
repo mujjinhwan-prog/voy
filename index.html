@@ -438,6 +438,7 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth-card{width:100%;max-width:420px}
 .auth-hero{text-align:center;margin-bottom:22px}
 .auth-hero .logo{width:62px;height:62px;font-size:30px;margin:0 auto 14px}
+.auth-hero .hero-ic{display:block;width:132px;height:132px;margin:0 auto 12px;border-radius:30px;box-shadow:0 6px 22px rgba(0,0,0,.10)}
 .auth-hero h1{font-size:24px;font-weight:900}
 .auth-hero p{color:var(--muted);font-size:14px;margin-top:4px}
 .auth .box{padding:22px}
@@ -463,6 +464,9 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .install img{width:52px;height:52px;border-radius:13px;box-shadow:0 3px 10px rgba(0,0,0,.12);flex-shrink:0}
 .install b{display:block;font-size:15px}
 .install small{color:var(--muted);font-size:12.5px;line-height:1.45;display:block}
+.install.ok{border-color:color-mix(in srgb,var(--accent) 45%,var(--border));background:color-mix(in srgb,var(--accent) 7%,var(--surface));cursor:default}
+.install.ok .chk{width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;margin-right:6px;vertical-align:-4px}
+.install.ok .re{background:none;border:0;padding:0;margin-top:4px;color:var(--accent);font-size:12.5px;font-weight:700;text-decoration:underline;cursor:pointer}
 .install .go{margin-left:auto;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:13px;padding:8px 13px;border-radius:99px;white-space:nowrap}
 .steps{counter-reset:st;list-style:none;margin:6px 0 0}
 .steps li{counter-increment:st;display:flex;gap:10px;align-items:flex-start;padding:9px 0;font-size:14px;line-height:1.5;border-bottom:1px dashed var(--border)}
@@ -1657,7 +1661,12 @@ function openSiteViewer(name, url, icon) {
   fr.src = url;
   w.addEventListener('click', e => {
     const b = e.target.closest('[data-sv]'); if (!b) return;
-    if (b.dataset.sv === 'close') { history.state && history.state.sv ? history.back() : closeSiteViewer(); }
+    /* 닫기(<, ✕): 페이지 안에서 몇 단계를 이동했든 바로 VOY 메인(피드)으로 — 안쪽 페이지 기록을 되감지 않음 */
+    if (b.dataset.sv === 'close') {
+      closeSiteViewer();
+      try { if (history.state && history.state.sv) history.replaceState(null, ''); } catch (er) {}
+      if (!/\/admin\//.test(location.pathname)) { if (location.hash !== '#/feed') location.hash = '#/feed'; else if (typeof route === 'function') route(); }
+    }
     if (b.dataset.sv === 'reload') { try { fr.contentWindow.location.reload(); } catch (er) { fr.src = url; } }
   });
   try { history.pushState({ sv: 1 }, ''); } catch (e) {}
@@ -1761,7 +1770,7 @@ function refreshQL() { const r = document.getElementById('qlRail'), s = document
    · Chrome / Edge / 삼성인터넷 (안드로이드·PC): [설치] 한 번 → 브라우저 확인창 → 끝 (메뉴 안 열어도 됨)
    · 카카오톡·네이버 등 앱 안의 브라우저: 자동으로 Chrome/Safari로 다시 열기
    · 아이폰(Safari·Chrome·Edge): 애플이 자동 설치를 막아 두어, 눌러야 할 버튼 위치를 화살표로 직접 가리켜 안내 */
-window.addEventListener('appinstalled', () => { markAppInstalled(); window.__bip = null; document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); toast('VOY™ 아이콘이 설치되었어요! 홈 화면(바탕화면)의 VOY™로 열어주세요'); });
+window.addEventListener('appinstalled', () => { markAppInstalled(); window.__bip = null; document.querySelectorAll('.inst-sheet,.inst-arrow').forEach(el => el.remove()); refreshInstallCard(); toast('VOY™ 아이콘이 설치되었어요! 홈 화면(바탕화면)의 VOY™로 열어주세요'); });
 /* 앱(아이콘)으로 열었는지 — 브라우저·기기마다 신호가 달라 여러 가지를 함께 확인 */
 function isStandalone() {
   const mm = q => { try { return matchMedia(q).matches; } catch (e) { return false; } };
@@ -1849,12 +1858,24 @@ const Inst = {
   }
 };
 function installCardHTML() {
-  if (isStandalone() || appInstalledHere()) return '';
+  if (isStandalone()) return '';   // 이미 앱(아이콘)으로 열린 상태 → 안내 불필요
   const mob = Inst.env().mob;
+  if (appInstalledHere()) return `<div class="install ok"><img src="icons/voy-192.png?v=3" alt="VOY™ 아이콘">
+    <div><b><span class="chk">✓</span>이 기기에 VOY™ 앱이 설치되어 있어요</b><small>${mob ? '홈 화면' : '바탕화면·시작 메뉴'}의 <b style="display:inline;font-size:inherit">VOY™ 아이콘</b>으로 열면 주소창 없이 앱 화면으로 열려요.</small>
+    <button type="button" class="re" data-act="reinstall">아이콘이 없나요? 다시 설치하기</button></div></div>`;
   return `<button class="install" data-act="install" type="button"><img src="icons/voy-192.png?v=3" alt="VOY™ 아이콘">
     <div><b>VOY™ 바로가기 아이콘 설치</b><small>${mob ? '홈 화면에 아이콘을 추가하고 앱처럼 바로 열어보세요' : 'PC 바탕화면·작업표시줄에 아이콘을 추가하고 바로 열어보세요'}</small></div><span class="go">설치</span></button>`;
 }
 function doInstall() { return Inst.run(); }
+function refreshInstallCard() { const slot = document.getElementById('instSlot'); if (slot) slot.innerHTML = installCardHTML(); }
+/* 안드로이드 Chrome 등: 브라우저에게 직접 "이 기기에 VOY™ 앱이 설치돼 있나?"를 물어 정확히 표시 */
+(async () => {
+  try {
+    if (isStandalone() || !navigator.getInstalledRelatedApps) return;
+    const apps = await navigator.getInstalledRelatedApps();
+    if (apps && apps.length) { markAppInstalled(); refreshInstallCard(); }
+  } catch (e) {}
+})();
 function installGuide(title, steps, note) {
   openModal(`<div class="modal-head"><h3>${title}</h3><button class="icon-x" data-close>${I('x')}</button></div>
     <div class="modal-body"><div style="display:flex;gap:12px;align-items:center;margin-bottom:6px"><img src="icons/voy-192.png?v=3" alt="" style="width:56px;height:56px;border-radius:14px;box-shadow:0 3px 10px rgba(0,0,0,.12)"><div><b style="font-size:16px">VOY™</b><div class="hint" style="margin:0">설치하면 이 아이콘으로 바로 열려요</div></div></div>
@@ -2541,7 +2562,8 @@ const Badge = {
 /* ---------------- 로그인 ---------------- */
 async function renderAuth() {
   root.innerHTML = `<div class="auth"><div class="auth-card">
-    <div class="auth-hero"><div class="logo">V</div><h1>Voice of YUHAN</h1><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
+    <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=3" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
+    <div id="instSlot" style="margin:-8px 0 14px">${installCardHTML()}</div>
     <form class="box" id="authform" autocomplete="on">
       <label class="lbl" style="margin-top:0">ID (회사 이메일)</label>
       <input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@${COMPANY_DOMAIN}" required>
@@ -2551,9 +2573,8 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261110.0902</p>
+      <p class="ver-tag">v261110.0933</p>
     </form>
-    ${installCardHTML()}
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
   Inst.auto();
@@ -2618,6 +2639,7 @@ document.addEventListener('click', async e => {
     case 'theme': setTheme(t.dataset.v); document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('on', b === t)); break;
     case 'logout': if (await confirmBox('로그아웃할까요?', '로그아웃')) { await API.signOut(); S.me = null; location.hash = ''; document.body.classList.remove('has-bnav'); renderAuth(); } break;
     case 'logout-gate': await API.signOut(); S.me = null; renderAuth(); break;
+    case 'reinstall': try { localStorage.removeItem('voy_app_ok'); } catch (er) {} refreshInstallCard(); Inst.run(); break;
     case 'app-done': markAppInstalled(); document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); route(); maybeShowPopups(); break;
     case 'gate-bypass': S.gateBypass = true; try { sessionStorage.setItem('voy_gate_bypass', '1'); } catch (er) {} route(); maybeShowPopups(); break;
     case 'push-on': try { await enablePush(); document.getElementById('pushPrompt')?.remove(); } catch (er) { toast(friendly(er), 'err'); } break;

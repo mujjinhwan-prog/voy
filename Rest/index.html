@@ -19,49 +19,49 @@ html,body{margin:0;padding:0}
 body{background:#fff;color:var(--ink);font-family:var(--bfont);min-height:100vh;overscroll-behavior-y:none}
 button{font-family:inherit;cursor:pointer;color:inherit}
 input,textarea{font-family:var(--bfont)}
-.outline{text-shadow:3px 0 var(--ink),-3px 0 var(--ink),0 3px var(--ink),0 -3px var(--ink),2px 2px var(--ink),-2px -2px var(--ink),2px -2px var(--ink),-2px 2px var(--ink),0 6px 0 var(--ink)}
-.outline-s{text-shadow:2px 0 var(--ink),-2px 0 var(--ink),0 2px var(--ink),0 -2px var(--ink),1.5px 1.5px var(--ink),-1.5px -1.5px var(--ink),1.5px -1.5px var(--ink),-1.5px 1.5px var(--ink),0 3px 0 var(--ink)}
+.outline{text-shadow:2.5px 0 var(--ink),-3px 0 var(--ink),0 2.5px var(--ink),0 -3px var(--ink),1.5px 1.5px var(--ink),-2px -2px var(--ink),1.5px -2px var(--ink),-2px 1.5px var(--ink),0 5px 0 var(--ink)}
+.outline-s{text-shadow:1.5px 0 var(--ink),-2px 0 var(--ink),0 1.5px var(--ink),0 -2px var(--ink),1.5px 1.5px var(--ink),-1.5px -1.5px var(--ink),1.5px -1.5px var(--ink),-1.5px 1.5px var(--ink),0 2.5px 0 var(--ink)}
 
 /* ===== views ===== */
 .view{display:none;min-height:100vh}
 .view.on{display:block}
 
 /* ===== header ===== */
-.hero{background:var(--sky);padding:22px 16px 30px;position:relative}
-.hero-in{max-width:540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.iconbtn{width:58px;height:58px;flex:0 0 58px;border-radius:18px;border:none;background:var(--slate);box-shadow:0 6px 0 var(--slate-d);display:grid;place-items:center;transition:transform .08s}
-.iconbtn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--slate-d)}
-.iconbtn svg{width:30px;height:30px}
+.hero{background:var(--sky);padding:17.5px 13px 24px;position:relative}
+.hero-in{max-width:432px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.iconbtn{width:46.5px;height:46.5px;flex:0 0 46.5px;border-radius:14.5px;border:none;background:var(--slate);box-shadow:0 5px 0 var(--slate-d);display:grid;place-items:center;transition:transform .08s}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1.5px 0 var(--slate-d)}
+.iconbtn svg{width:24px;height:24px}
 .logo{text-align:center;flex:1}
-.logo h1{margin:0;font-family:var(--hfont);font-weight:400;font-size:clamp(25px,7.2vw,42px);letter-spacing:-.5px;line-height:1;color:#46505f;display:inline-block;white-space:nowrap;position:relative;padding:0 6px 8px}
+.logo h1{margin:0;font-family:var(--hfont);font-weight:400;font-size:clamp(20px,5.8vw,33.5px);letter-spacing:-.5px;line-height:1;color:#46505f;display:inline-block;white-space:nowrap;position:relative;padding:0 5px 6.5px}
 .logo h1 .v{color:var(--red)}
-.logo h1::after{content:"";position:absolute;left:-6px;right:-6px;bottom:0;height:8px;border-radius:4px;background:linear-gradient(90deg,#1ec0f0 0 50%,#ee4242 50% 100%);transform:skewX(-20deg)}
-.tag{display:inline-block;margin-top:10px;background:#3b4252;color:#fff;font-family:var(--hfont);font-size:15px;padding:6px 14px 7px;border-radius:6px;transform:rotate(-3deg);box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.logo h1::after{content:"";position:absolute;left:-6px;right:-6px;bottom:0;height:6.5px;border-radius:3px;background:linear-gradient(90deg,#1ec0f0 0 50%,#ee4242 50% 100%);transform:skewX(-20deg)}
+.tag{display:inline-block;margin-top:8px;background:#3b4252;color:#fff;font-family:var(--hfont);font-size:12px;padding:5px 11px 5.5px;border-radius:5px;transform:rotate(-3deg);box-shadow:0 3px 0 rgba(0,0,0,.18)}
 
 /* ===== home grid ===== */
-.wrap{max-width:540px;margin:0 auto;padding:22px 16px 130px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px 16px}
+.wrap{max-width:432px;margin:0 auto;padding:17.5px 13px 104px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 13px}
 .cw{position:relative}
-.card{position:relative;display:block;width:100%;aspect-ratio:.86;border:6px solid var(--ink);border-radius:30px;overflow:hidden;box-shadow:0 8px 0 #cfd6de;padding:0;transition:transform .08s,box-shadow .08s;background:var(--bg)}
-.card:active{transform:translateY(5px);box-shadow:0 3px 0 #cfd6de}
+.card{position:relative;display:block;width:100%;aspect-ratio:.86;border:5px solid var(--ink);border-radius:24px;overflow:hidden;box-shadow:0 6.5px 0 #cfd6de;padding:0;transition:transform .08s,box-shadow .08s;background:var(--bg)}
+.card:active{transform:translateY(4px);box-shadow:0 2.5px 0 #cfd6de}
 .card svg.art{position:absolute;inset:0;width:100%;height:100%}
-.card .label{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 14px;text-align:left;background:linear-gradient(rgba(35,38,52,0),rgba(35,38,52,.55) 45%);font-family:var(--hfont);color:#fff;font-size:clamp(23px,6.6vw,32px);line-height:1.08}
-.badge{position:absolute;top:-16px;left:50%;transform:translateX(-50%) rotate(-2deg);z-index:2;background:#24485a;border:5px solid var(--ink);border-radius:16px;padding:3px 14px 4px;font-family:var(--hfont);font-size:22px;color:#ffe14d;box-shadow:0 4px 0 var(--ink);white-space:nowrap;pointer-events:none}
+.card .label{position:absolute;left:0;right:0;bottom:0;padding:17.5px 11px 11px;text-align:left;background:linear-gradient(rgba(35,38,52,0),rgba(35,38,52,.55) 45%);font-family:var(--hfont);color:#fff;font-size:clamp(18.5px,5.3vw,25.5px);line-height:1.08}
+.badge{position:absolute;top:-16px;left:50%;transform:translateX(-50%) rotate(-2deg);z-index:2;background:#24485a;border:4px solid var(--ink);border-radius:13px;padding:2.5px 11px 3px;font-family:var(--hfont);font-size:17.5px;color:#ffe14d;box-shadow:0 3px 0 var(--ink);white-space:nowrap;pointer-events:none}
 .card:hover .art{animation:wob .6s ease}
 @keyframes wob{30%{transform:scale(1.04) rotate(-1deg)}60%{transform:scale(.99) rotate(1deg)}}
-.foot{text-align:center;color:#9aa4b2;font-size:14px;margin-top:28px}
+.foot{text-align:center;color:#9aa4b2;font-size:12px;margin-top:22.5px}
 
 /* ===== bottom bar ===== */
-.bbar{position:fixed;left:0;right:0;bottom:0;background:#3b4252;padding:14px 16px calc(14px + env(safe-area-inset-bottom));z-index:20}
-.bbar .in{max-width:540px;margin:0 auto}
+.bbar{position:fixed;left:0;right:0;bottom:0;background:#3b4252;padding:11px 13px calc(11px + env(safe-area-inset-bottom));z-index:20}
+.bbar .in{max-width:432px;margin:0 auto}
 
 /* ===== buttons ===== */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--hfont);font-size:24px;color:#fff;background:var(--c,var(--grn));border:5px solid var(--ink);border-radius:20px;padding:12px 18px 13px;box-shadow:0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s;line-height:1.1}
-.btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6.5px;font-family:var(--hfont);font-size:19px;color:#fff;background:var(--c,var(--grn));border:4px solid var(--ink);border-radius:16px;padding:9.5px 14.5px 10.5px;box-shadow:0 5px 0 var(--ink);transition:transform .08s,box-shadow .08s;line-height:1.1}
+.btn:active:not(:disabled){transform:translateY(3px);box-shadow:0 1.5px 0 var(--ink)}
 .btn:disabled{filter:grayscale(.6);opacity:.65;cursor:default}
 .btn.full{width:100%}
-.btn.sm{font-size:17px;padding:7px 12px 8px;border-width:4px;border-radius:14px;box-shadow:0 4px 0 var(--ink)}
-.btn.sm:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+.btn.sm{font-size:13.5px;padding:5.5px 9.5px 6.5px;border-width:3px;border-radius:11px;box-shadow:0 3px 0 var(--ink)}
+.btn.sm:active:not(:disabled){transform:translateY(2.5px);box-shadow:0 1px 0 var(--ink)}
 .btn.y{--c:var(--yel);color:var(--ink)}
 .btn.w{--c:#fff;color:var(--ink)}
 .btn.b{--c:var(--blu)}
@@ -69,119 +69,135 @@ input,textarea{font-family:var(--bfont)}
 .btn.p{--c:var(--pur)}
 .btn.o{--c:var(--org)}
 .btn.y,.btn.w{text-shadow:none!important}
-.row{display:flex;gap:10px}
+.row{display:flex;gap:8px}
 .row>*{flex:1}
 
 /* ===== game header ===== */
-.gbar{background:var(--sky);padding:16px}
-.gbar .in{max-width:540px;margin:0 auto;display:flex;align-items:center;gap:12px}
-.gbar .iconbtn{width:52px;height:52px;flex-basis:52px;border-radius:16px}
-.gtitle{flex:1;text-align:center;font-family:var(--hfont);font-size:clamp(24px,6.6vw,30px);color:#46505f}
-.gtitle small{display:block;font-family:var(--bfont);font-size:13px;color:var(--slate);margin-top:2px}
+.gbar{background:var(--sky);padding:13px}
+.gbar .in{max-width:432px;margin:0 auto;display:flex;align-items:center;gap:9.5px}
+.gbar .iconbtn{width:41.5px;height:41.5px;flex-basis:41.5px;border-radius:13px}
+.gtitle{flex:1;text-align:center;font-family:var(--hfont);font-size:clamp(19px,5.3vw,24px);color:#46505f}
+.gtitle small{display:block;font-family:var(--bfont);font-size:12px;color:var(--slate);margin-top:1.5px}
 
 /* ===== panels ===== */
-.panel{background:#fff;border:5px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink);padding:16px;margin-bottom:22px}
-.ptitle{font-family:var(--hfont);font-size:20px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
-.ptitle .cnt{font-family:var(--bfont);font-size:14px;color:var(--slate);margin-left:auto}
-.inp{width:100%;border:4px solid var(--ink);border-radius:14px;padding:9px 12px;font-size:17px;outline:none;background:#fff;color:var(--ink)}
+.panel{background:#fff;border:4px solid var(--ink);border-radius:19px;box-shadow:0 5px 0 var(--ink);padding:13px;margin-bottom:17.5px}
+.ptitle{font-family:var(--hfont);font-size:16px;margin:0 0 8px;display:flex;align-items:center;gap:6.5px}
+.ptitle .cnt{font-family:var(--bfont);font-size:12px;color:var(--slate);margin-left:auto}
+.inp{width:100%;border:3px solid var(--ink);border-radius:11px;padding:7px 9.5px;font-size:13.5px;outline:none;background:#fff;color:var(--ink)}
 .inp:focus{background:#fffbe6}
-.hint{font-size:13px;color:var(--slate);margin-top:8px}
+.hint{font-size:12px;color:var(--slate);margin-top:6.5px}
 
 /* chips */
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.chip{display:inline-flex;align-items:center;gap:6px;background:var(--c);border:3px solid var(--ink);border-radius:999px;padding:4px 5px 4px 12px;font-size:16px}
-.chip button{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);background:#fff;font-family:var(--hfont);font-size:13px;line-height:1;padding:0;display:grid;place-items:center}
-.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9.5px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:var(--c);border:2.5px solid var(--ink);border-radius:799px;padding:3px 4px 3px 9.5px;font-size:13px}
+.chip button{width:17.5px;height:17.5px;border-radius:50%;border:1.5px solid var(--ink);background:#fff;font-family:var(--hfont);font-size:12px;line-height:1;padding:0;display:grid;place-items:center}
+.presets{display:flex;gap:5px;flex-wrap:wrap;margin-top:9.5px}
 
 /* ===== roulette ===== */
 #v-roulette{background:#fff3df}
-.wheelbox{position:relative;width:min(86vw,390px);margin:6px auto 22px}
-.wheelbox canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 0 rgba(43,47,58,.9))}
-.pointer{position:absolute;top:-14px;left:50%;width:58px;height:66px;transform:translateX(-50%);transform-origin:50% 10%;z-index:2}
+.wheelbox{position:relative;width:min(68.8vw,312px);margin:5px auto 17.5px}
+.wheelbox canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 6.5px 0 rgba(43,47,58,.9))}
+.pointer{position:absolute;top:-14px;left:50%;width:46.5px;height:53px;transform:translateX(-50%);transform-origin:50% 10%;z-index:2}
 .pointer.tick{animation:tick .12s ease}
 @keyframes tick{50%{transform:translateX(-50%) rotate(-14deg)}}
 
 /* ===== ladder ===== */
 #v-ladder{background:#e6f9ee}
-.lsetrow{display:grid;grid-template-columns:30px 1fr 22px 1fr;gap:8px;align-items:center;margin-bottom:8px}
-.dot{width:30px;height:30px;border-radius:50%;background:var(--c);border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:15px}
+.lsetrow{display:grid;grid-template-columns:24px 1fr 17.5px 1fr;gap:6.5px;align-items:center;margin-bottom:6.5px}
+.dot{width:24px;height:24px;border-radius:50%;background:var(--c);border:2.5px solid var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:12px}
 .arrow{text-align:center;font-family:var(--hfont);color:var(--slate)}
-.step{display:inline-flex;align-items:center;gap:10px}
-.step button{width:42px;height:42px;border-radius:12px;border:4px solid var(--ink);background:var(--yel);font-family:var(--hfont);font-size:24px;line-height:1;box-shadow:0 4px 0 var(--ink);padding:0}
-.step button:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-.step b{font-family:var(--hfont);font-size:28px;min-width:34px;text-align:center;font-weight:400}
-.chk{display:flex;align-items:center;gap:8px;font-size:16px;margin:6px 0 2px;cursor:pointer}
-.chk input{width:22px;height:22px;accent-color:#ff6b6b}
-.board{padding:14px 8px 16px}
+.step{display:inline-flex;align-items:center;gap:8px}
+.step button{width:33.5px;height:33.5px;border-radius:9.5px;border:3px solid var(--ink);background:var(--yel);font-family:var(--hfont);font-size:19px;line-height:1;box-shadow:0 3px 0 var(--ink);padding:0}
+.step button:active{transform:translateY(2.5px);box-shadow:0 1px 0 var(--ink)}
+.step b{font-family:var(--hfont);font-size:22.5px;min-width:27px;text-align:center;font-weight:400}
+.chk{display:flex;align-items:center;gap:6.5px;font-size:13px;margin:5px 0 1.5px;cursor:pointer}
+.chk input{width:17.5px;height:17.5px;accent-color:#ff6b6b}
+.board{padding:11px 6.5px 13px}
 .lnames,.lprizes{display:grid;grid-template-columns:repeat(var(--n),1fr)}
-.lp{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:0 2px;min-width:0}
-.lp .av{width:42px;height:42px;border-radius:50%;background:var(--c);border:4px solid var(--ink);box-shadow:0 4px 0 var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:19px;transition:transform .1s}
+.lp{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;padding:0 1.5px;min-width:0}
+.lp .av{width:33.5px;height:33.5px;border-radius:50%;background:var(--c);border:3px solid var(--ink);box-shadow:0 3px 0 var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:15px;transition:transform .1s}
 .lp:not(.done):hover .av{transform:translateY(-3px)}
-.lp .nm{font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lp.done .av{opacity:.5;box-shadow:0 1px 0 var(--ink);transform:translateY(3px)}
-.ladsvg{width:100%;height:auto;display:block;margin:2px 0}
-.pz{margin:0 2px;min-height:56px;border:4px solid var(--ink);border-radius:12px;background:var(--yel);display:grid;place-items:center;text-align:center;padding:4px 2px;font-size:13px;line-height:1.15;word-break:keep-all;overflow-wrap:anywhere}
-.pz.q{font-family:var(--hfont);font-size:24px}
-.pz.open{background:#fff;border-color:var(--c);box-shadow:inset 0 0 0 3px var(--ink);animation:flip .45s ease}
-.pz .who{display:block;font-size:11px;color:var(--slate);margin-top:2px}
+.lp .nm{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lp.done .av{opacity:.5;box-shadow:0 1px 0 var(--ink);transform:translateY(2.5px)}
+.ladsvg{width:100%;height:auto;display:block;margin:1.5px 0}
+.pz{margin:0 1.5px;min-height:45px;border:3px solid var(--ink);border-radius:9.5px;background:var(--yel);display:grid;place-items:center;text-align:center;padding:3px 1.5px;font-size:12px;line-height:1.15;word-break:keep-all;overflow-wrap:anywhere}
+.pz.q{font-family:var(--hfont);font-size:19px}
+.pz.open{background:#fff;border-color:var(--c);box-shadow:inset 0 0 0 2.5px var(--ink);animation:flip .45s ease}
+.pz .who{display:block;font-size:12px;color:var(--slate);margin-top:1.5px}
 @keyframes flip{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
 
 /* ===== lotto ===== */
 #v-lotto{background:#f1ebff}
-.machine{display:flex;flex-direction:column;align-items:center;margin:8px 0 6px}
-.globe{position:relative;width:230px;height:230px;border-radius:50%;border:6px solid var(--ink);background:radial-gradient(circle at 34% 28%,#fff 0 9%,#eef8ff 10% 42%,#c9e7fb 100%);overflow:hidden;z-index:1}
+.machine{display:flex;flex-direction:column;align-items:center;margin:6.5px 0 5px}
+.globe{position:relative;width:184px;height:184px;border-radius:50%;border:5px solid var(--ink);background:radial-gradient(circle at 34% 28%,#fff 0 9%,#eef8ff 10% 42%,#c9e7fb 100%);overflow:hidden;z-index:1}
 .globe::after{content:"";position:absolute;left:22%;top:12%;width:26%;height:12%;border-radius:50%;background:rgba(255,255,255,.85);transform:rotate(-25deg)}
-.gball{position:absolute;width:36px;height:36px;border-radius:50%;border:3px solid var(--ink);left:var(--x);top:var(--y);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7) 0 16%,transparent 17%),var(--c);animation:float 2.6s ease-in-out var(--d) infinite;display:grid;place-items:center;font-family:var(--hfont);font-size:14px;color:#fff}
+.gball{position:absolute;width:29px;height:29px;border-radius:50%;border:2.5px solid var(--ink);left:var(--x);top:var(--y);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7) 0 16%,transparent 17%),var(--c);animation:float 2.6s ease-in-out var(--d) infinite;display:grid;place-items:center;font-family:var(--hfont);font-size:12px;color:#fff}
 .globe.mix .gball{animation:mix .32s linear var(--d) infinite}
 @keyframes float{50%{transform:translateY(-6px)}}
 @keyframes mix{25%{transform:translate(var(--mx),calc(var(--my) * -1))}50%{transform:translate(calc(var(--mx) * -1),var(--my))}75%{transform:translate(var(--my),var(--mx))}}
-.neck{width:44px;height:20px;background:#ffb703;border:5px solid var(--ink);border-top:none;margin-top:-4px}
-.base{width:150px;height:34px;background:#ffb703;border:5px solid var(--ink);border-radius:12px 12px 18px 18px;margin-top:-2px;box-shadow:0 6px 0 var(--ink)}
-.tray{display:flex;justify-content:center;gap:7px;background:#3b4252;border:5px solid var(--ink);border-radius:999px;padding:10px 12px;margin:22px auto 20px;max-width:380px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
-.slot{width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:3px dashed rgba(255,255,255,.3)}
-.ball{width:44px;height:44px;flex:0 0 44px;border-radius:50%;border:3px solid var(--ink);background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.75) 0 15%,transparent 16%),var(--c);display:grid;place-items:center;font-family:var(--hfont);font-size:20px;color:#fff;animation:pop .45s cubic-bezier(.3,1.7,.5,1)}
-.ball.s{width:34px;height:34px;flex-basis:34px;font-size:15px;border-width:3px;animation:none}
+.neck{width:35px;height:16px;background:#ffb703;border:4px solid var(--ink);border-top:none;margin-top:-4px}
+.base{width:120px;height:27px;background:#ffb703;border:4px solid var(--ink);border-radius:9.5px 9.5px 14.5px 14.5px;margin-top:-2px;box-shadow:0 5px 0 var(--ink)}
+.tray{display:flex;justify-content:center;gap:5.5px;background:#3b4252;border:4px solid var(--ink);border-radius:799px;padding:8px 9.5px;margin:17.5px auto 16px;max-width:304px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.slot{width:35px;height:35px;flex:0 0 35px;border-radius:50%;border:2.5px dashed rgba(255,255,255,.3)}
+.ball{width:35px;height:35px;flex:0 0 35px;border-radius:50%;border:2.5px solid var(--ink);background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.75) 0 15%,transparent 16%),var(--c);display:grid;place-items:center;font-family:var(--hfont);font-size:16px;color:#fff;animation:pop .45s cubic-bezier(.3,1.7,.5,1)}
+.ball.s{width:27px;height:27px;flex-basis:27px;font-size:12px;border-width:2.5px;animation:none}
 @keyframes pop{0%{transform:scale(0)}100%{transform:scale(1)}}
-.seg{display:flex;border:4px solid var(--ink);border-radius:16px;overflow:hidden;background:#fff}
-.seg button{flex:1;border:none;background:#fff;padding:10px 6px;font-size:17px}
-.seg button+button{border-left:4px solid var(--ink)}
+.seg{display:flex;border:3px solid var(--ink);border-radius:13px;overflow:hidden;background:#fff}
+.seg button{flex:1;border:none;background:#fff;padding:8px 5px;font-size:13.5px}
+.seg button+button{border-left:3px solid var(--ink)}
 .seg button.on{background:var(--yel);font-family:var(--hfont)}
-.grow{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:3px dashed #e3e7ee}
+.grow{display:flex;align-items:center;gap:5px;padding:6.5px 0;border-bottom:2.5px dashed #e3e7ee}
 .grow:last-child{border-bottom:none}
-.glab{width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:var(--ink);color:#fff;font-family:var(--hfont);display:grid;place-items:center;font-size:15px}
-.hist .when{font-size:13px;color:var(--slate);margin:10px 0 2px}
-.empty{color:var(--slate);text-align:center;padding:10px 0;font-size:15px}
+.glab{width:22.5px;height:22.5px;flex:0 0 22.5px;border-radius:6.5px;background:var(--ink);color:#fff;font-family:var(--hfont);display:grid;place-items:center;font-size:12px}
+.hist .when{font-size:12px;color:var(--slate);margin:8px 0 1.5px}
+.empty{color:var(--slate);text-align:center;padding:8px 0;font-size:12px}
 
 /* ===== draw ===== */
 #v-draw{background:#e3f5ff}
-.slotbox{height:150px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#2fa8e0 0 16px,#46b5ea 16px 32px);border:5px solid var(--ink);border-radius:26px;box-shadow:0 6px 0 var(--ink);margin-bottom:22px;padding:0 18px;position:relative}
-.slotname{background:#fff;border:5px solid var(--ink);border-radius:20px;padding:10px 22px 12px;font-family:var(--hfont);font-size:clamp(28px,9vw,42px);min-width:66%;text-align:center;box-shadow:0 5px 0 var(--ink);word-break:keep-all}
+.slotbox{height:120px;display:grid;place-items:center;background:repeating-linear-gradient(45deg,#2fa8e0 0 13px,#46b5ea 13px 25.5px);border:4px solid var(--ink);border-radius:21px;box-shadow:0 5px 0 var(--ink);margin-bottom:17.5px;padding:0 14.5px;position:relative}
+.slotname{background:#fff;border:4px solid var(--ink);border-radius:16px;padding:8px 17.5px 9.5px;font-family:var(--hfont);font-size:clamp(22.5px,7.2vw,33.5px);min-width:66%;text-align:center;box-shadow:0 4px 0 var(--ink);word-break:keep-all}
 .slotname.pop{animation:pop2 .5s cubic-bezier(.3,1.7,.5,1);background:var(--yel)}
 @keyframes pop2{0%{transform:scale(.6)}100%{transform:scale(1)}}
-textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
+textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
 .wlist{list-style:none;margin:0;padding:0}
-.wlist li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:4px solid var(--ink);border-radius:14px;margin-bottom:8px;background:#fff;font-size:19px;animation:slidein .35s ease}
-.wlist li .no{width:32px;height:32px;border-radius:50%;background:var(--c,var(--yel));border:3px solid var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:16px}
+.wlist li{display:flex;align-items:center;gap:8px;padding:6.5px 8px;border:3px solid var(--ink);border-radius:11px;margin-bottom:6.5px;background:#fff;font-size:15px;animation:slidein .35s ease}
+.wlist li .no{width:25.5px;height:25.5px;border-radius:50%;background:var(--c,var(--yel));border:2.5px solid var(--ink);display:grid;place-items:center;font-family:var(--hfont);font-size:13px}
 @keyframes slidein{0%{transform:translateX(-24px);opacity:0}}
 
 /* ===== modal / toast / fx ===== */
-.modal{position:fixed;inset:0;background:rgba(30,34,45,.6);display:none;place-items:center;z-index:50;padding:20px}
+.modal{position:fixed;inset:0;background:rgba(30,34,45,.6);display:none;place-items:center;z-index:50;padding:16px}
 .modal.on{display:grid}
-.mbox{background:#fff;border:6px solid var(--ink);border-radius:28px;box-shadow:0 10px 0 var(--ink);padding:24px 18px 18px;max-width:390px;width:100%;text-align:center;animation:pop2 .4s cubic-bezier(.3,1.6,.5,1);max-height:88vh;overflow:auto}
-.memoji{font-size:62px;line-height:1}
-.mlabel{font-size:16px;color:var(--slate);margin-top:8px}
-.mtitle{font-family:var(--hfont);font-size:clamp(32px,10vw,44px);margin:4px 0;word-break:keep-all;line-height:1.15}
-.msub{font-size:16px;margin-top:6px}
-.mbtns{display:flex;gap:10px;margin-top:18px}
-.mbtns .btn{flex:1;font-size:19px}
-.rtable{width:100%;border-collapse:separate;border-spacing:0 6px;margin-top:8px;font-size:17px}
-.rtable td{padding:7px 10px;background:#f4f6f9}
-.rtable td:first-child{border-radius:10px 0 0 10px;text-align:left}
-.rtable td:last-child{border-radius:0 10px 10px 0;text-align:right}
+.mbox{background:#fff;border:5px solid var(--ink);border-radius:22.5px;box-shadow:0 8px 0 var(--ink);padding:19px 14.5px 14.5px;max-width:312px;width:100%;text-align:center;animation:pop2 .4s cubic-bezier(.3,1.6,.5,1);max-height:88vh;overflow:auto}
+.memoji{font-size:49.5px;line-height:1}
+.mlabel{font-size:13px;color:var(--slate);margin-top:6.5px}
+.mtitle{font-family:var(--hfont);font-size:clamp(25.5px,8vw,35px);margin:3px 0;word-break:keep-all;line-height:1.15}
+.msub{font-size:13px;margin-top:5px}
+.mbtns{display:flex;gap:8px;margin-top:14.5px}
+.mbtns .btn{flex:1;font-size:15px}
+.rtable{width:100%;border-collapse:separate;border-spacing:0 5px;margin-top:6.5px;font-size:13.5px}
+.rtable td{padding:5.5px 8px;background:#f4f6f9}
+.rtable td:first-child{border-radius:8px 0 0 8px;text-align:left}
+.rtable td:last-child{border-radius:0 8px 8px 0;text-align:right}
 .rtable tr.hit td{background:#fff3bf;font-family:var(--hfont)}
-.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:16px;opacity:0;pointer-events:none;transition:.25s;z-index:60;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:8px 14.5px;border-radius:799px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:60;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:70}
+
+/* 모바일: 카드 영역을 80% 폭으로 — 아기자기하게 */
+.grid{width:82%;max-width:350px;margin:0 auto;gap:16px 13px}
+.foot{margin-top:22px}
+
+/* ===== PC·태블릿 큰 화면: 게임 화면을 가운데(상하좌우) 카드로 — 글자는 조금 키워 잘 보이게 ===== */
+@media (min-width:820px){
+  html{background:radial-gradient(circle at 12% 18%,#d6e8f8 0 140px,transparent 141px),radial-gradient(circle at 88% 82%,#ffeccc 0 170px,transparent 171px),radial-gradient(circle at 80% 14%,#e6f9ee 0 70px,transparent 71px),#eef3f8;background-attachment:fixed}
+  body{background:transparent;display:flex;flex-direction:column;min-height:100vh;padding:28px 16px}
+  .view{min-height:0;width:100%;max-width:470px;margin:auto;border:5px solid var(--ink);border-radius:30px;overflow:hidden;box-shadow:0 10px 0 var(--ink),0 24px 60px rgba(43,47,58,.18);zoom:1.15;background-color:#fff}
+  .wrap{padding-bottom:24px}
+  .bbar{position:static;padding:12px 16px 14px}
+  .toast{bottom:40px}
+  .mbox{zoom:1.15}
+}
+@media (min-width:820px) and (max-height:860px){ .view{zoom:1} }
 </style>
 </head>
 <body>
@@ -221,11 +237,11 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
       <svg class="pointer" id="pointer" viewBox="0 0 58 66"><path d="M8 8h42L29 60z" fill="#ff4d4d" stroke="#2b2f3a" stroke-width="6" stroke-linejoin="round"/><circle cx="29" cy="20" r="6" fill="#fff" stroke="#2b2f3a" stroke-width="3"/></svg>
       <canvas id="wheel" width="720" height="720"></canvas>
     </div>
-    <button class="btn full r outline-s" id="spinBtn" style="font-size:30px;margin-bottom:26px">돌려! 🍽️</button>
+    <button class="btn full r outline-s" id="spinBtn" style="font-size:24px;margin-bottom:21px">돌려! 🍽️</button>
     <div class="panel">
       <div class="ptitle">🍱 메뉴판 <span class="cnt" id="menuCnt"></span></div>
       <div class="chips" id="menuChips"></div>
-      <div class="row" style="gap:8px">
+      <div class="row" style="gap:6.5px">
         <input class="inp" id="menuInp" maxlength="12" placeholder="메뉴 추가 (예: 마라탕)">
         <button class="btn sm y" id="menuAdd" style="flex:0 0 auto">추가</button>
       </div>
@@ -254,7 +270,7 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
         <div id="lRows"></div>
         <div class="hint">결과 칸에 “☕ 커피쏘기”, “꽝”, “통과”처럼 자유롭게 적어주세요.</div>
       </div>
-      <button class="btn full outline-s" id="lBuild" style="font-size:28px">사다리 만들기! 🪜</button>
+      <button class="btn full outline-s" id="lBuild" style="font-size:22.5px">사다리 만들기! 🪜</button>
     </div>
     <div id="ladPlay" style="display:none">
       <div class="panel board">
@@ -262,8 +278,8 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
         <svg class="ladsvg" id="ladSvg"></svg>
         <div class="lprizes" id="lPrizes"></div>
       </div>
-      <p class="hint" style="text-align:center;margin:-8px 0 16px">👆 위의 동그라미를 눌러 한 명씩 내려가 보세요</p>
-      <button class="btn full r outline-s" id="lAll" style="margin-bottom:14px">전체 결과 보기</button>
+      <p class="hint" style="text-align:center;margin:-8px 0 13px">👆 위의 동그라미를 눌러 한 명씩 내려가 보세요</p>
+      <button class="btn full r outline-s" id="lAll" style="margin-bottom:11px">전체 결과 보기</button>
       <div class="row">
         <button class="btn y" id="lShuffle">🔀 다시 섞기</button>
         <button class="btn w" id="lEdit">✏️ 설정</button>
@@ -286,10 +302,10 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
       <div class="base"></div>
     </div>
     <div class="tray" id="tray"></div>
-    <div class="seg" id="lottoSeg" style="margin-bottom:14px">
+    <div class="seg" id="lottoSeg" style="margin-bottom:11px">
       <button data-g="1" class="on">1게임</button><button data-g="5">5게임</button>
     </div>
-    <button class="btn full p outline-s" id="lottoBtn" style="font-size:30px;margin-bottom:24px">번호 뽑기! 🎱</button>
+    <button class="btn full p outline-s" id="lottoBtn" style="font-size:24px;margin-bottom:19px">번호 뽑기! 🎱</button>
     <div class="panel" id="lottoResPanel" style="display:none">
       <div class="ptitle">🍀 이번 번호 <button class="btn sm w" id="lottoCopy" style="margin-left:auto">복사</button></div>
       <div id="lottoRes"></div>
@@ -310,19 +326,19 @@ textarea.inp{min-height:96px;resize:vertical;line-height:1.4}
     <button class="iconbtn sndBtn" aria-label="소리"></button>
   </div></div>
   <main class="wrap">
-    <div class="seg" id="drawSeg" style="margin-bottom:18px">
+    <div class="seg" id="drawSeg" style="margin-bottom:14.5px">
       <button data-m="win" class="on">🎁 당첨자 뽑기</button><button data-m="order">🔢 순서 정하기</button>
     </div>
     <div class="slotbox"><div class="slotname" id="slotName">누가 될까?</div></div>
     <div class="panel">
       <div class="ptitle">👥 참가자 <span class="cnt" id="drawCnt"></span></div>
       <textarea class="inp" id="drawNames" placeholder="이름을 쉼표나 줄바꿈으로 구분해 입력"></textarea>
-      <div id="winSet" style="margin-top:14px;display:flex;align-items:center;gap:14px">
-        <span style="font-size:17px">당첨 인원</span>
+      <div id="winSet" style="margin-top:11px;display:flex;align-items:center;gap:11px">
+        <span style="font-size:13.5px">당첨 인원</span>
         <div class="step"><button id="dMinus">−</button><b id="dN">1</b><button id="dPlus">+</button></div>
       </div>
     </div>
-    <button class="btn full b outline-s" id="drawBtn" style="font-size:30px;margin-bottom:24px">뽑기 시작! ✨</button>
+    <button class="btn full b outline-s" id="drawBtn" style="font-size:24px;margin-bottom:19px">뽑기 시작! ✨</button>
     <div class="panel" id="drawResPanel" style="display:none">
       <div class="ptitle" id="drawResTitle">🏆 결과</div>
       <ul class="wlist" id="drawRes"></ul>
@@ -466,10 +482,10 @@ const GAMES=[
   {id:'draw',name:'랜덤<br>뽑기',bg:'#2fa8e0',art:drawArt,badge:'NEW!'}
 ];
 $('#cards').innerHTML=GAMES.map(g=>`<div class="cw">${g.badge?`<div class="badge">${g.badge}</div>`:''}<button class="card" style="--bg:${g.bg}" data-go="${g.id}">${g.art()}<div class="label outline">${g.name}</div></button></div>`).join('');
-$$('[data-go]').forEach(b=>b.onclick=()=>{beep(700,.06);location.hash=b.dataset.go});
-$('#randomGame').onclick=()=>{const g=GAMES[rnd(GAMES.length)];beep(700,.06);toast(`오늘은 ${g.name.replace('<br>',' ')}! 🎲`);setTimeout(()=>location.hash=g.id,400)};
-$('#helpBtn').onclick=()=>modal({emoji:'🤔',title:'이렇게 써요',html:`<div style="text-align:left;font-size:16px;line-height:1.7;margin-top:8px">🍽️ <b>점심 룰렛</b> 메뉴 넣고 돌리기<br>🪜 <b>사다리</b> 커피 내기·당번 정하기<br>🎱 <b>로또</b> 이번 주 행운 번호<br>🎁 <b>랜덤 뽑기</b> 당첨자·발표 순서<br><span style="color:#6c7a8c;font-size:14px">입력한 내용은 이 기기에만 저장돼요.</span></div>`});
-$$('.back').forEach(b=>b.onclick=()=>{location.hash='home'});
+$$('[data-go]').forEach(b=>b.onclick=()=>{beep(700,.06);location.replace('#'+b.dataset.go)});
+$('#randomGame').onclick=()=>{const g=GAMES[rnd(GAMES.length)];beep(700,.06);toast(`오늘은 ${g.name.replace('<br>',' ')}! 🎲`);setTimeout(()=>location.replace('#'+g.id),400)};
+$('#helpBtn').onclick=()=>modal({emoji:'🤔',title:'이렇게 써요',html:`<div style="text-align:left;font-size:13px;line-height:1.7;margin-top:6.5px">🍽️ <b>점심 룰렛</b> 메뉴 넣고 돌리기<br>🪜 <b>사다리</b> 커피 내기·당번 정하기<br>🎱 <b>로또</b> 이번 주 행운 번호<br>🎁 <b>랜덤 뽑기</b> 당첨자·발표 순서<br><span style="color:#6c7a8c;font-size:12px">입력한 내용은 이 기기에만 저장돼요.</span></div>`});
+$$('.back').forEach(b=>b.onclick=()=>{location.replace('#home')});
 
 /* ---------- router ---------- */
 const VIEWS=['home','roulette','ladder','lotto','draw'];
@@ -670,7 +686,7 @@ let lottoG=1,lottoBusy=false,lottoHist=store.get('lotto',[]),lottoLast=null;
   let h='';
   for(let i=0;i<15;i++){
     const n=1+rnd(45),x=12+Math.random()*62,y=40+Math.random()*44;
-    h+=`<div class="gball outline-s" style="--x:${x}%;--y:${y}%;--c:${ballColor(n)};--d:-${(Math.random()*2).toFixed(2)}s;--mx:${(Math.random()*60-30).toFixed(0)}px;--my:${(Math.random()*60-30).toFixed(0)}px">${n}</div>`;
+    h+=`<div class="gball outline-s" style="--x:${x}%;--y:${y}%;--c:${ballColor(n)};--d:-${(Math.random()*2).toFixed(2)}s;--mx:${(Math.random()*48-24).toFixed(0)}px;--my:${(Math.random()*48-24).toFixed(0)}px">${n}</div>`;
   }
   $('#globe').innerHTML=h;
 })();

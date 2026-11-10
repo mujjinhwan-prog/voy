@@ -36,5 +36,11 @@
     }
   ],
   "prefer_related_applications": false,
-  "orientation": "any"
+  "orientation": "any",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://mujjinhwan-prog.github.io/voy/manifest.webmanifest"
+    }
+  ]
 }
