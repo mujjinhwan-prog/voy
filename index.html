@@ -185,7 +185,7 @@ body{min-height:100vh}
 .top-pill{flex:1 1 auto;min-width:0;max-width:300px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:7px 12px;border-radius:99px;font-size:12.5px;white-space:nowrap;overflow:hidden}
 .top-pill b{color:var(--point);overflow:hidden;text-overflow:ellipsis}
 .top-pill .tp-m{flex-shrink:0}
-@media(max-width:380px){.top-pill .tp-m{display:none}}
+@media(max-width:400px){.top-pill{font-size:11.5px;padding:6px 10px;gap:5px}}
 .toolbar #fmonth{flex:0 0 auto;width:108px;min-width:0;padding:0 24px 0 12px;font-size:13px;background-position:right 9px center}
 .card-row{display:flex;gap:12px;align-items:flex-start}.card-txt{flex:1;min-width:0}
 .excerpt.one{-webkit-line-clamp:1;margin:0}
@@ -437,6 +437,14 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 18px}
 .auth-card{width:100%;max-width:420px}
 .auth-hero{text-align:center;margin-bottom:22px}
+/* 시작 화면: VOY 로고가 작게 시작해 다가오듯 커짐 */
+.boot-splash{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.boot-splash img{width:150px;height:150px;border-radius:34px;box-shadow:0 10px 30px rgba(0,0,0,.12);animation:bootZoom 1.1s cubic-bezier(.2,.9,.25,1.15) both,bootBreath 2.2s ease-in-out 1.1s infinite}
+.boot-splash p{color:var(--muted);font-size:14px;animation:bootFade .6s ease .7s both}
+@keyframes bootZoom{0%{transform:scale(.28);opacity:0;filter:blur(3px)}55%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+@keyframes bootBreath{50%{transform:scale(1.04)}}
+@keyframes bootFade{from{opacity:0;transform:translateY(6px)}}
+@media (prefers-reduced-motion:reduce){.boot-splash img,.boot-splash p{animation:none}}
 .auth-hero .logo{width:62px;height:62px;font-size:30px;margin:0 auto 14px}
 .auth-hero .hero-ic{display:block;width:132px;height:132px;margin:0 auto 12px;border-radius:30px;box-shadow:0 6px 22px rgba(0,0,0,.10)}
 .auth-hero h1{font-size:24px;font-weight:900}
@@ -1521,7 +1529,7 @@ const QL_DEFAULTS = [
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
-  { id: 'rest',     name: '쉬는시간|놀이터',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
+  { id: 'rest',     name: 'Fun펀!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1546,7 +1554,7 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
-  rest: { name: '쉬는시간 놀이터 (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
+  rest: { name: 'Fun펀!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
     '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
     '<circle cx="44" cy="22" r="7.5" fill="#fff"/><text x="44" y="25.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#E8590C">7</text>' +
@@ -1561,7 +1569,7 @@ function qlIconSVG(key, size) {
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
-const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
+const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'], rest: ['쉬는시간|놀이터', '쉬는시간 놀이터'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
 /* 이름 안의 | 는 줄바꿈 (예: 건강의 벗|USE) */
 function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
@@ -1885,10 +1893,11 @@ function installGuide(title, steps, note) {
 
 async function boot() {
   mountThemeToggle();
-  root.innerHTML = '<div class="loading" style="padding-top:40vh">불러오는 중…</div>';
+  root.innerHTML = '<div class="boot-splash"><img src="icons/voy-512.png?v=3" alt="VOY™"><p>불러오는 중…</p></div>';
   try {
     if (!LOCAL && !window.supabase) throw new Error('Supabase 라이브러리를 불러오지 못했습니다.');
-    const [me, boards, settings] = await Promise.all([API.init(), API.boards(), API.settings()]);
+    let first = false; try { first = !sessionStorage.getItem('voy_splash'); sessionStorage.setItem('voy_splash', '1'); } catch (e) {}
+    const [me, boards, settings] = await Promise.all([API.init(), API.boards(), API.settings(), new Promise(r => setTimeout(r, first ? 1100 : 0))]);   // 앱을 처음 열 때는 로고가 다가오는 동작을 끝까지 보여줌
     S.me = me; S.boards = boards; S.settings = settings;
     QL.init(settings.quicklinks); QL.bind(); QL.checkAuto(refreshQL);
   } catch (e) { root.innerHTML = `<div class="empty">${esc(friendly(e))}</div>`; return; }
@@ -1958,7 +1967,7 @@ function shell(inner, tab, fab = true) {
   root.innerHTML = `<div class="app">
     <header class="top"><div class="top-row">
       <div class="brand" data-act="home"><div class="logo">V</div><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
-      <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth())}</span><b>${esc(me.nickname)}</b></div>
+      <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth(), true)}의</span><b>${esc(me.nickname)}</b></div>
       <button class="avatar sm" style="background:${avColor(me.nickname)}" data-act="go" data-to="#/me" aria-label="내 정보">${esc(me.nickname[0])}</button></div>
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
     </header>
@@ -2573,7 +2582,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261110.0933</p>
+      <p class="ver-tag">v261110.1010</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
