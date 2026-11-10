@@ -87,8 +87,11 @@ label.lbl{display:block;font-size:13px;font-weight:600;color:var(--text2);margin
 .ql-tile:hover{background:var(--surface2)}
 .ql-tile:active{transform:scale(.96)}
 .ql-ic{position:relative;display:block;line-height:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.12))}
-.ql-dot{position:absolute;top:-4px;right:-4px;width:15px;height:15px;border-radius:50%;background:#E5484D;border:2.5px solid var(--surface);animation:qlpulse 1.8s ease-in-out infinite}
-@keyframes qlpulse{0%,100%{box-shadow:0 0 0 0 rgba(229,72,77,.45)}50%{box-shadow:0 0 0 5px rgba(229,72,77,0)}}
+/* 바로가기 업데이트 표시: 크게 + 깜빡깜빡 + 퍼지는 링 */
+.ql-dot{position:absolute;top:-6px;right:-6px;width:19px;height:19px;border-radius:50%;background:#FF2D3A;border:3px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25);animation:qlblink 1.1s steps(1,end) infinite,qlpulse 1.1s ease-out infinite;z-index:2}
+@keyframes qlblink{0%,62%{background:#FF2D3A}63%,100%{background:#FFB1B6}}
+@keyframes qlpulse{0%{box-shadow:0 0 0 0 rgba(255,45,58,.65),0 1px 4px rgba(0,0,0,.25)}100%{box-shadow:0 0 0 9px rgba(255,45,58,0),0 1px 4px rgba(0,0,0,.25)}}
+@media (prefers-reduced-motion:reduce){.ql-dot{animation:none}}
 .ql-soon{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);font-style:normal;font-size:9.5px;font-weight:800;background:var(--text);color:var(--surface);padding:1px 6px;border-radius:99px;line-height:1.5;white-space:nowrap}
 .ql-tile.soon .ql-ic svg{opacity:.75}
 .ql-name{font-size:12.5px;font-weight:700;line-height:1.3;word-break:keep-all}
@@ -957,14 +960,17 @@ const API = {
       if (u.status === 'blocked') throw new Error('글쓰기가 제한된 계정입니다');
       if (b?.admin_only && !isAdminRole(u.role)) throw new Error('관리자 전용 게시판입니다');
       const mk = curMonth(), ck = 'p' + mk; if (!isAdmin) db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, images: d.images || [], pdf: d.pdf || null,
+      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null, images: d.images || [], pdf: d.pdf || null,
         is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: isAdmin ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
       if (p.is_pinned && !keepPinned) db.posts.forEach(x => x.is_pinned = false);
       db.posts.push(p); Local.save(); return this._vis(p);
     }
-    const row = must(await sb.from('posts').insert({ user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null,
-      images: d.images || [], pdf: d.pdf || null, is_pinned: isAdmin && !!d.is_pinned }).select('id,is_pinned').single());
+    const ins = { user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null,
+      images: d.images || [], pdf: d.pdf || null, is_pinned: isAdmin && !!d.is_pinned };
+    let res = await sb.from('posts').insert(ins).select('id,is_pinned').single();
+    if (res.error && /link_image/.test(res.error.message || '')) { delete ins.link_image; res = await sb.from('posts').insert(ins).select('id,is_pinned').single(); }   // SQL 패치 전에도 글쓰기는 되도록
+    const row = must(res);
     if (row.is_pinned && !keepPinned) await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', row.id);
     return this.getPost(row.id);
   },
@@ -975,7 +981,9 @@ const API = {
       if (p.user_id !== this.uid && !isAdminRole(this.profile?.role)) throw new Error('권한이 없습니다.');
       Object.assign(p, patch, { updated_at: new Date().toISOString() }); Local.save(); return this._vis(p);
     }
-    must(await sb.from('posts').update(patch).eq('id', id));
+    let res = await sb.from('posts').update(patch).eq('id', id);
+    if (res.error && /link_image/.test(res.error.message || '')) { patch = { ...patch }; delete patch.link_image; res = await sb.from('posts').update(patch).eq('id', id); }
+    must(res);
     return this.getPost(id);
   },
   async deletePosts(ids) {
@@ -1091,13 +1099,26 @@ const API = {
     }
     return this._put(file, kind);
   },
-  /* 링크 페이지 제목 가져오기 (실패하면 빈 값 — 작성자가 직접 입력) */
-  async linkTitle(url) {
+  /* 링크 페이지의 제목·대표 사진(og:image) 가져오기 — microlink 무료 API (실패하면 빈 값) */
+  async linkMeta(url) {
     try {
-      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 6000);
+      const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 7000);
       const r = await fetch('https://api.microlink.io/?url=' + encodeURIComponent(url), { signal: ctl.signal }); clearTimeout(tm);
-      const j = await r.json(); return (j && j.data && j.data.title || '').trim().slice(0, 140);
-    } catch (e) { return ''; }
+      const j = await r.json(), d = (j && j.data) || {};
+      const img = (d.image && d.image.url) || '';
+      return { title: (d.title || '').trim().slice(0, 140), image: /^https:\/\//.test(img) ? img.slice(0, 600) : '' };
+    } catch (e) { return { title: '', image: '' }; }
+  },
+  async linkTitle(url) { return (await this.linkMeta(url)).title; },
+  /* 예전 글(사진 정보 없음)용: 보는 기기에서 한 번만 가져와 7일간 기억 */
+  async linkThumb(url) {
+    const K = 'voy_lthumb', now = Date.now(); let c = {};
+    try { c = JSON.parse(localStorage.getItem(K) || '{}'); } catch (e) {}
+    const hit = c[url]; if (hit && now - hit.t < 7 * 864e5) return hit.i;
+    const i = (await this.linkMeta(url)).image;
+    c[url] = { i, t: now }; const ks = Object.keys(c); if (ks.length > 150) ks.sort((a, b) => c[a].t - c[b].t).slice(0, ks.length - 150).forEach(k => delete c[k]);
+    try { localStorage.setItem(K, JSON.stringify(c)); } catch (e) {}
+    return i;
   },
   async _put(file, kind) {
     if (kind === 'pdf') {
@@ -1464,7 +1485,7 @@ const QL_DEFAULTS = [
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
-  { id: 'rest',     name: 'Fun펀!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
+  { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1489,7 +1510,7 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
-  rest: { name: 'Fun펀!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
+  rest: { name: 'FunVOY!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
     '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
     '<circle cx="44" cy="22" r="7.5" fill="#fff"/><text x="44" y="25.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#E8590C">7</text>' +
@@ -1504,7 +1525,7 @@ function qlIconSVG(key, size) {
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
-const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'], rest: ['쉬는시간|놀이터', '쉬는시간 놀이터'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
+const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'], rest: ['쉬는시간|놀이터', '쉬는시간 놀이터', 'Fun펀!!'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
 /* 이름 안의 | 는 줄바꿈 (예: 건강의 벗|USE) */
 function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
@@ -1727,7 +1748,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261110.1010</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261111.0815</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 최고관리자 <b>admin / admin1234</b> · 일반관리자 <b>manager / manager1234</b></p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
