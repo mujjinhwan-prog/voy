@@ -786,5 +786,6 @@ syncDraw();
 route();
 addEventListener('resize',()=>{if($('#v-roulette').classList.contains('on'))drawWheel()});
 </script>
+<script>document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.closest&&t.closest('input,textarea,[contenteditable="true"]'))return;e.preventDefault();});</script>
 </body>
 </html>

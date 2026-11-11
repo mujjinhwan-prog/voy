@@ -545,8 +545,8 @@ function mountThemeToggle() {
 function toast(msg, type) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
-  const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; el.appendChild(t);
-  setTimeout(() => t.classList.add('out'), 2600); setTimeout(() => t.remove(), 3000);
+  const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; const ml = String(msg).includes('\n'); if (ml) { t.style.whiteSpace = 'pre-line'; t.style.textAlign = 'center'; } el.appendChild(t);
+  setTimeout(() => t.classList.add('out'), ml ? 4200 : 2600); setTimeout(() => t.remove(), ml ? 4600 : 3000);
 }
 function openModal(html, opts = {}) {
   const wrap = document.createElement('div'); wrap.className = 'modal-back';
@@ -586,6 +586,13 @@ function attachPwEye(root) {
 }
 new MutationObserver(() => attachPwEye()).observe(document.documentElement, { childList: true, subtree: true });
 document.addEventListener('DOMContentLoaded', () => attachPwEye());
+
+/* 오른쪽 마우스(우클릭 메뉴) 막기 — 글 입력칸에서는 붙여넣기를 위해 허용 */
+document.addEventListener('contextmenu', e => {
+  const t = e.target;
+  if (t && t.closest && t.closest('input, textarea, [contenteditable="true"]')) return;
+  e.preventDefault();
+});
 
 /* =====================================================================
    ★ 설정 — Supabase 프로젝트 정보만 넣으면 실서비스 모드로 동작합니다.
@@ -1836,7 +1843,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261111.1622</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261112.0411</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;

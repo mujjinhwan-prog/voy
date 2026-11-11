@@ -696,6 +696,13 @@ function attachPwEye(root) {
 new MutationObserver(() => attachPwEye()).observe(document.documentElement, { childList: true, subtree: true });
 document.addEventListener('DOMContentLoaded', () => attachPwEye());
 
+/* 오른쪽 마우스(우클릭 메뉴) 막기 — 글 입력칸에서는 붙여넣기를 위해 허용 */
+document.addEventListener('contextmenu', e => {
+  const t = e.target;
+  if (t && t.closest && t.closest('input, textarea, [contenteditable="true"]')) return;
+  e.preventDefault();
+});
+
 /* =====================================================================
    ★ 설정 — Supabase 프로젝트 정보만 넣으면 실서비스 모드로 동작합니다.
    (비워두면 브라우저 저장소를 쓰는 '데모 모드'로 동작)
@@ -2872,7 +2879,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.0337`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.0411`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -2881,7 +2888,14 @@ function sameKey(sub) {
 async function enablePush() {
   if (!pushSupported()) throw new Error('이 환경에서는 알림을 켤 수 없어요');
   let perm = Notification.permission;
-  if (perm !== 'granted') perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
+    toast('허용 창을 여는 중이에요…');
+    // 일부 브라우저(삼성 인터넷 앱 화면 등)는 창을 띄우지 않고 응답도 안 줌 → 5초 기다린 뒤 안내
+    perm = await Promise.race([
+      new Promise(res => { try { const r = Notification.requestPermission(res); if (r && r.then) r.then(res, () => res('default')); } catch (e) { res('default'); } }),
+      new Promise(res => setTimeout(() => res('timeout'), 5000))]);
+    if (perm === 'timeout') perm = Notification.permission === 'granted' ? 'granted' : 'default';
+  }
   if (perm !== 'granted') { pushHelp(perm); const er = new Error('알림 권한이 허용되지 않았어요 — 안내 순서대로 허용한 뒤 다시 켜 주세요'); er.name = 'NotAllowedError'; throw er; }
   const reg = await swReg(); if (!reg) throw new Error('알림 준비 중입니다. 앱을 완전히 닫았다가 다시 열고 켜 주세요');
   let sub = await reg.pushManager.getSubscription();
@@ -2961,7 +2975,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261112.0337" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261112.0411" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -2986,7 +3000,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261112.0337" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261112.0411" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
