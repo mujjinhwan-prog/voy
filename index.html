@@ -2711,9 +2711,21 @@ function pwModal(force, curPw) {
 const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 function pushSupported() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && !!VAPID_PUBLIC_KEY && !LOCAL; }
 function b64ToU8(b) { const p = '='.repeat((4 - b.length % 4) % 4), s = atob((b + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...s].map(c => c.charCodeAt(0))); }
+/* 알림 켜짐 확인 — 기기마다 서비스워커를 늦게 돌려주는 경우가 있어 ready(최대 4초)로 기다리고,
+   켜 둔 기록이 있는데 구독이 사라졌으면 조용히 다시 연결 (다른 메뉴에 갔다 오면 꺼진 것처럼 보이던 문제) */
+const PUSH_FLAG = 'voy_push_on';
+async function swReg() {
+  try { return await Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 4000))]) || await navigator.serviceWorker.getRegistration(); } catch (e) { return null; }
+}
 async function pushIsOn() {
   if (!pushSupported() || Notification.permission !== 'granted') return false;
-  try { const reg = await navigator.serviceWorker.getRegistration(); return !!(reg && await reg.pushManager.getSubscription()); } catch (e) { return false; }
+  try {
+    const reg = await swReg(); if (!reg) return localStorage.getItem(PUSH_FLAG) === '1';
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub && localStorage.getItem(PUSH_FLAG) === '1') { sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToU8(VAPID_PUBLIC_KEY) }); await API.savePushSub(sub); }
+    if (sub) localStorage.setItem(PUSH_FLAG, '1');
+    return !!sub;
+  } catch (e) { try { return localStorage.getItem(PUSH_FLAG) === '1'; } catch (x) { return false; } }
 }
 function pushBoxHTML() {
   let hint = '새 글이 올라오면 휴대폰·PC에 🔔 알림이 오고, 설치한 VOY™ 아이콘에 배지가 표시돼요.';
@@ -2727,6 +2739,7 @@ function pushBoxHTML() {
 }
 async function bindPushBox() {
   const sw = document.getElementById('pushSw'); if (!sw) return;
+  try { sw.checked = localStorage.getItem(PUSH_FLAG) === '1' && Notification.permission === 'granted'; } catch (e) {}   // 바로 표시 → 아래에서 실제 상태 확인
   sw.checked = await pushIsOn();
   sw.onchange = async () => { sw.disabled = true; try { sw.checked ? await enablePush() : await disablePush(); } catch (e) { toast(friendly(e), 'err'); sw.checked = await pushIsOn(); } sw.disabled = false; };
 }
@@ -2734,12 +2747,13 @@ async function enablePush() {
   if (!pushSupported()) throw new Error('이 환경에서는 알림을 켤 수 없어요');
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') throw new Error('알림 권한을 허용해야 켤 수 있어요');
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await swReg(); if (!reg) throw new Error('알림 준비 중입니다. 앱을 닫았다가 다시 열고 켜주세요');
   const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToU8(VAPID_PUBLIC_KEY) });
-  await API.savePushSub(sub); toast('🔔 새 글 알림을 켰어요');
+  await API.savePushSub(sub); try { localStorage.setItem(PUSH_FLAG, '1'); } catch (e) {} toast('🔔 새 글 알림을 켰어요');
 }
 async function disablePush() {
-  const reg = await navigator.serviceWorker.getRegistration(); const sub = reg && await reg.pushManager.getSubscription();
+  try { localStorage.removeItem(PUSH_FLAG); } catch (e) {}
+  const reg = await swReg(); const sub = reg && await reg.pushManager.getSubscription();
   if (sub) { await API.deletePushSub(sub.endpoint).catch(() => {}); await sub.unsubscribe(); }
   toast('새 글 알림을 껐어요');
 }
@@ -2787,7 +2801,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1622" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261111.1709" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
