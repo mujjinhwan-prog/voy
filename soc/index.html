@@ -152,6 +152,7 @@ h1{font-size:clamp(24px,3.4vw,38px);line-height:1.15;margin:0;font-weight:700;le
 
 /* Controls */
 .controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:0 0 14px}
+.controls.ctl-top{margin:0 0 16px}
 .seg{display:inline-flex;border:1px solid var(--rule);border-radius:9px;overflow:hidden;background:var(--surface)}
 .seg button{border:0;background:transparent;color:var(--muted);font:500 13px var(--font);padding:7px 13px;cursor:pointer;border-right:1px solid var(--rule)}
 .seg button:last-child{border-right:0}
@@ -414,7 +415,7 @@ tr.hema td.when{border-left-color:var(--hema)} tr.obgyn td.when{border-left-colo
   <div>
     <div class="titlerow"><h1 id="pageTitle">2026 국내·해외 주요 학술대회 연간 캘린더</h1><a class="yearbtn" id="yearBtn" href="?y=2027">2027 미리보기<span aria-hidden="true">→</span></a></div>
     <p class="lede" id="lede">내과계(순환기·내분비·신경과·신장·소화기·간·항암·혈액·류마티스)와 이비인후과·소아청소년과·정형외과·외과·흉부외과·대장항문·산부인과·피부과, 기초·진단의학(병리·핵의학·생리·의용생체)의 국내 학회와 해외 주요 학회를 한 화면에 모았습니다. 유한양행 사옥에서 열리는 행사는 별도 표시했습니다. 연간 보드의 일정을 누르면 아래 표의 해당 행으로 이동합니다.</p>
-    <div class="updated" id="updated"><span>최종 업데이트 <b id="updDate">2026.11.03</b></span><span aria-hidden="true">·</span><span>매월 공식 사이트 대조 점검</span></div>
+    <div class="updated" id="updated"><span>최종 업데이트 <b id="updDate">2026.11.11</b></span><span aria-hidden="true">·</span><span>매월 공식 사이트 대조 점검</span></div>
   </div>
   <div class="stats" id="stats"></div>
 </header>
@@ -435,7 +436,7 @@ tr.hema td.when{border-left-color:var(--hema)} tr.obgyn td.when{border-left-colo
   <div id="mmonths"></div>
 </section>
 
-<div class="controls" role="group" aria-label="필터">
+<div class="controls" id="controls" role="group" aria-label="필터">
   <div class="seg" id="regionSeg" aria-label="국내 해외 구분">
     <button type="button" data-v="all" aria-pressed="true">국내+해외</button>
     <button type="button" data-v="kr" aria-pressed="false">국내</button>
@@ -468,8 +469,8 @@ tr.hema td.when{border-left-color:var(--hema)} tr.obgyn td.when{border-left-colo
       <li><b>11/7–8 주말:</b> KSMO 간암 심포지엄(11/7, 파르나스)과 재택의료학회 추계(11/8)가 열립니다. KSMO 간암 심포지엄은 사전등록이 정원 마감됐습니다.</li>
       <li><b>11/12–15:</b> AACR-KCA(11/12–13) 직후 KSOG·골대사 추계·척추외과 추계·천식알레르기 추계(11/13–14), 표적치료 추계(11/14), 두통학회 추계·임상고혈압학회 추계(광주)(11/15)가 몰려 있습니다.</li>
       <li><b>11/19–21 KDDW 주간:</b> KDDW(그랜드 워커힐)와 같은 주에 CTOS 2026(11/18–21), 혈액학회 추계(11/20), KPS 2026(11/20–22), 치매학회 추계(11/21)가 열립니다.</li>
-      <li><b>11월 말이 두 번째 고비입니다.</b> ICKNA·족부족관절 추계(11/26–27), IMCVP·혈전지혈 추계·KSMO 경인지회(11/27–28), 당뇨병 PG Course(11/28), 노인병학회 추계(11/28–29), 정형외과의사회 추계(11/29)가 이어지고, 해외 APDW(11/24–28)가 겹칩니다. IMCVP와 족부족관절 추계는 같은 그랜드 워커힐에서 열립니다.</li>
-      <li><b>12월:</b> 항문질환연구회 집담회(12/6, 유한양행 본사 4층 강당), KOREADERMA(12/11–13), 해외 ASH(12/12–15), 간암학회 STC(12/18)가 남아 있습니다.</li>
+      <li><b>11월 말이 두 번째 고비입니다.</b> ICKNA·족부족관절 추계(11/26–27), IMCVP·혈전지혈 추계·KSMO 경인지회(11/27–28), 당뇨병 PG Course(11/28), 노인병학회 추계(11/28–29), 정형외과의사회 추계(11/29, 롯데호텔 서울)가 이어지고, 해외 APDW(11/24–28)가 겹칩니다. IMCVP와 족부족관절 추계는 같은 그랜드 워커힐에서 열립니다.</li>
+      <li><b>12월:</b> 근골격종양학회 추계(12/4, 서울대병원), 항문질환연구회 집담회(12/6, 유한양행 본사 4층 강당), KOREADERMA(12/11–13), 해외 ASH(12/12–15), 간암학회 STC(12/18)가 남아 있습니다.</li>
       <li><b>마감 임박:</b> 임상고혈압학회 11/12, 당뇨병 PG Course·노인병학회·KSMO 경인지회 11/13, 족부족관절 11/22, KOREADERMA 11/27 (모두 사전등록).</li>
       <li><b>해외 학회 후속 활동:</b> AHA·AASLD·ACR·ASH 핵심 결과를 D+7 내 요약해 KDDW·ICKNA·IMCVP 등 국내 행사 디테일링에 활용하세요.</li>
     </ul>
@@ -486,23 +487,18 @@ tr.hema td.when{border-left-color:var(--hema)} tr.obgyn td.when{border-left-colo
 </div>
 
 <section class="upd" id="updates" aria-labelledby="updTitle">
-  <div class="upd-head"><h3 id="updTitle">업데이트 안내</h3><span class="upd-date">2026.11.03 반영</span></div>
-  <p class="upd-intro">메디파나뉴스·데일리메디·메디포뉴스 등 의학 전문 매체의 학회 소식과 대한의학회·당뇨병학회·대장항문학회 공식 일정을 기존 일정과 하나씩 대조했습니다. 중복은 제외하고, 새로운 학회 5건을 넣고 1건의 일정을 바로잡았습니다.</p>
+  <div class="upd-head"><h3 id="updTitle">업데이트 안내</h3><span class="upd-date">2026.11.11 반영</span></div>
+  <p class="upd-intro">지금까지 검색한 학회 전체를 대한의학회 일정표, 대한정형외과학회 연간 일정, 학회 공지와 의학 전문지(메디포뉴스·메디파나뉴스·데일리메디·메디칼타임즈·메디팜헬스) 보도로 다시 대조했습니다. 남은 11~12월 일정 중 날짜가 바뀐 행사는 없고, 4건을 새로 넣고 1건의 장소를 확정했습니다.</p>
   <ul class="upd-list">
-    <li><span class="utag add">신규</span><span><b>검색 학회 8곳 추가</b> — 대한암예방학회·병리학회·심장혈관흉부외과학회·의용생체공학회·이과학회·생리학회·핵의학회·견·주관절의학회. 9건을 새로 넣었고(견·주관절 추계와 Politzer는 이미 있음), 병리·핵의학·생리·의용생체는 새 분과 <b>기초·진단의학</b>으로 묶었습니다.</span></li>
-    <li><span class="utag add">해외</span><span><b>같은 분야 해외 학회 11건 추가</b> — USCAP·ECP(병리), SNMMI·EANM(핵의학), APS Summit(생리), EMBC(의용생체), AATS·EACTS(흉부외과), COSM(이과), ICSES(견·주관절), AACR(암 연구·예방). 2027 미리보기에도 STS·USCAP·APS Summit·COSM·AATS·SNMMI 6건을 넣었습니다.</span></li>
-    <li><span class="utag chg">변경</span><span><b>생리학회 가을학술대회</b>는 대한의학회 일정표(11/5–6 송도)와 학회 발표 기사(11/3–5 성남 가천컨벤션센터)가 달라 기사 기준으로 넣고 '일부 확인'으로 표시했습니다.</span></li>
-    <li><span class="utag add">신규</span><span><b>2027 미리보기</b> — 제목 옆 버튼을 누르면 2027년 1~6월 국내 8건·해외 21건을 같은 형식(연간 보드·월별·상세 표·월별 출력)으로 볼 수 있습니다.</span></li>
-    <li><span class="utag chg">변경</span><span><b>족부족관절학회 추계</b>: 11/20–21 고려대 → <b>11/26–27 그랜드 워커힐 서울</b>(제36차). 학회가 직접 낸 보도자료 기준이며, 대한의학회 일정표와 달라 '일부 확인'으로 표시했습니다. 사전등록 11/22 마감.</span></li>
-    <li><span class="utag add">추가</span><span><b>한국임상고혈압학회 추계</b>(11/15, 광주 김대중컨벤션센터) — 일차의료 고혈압·SGLT2·GLP-1 세션, 평점 5점, 사전등록 11/12 마감</span></li>
-    <li><span class="utag add">추가</span><span><b>당뇨병학회 제25차 Postgraduate Course</b>(11/28, 백범김구기념관) — 의협·내과 각 5점, 사전등록 11/13 마감</span></li>
-    <li><span class="utag add">추가</span><span><b>KSMO 간암 심포지엄</b>(11/7, 파르나스 · 사전등록 정원 마감), <b>KSMO 경인지회 추계 심포지엄</b>(11/27–28, 송도컨벤시아)</span></li>
-    <li><span class="utag add">추가</span><span><b>대한재택의료학회 추계</b>(11/8, 호텔 삼정) — 재택의료 질 관리·표준화</span></li>
-    <li><span class="utag chg">보완</span><span><b>KSOG 2026</b>(11/13–14) 세부 세션을 추가했습니다. 사전등록은 끝났으니 현장등록은 공식 사이트에서 확인하세요.</span></li>
-    <li><span class="utag chk">재확인</span><span>ACKSS(11/5–7), AACR-KCA(11/12–13), 항문질환연구회 집담회(12/6, 유한양행 4층 강당) 일정이 대장항문학회 공식 일정표와 같습니다. 노인병학회·산부인과학회 일정도 보도 내용과 같습니다.</span></li>
-    <li><span class="utag wait">확인 중</span><span><b>정형외과의사회 추계</b>(11/29) 장소는 아직 공지되지 않았습니다. 대학병원 개원의 연수강좌와 지역 의사회 행사는 학회 학술대회가 아니어서 넣지 않았습니다.</span></li>
+    <li><span class="utag chg">확정</span><span><b>정형외과의사회 추계</b>(11/29) 장소가 <b>롯데호텔 서울(소공동)</b>로 확인됐습니다.</span></li>
+    <li><span class="utag add">추가</span><span><b>노년근골격의학회 추계</b>(11/15, 그랜드 워커힐), <b>정형외과초음파학회 추계</b>(11/22, SC컨벤션센터), <b>근골격종양학회 추계</b>(12/4, 서울대병원)</span></li>
+    <li><span class="utag add">추가</span><span><b>대한의사협회 제43차 종합학술대회</b>(7/10–12, 파르나스) — 이미 끝난 행사로, 기록용으로 넣었습니다.</span></li>
+    <li><span class="utag wait">주의</span><span><b>족부족관절학회 추계</b>는 출처 세 곳의 날짜·장소가 서로 다릅니다(11/20–21 고려대·스위스그랜드, 11/26–27 그랜드 워커힐). 가장 최근 보도자료 기준을 유지했으니 참석 전 사무국에 꼭 확인하세요.</span></li>
+    <li><span class="utag chk">재확인</span><span>KDDW·ICKNA·IMCVP·치매·두통·혈액학회 추계, KOREADERMA, 간암학회 STC, ASH 등 남은 일정은 변동이 없습니다.</span></li>
+    <li><span class="utag wait">확인 중</span><span><b>2027 상반기</b>는 새로 확정 발표된 국내 학회가 없습니다. KSN 2027 공식 사이트는 열렸지만 내용을 확인하지 못해 다음 점검 때 반영하겠습니다.</span></li>
   </ul>
   <details><summary>이전 업데이트</summary>
+    <p>2026.11.03 — 족부족관절 추계 일정 변경, 임상고혈압·당뇨병 PG Course·KSMO 간암/경인·재택의료 추가, 검색 학회 8곳(병리·흉부외과·핵의학 등)과 같은 분야 해외 학회 추가, 2027 상반기 미리보기 신설.</p>
     <p>2026.11.02 — 11월 학회 16건 추가(IMCVP·혈액학회·척추외과·CTOS·노인병학회 등), 남은 일정 안내를 11월 기준으로 정리.</p>
     <p>2026.10.22 — 모바일 첫 화면에 '오늘의 학회' 추가, Hypertension Seoul에 대한고혈압학회·추계학술대회 공식 링크 추가.</p>
     <p>2026.10.13 — MDS 2026·KSGE Days 2026 추가(종료 행사), Hypertension Seoul 프로그램 보완, ICDM·소아혈액종양 추계 일정 재확인.</p>
@@ -531,7 +527,7 @@ tr.hema td.when{border-left-color:var(--hema)} tr.obgyn td.when{border-left-colo
 </section>
 
 <div class="footrow">
-  <div class="footwrap"><p class="foot">학회 공식 사이트, 대한의학회 학술대회 일정(<a href="https://www.kams.or.kr/bbs/?code=ws" target="_blank" rel="noopener noreferrer">kams.or.kr</a>), 대한신경과학회 국내외행사일정(<a href="https://renew.neuro.or.kr/kr/board_list/do-schedule?year=2026" target="_blank" rel="noopener noreferrer">neuro.or.kr</a>), 대한정형외과학회 연간 일정(<a href="https://www.koa.or.kr/schedule/" target="_blank" rel="noopener noreferrer">koa.or.kr</a>), 대한소아청소년과학회 주요학술행사(<a href="https://pediatrics.or.kr/calendar/" target="_blank" rel="noopener noreferrer">pediatrics.or.kr</a>), 대한당뇨병학회 학술행사(<a href="https://www.diabetes.or.kr/bbs/?code=schedule" target="_blank" rel="noopener noreferrer">diabetes.or.kr</a>), 대한대장항문학회 행사일정(<a href="https://www.colon.or.kr/event_schedule/index.kin?gubun=1&tabs=3" target="_blank" rel="noopener noreferrer">colon.or.kr</a>), 의학 전문지(메디포뉴스·메디파나뉴스·데일리메디·메디칼타임즈·메디팜헬스) 보도를 근거로 <span id="updFoot">2026년 11월 3일</span> 기준으로 정리했습니다. 해외 학회 날짜는 현지 날짜입니다. 후원·출장 계약 전에는 각 학회 사무국에 최종 확인하세요.</p>
+  <div class="footwrap"><p class="foot">학회 공식 사이트, 대한의학회 학술대회 일정(<a href="https://www.kams.or.kr/bbs/?code=ws" target="_blank" rel="noopener noreferrer">kams.or.kr</a>), 대한신경과학회 국내외행사일정(<a href="https://renew.neuro.or.kr/kr/board_list/do-schedule?year=2026" target="_blank" rel="noopener noreferrer">neuro.or.kr</a>), 대한정형외과학회 연간 일정(<a href="https://www.koa.or.kr/schedule/" target="_blank" rel="noopener noreferrer">koa.or.kr</a>), 대한소아청소년과학회 주요학술행사(<a href="https://pediatrics.or.kr/calendar/" target="_blank" rel="noopener noreferrer">pediatrics.or.kr</a>), 대한당뇨병학회 학술행사(<a href="https://www.diabetes.or.kr/bbs/?code=schedule" target="_blank" rel="noopener noreferrer">diabetes.or.kr</a>), 대한대장항문학회 행사일정(<a href="https://www.colon.or.kr/event_schedule/index.kin?gubun=1&tabs=3" target="_blank" rel="noopener noreferrer">colon.or.kr</a>), 의학 전문지(메디포뉴스·메디파나뉴스·데일리메디·메디칼타임즈·메디팜헬스) 보도를 근거로 <span id="updFoot">2026년 11월 11일</span> 기준으로 정리했습니다. 해외 학회 날짜는 현지 날짜입니다. 후원·출장 계약 전에는 각 학회 사무국에 최종 확인하세요.</p>
   <details class="soclist" id="socList"><summary>검색 대상 학회 보기 <span id="socCount"></span></summary><div id="socBody"></div></details></div>
   <div class="visits" id="visits" hidden aria-label="방문자 수">
     <span id="vWrapToday" title="오늘 방문자 (한국시간 기준)"><b>V</b><span id="vToday">–</span></span>
@@ -671,7 +667,7 @@ const EVENTS_2026 = [
   {id:223,r:"krintl",cat:"ortho",soc:"대한슬관절학회",ev:"ICKKS 2026 (국제학술대회)",short:"ICKKS 2026",s:"2026-05-08",e:"2026-05-09",time:"프로그램 확인",venue:"그랜드 하얏트 인천",vd:"인천 중구",credit:"공식 공지 확인 필요",notes:["무릎 관절염·인공관절 분야 국제학회"],v:"ok",links:[["정형외과학회 연간 일정","https://www.koa.or.kr/schedule/"]]},
   {id:224,r:"kr",cat:"ortho",soc:"대한정형외과연구학회",ev:"제52차 추계학술대회",short:"정형외과연구 추계",s:"2026-10-07",e:"2026-10-07",time:"프로그램 확인",venue:"수원컨벤션센터",vd:"202+203 강의실",credit:"공식 공지 확인 필요",notes:["정형외과 기초·중개연구 학회"],v:"ok",links:[["연구학회 홈페이지","https://www.kors.or.kr/"]]},
   {id:225,r:"krintl",cat:"ortho",soc:"대한정형외과학회",ev:"제70차 국제학술대회 및 연수강좌",short:"정형외과학회 국제",s:"2026-10-08",e:"2026-10-10",time:"프로그램 확인",venue:"코엑스마곡",vd:"서울 강서구",credit:"공식 공지 확인 필요",notes:["정형외과 연중 최대 행사"],fix:"대한의학회 일정표에는 10/6–8로 표기 → 학회 공식(10/8–10) 우선",v:"ok",links:[["학회 연간 일정","https://www.koa.or.kr/schedule/"],["근골격종양학회 일정","https://kmsts.org/conference/schedule"]]},
-  {id:226,r:"kr",cat:"ortho",soc:"대한정형외과의사회",ev:"2026년 추계학술대회 및 정기총회",short:"정형외과의사회 추계",s:"2026-11-29",e:"2026-11-29",time:"프로그램 확인",venue:"장소 공식 확인 필요",vd:"(전년도는 롯데호텔 서울 개최)",credit:"공식 공지 확인 필요",notes:["개원 정형외과 연중 최대 행사"],v:"partial",links:[["의사회 연수강좌 안내","https://koreanos.org/symposium/list.php"]]},
+  {id:226,r:"kr",cat:"ortho",soc:"대한정형외과의사회",ev:"2026년 추계학술대회 및 정기총회",short:"정형외과의사회 추계",s:"2026-11-29",e:"2026-11-29",time:"프로그램 확인",venue:"롯데호텔 서울 (소공동)",vd:"서울 중구",credit:"공식 공지 확인 필요",notes:["개원 정형외과 연중 최대 행사","11/11 장소 확정 반영"],v:"ok",links:[["대한정형외과학회 연간 일정","https://www.koa.or.kr/schedule/"],["의사회 연수강좌 안내","https://koreanos.org/symposium/list.php"]]},
 
   /* ===== 국내: 외과 ===== */
   {id:231,r:"kr",cat:"surg",soc:"대한외과학회",ev:"2026 춘계학술대회 및 외과 내시경 연수강좌",short:"외과학회 춘계",s:"2026-05-29",e:"2026-05-31",time:"프로그램 확인",venue:"장소 공식 확인 필요",vd:"",credit:"공식 공지 확인 필요",notes:["학회 공지로 일정 확인, 장소는 미확인"],v:"partial",links:[["대한외과학회","https://www.surgery.or.kr/"]]},
@@ -745,7 +741,7 @@ const EVENTS_2026 = [
   {id:526,r:"kr",cat:"etc",soc:"대한천식알레르기학회",ev:"2026 추계학술대회",short:"천식알레르기 추계",s:"2026-11-13",e:"2026-11-14",time:"프로그램 확인",venue:"라한셀렉트 경주",vd:"경북 경주",credit:"공식 공지 확인 필요",notes:["성인 천식·알레르기 분야","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
   {id:527,r:"krintl",cat:"onc",soc:"대한근골격종양학회",ev:"CTOS 2026 (Connective Tissue Oncology Society Annual Meeting)",short:"CTOS 2026",s:"2026-11-18",e:"2026-11-21",time:"프로그램 확인",venue:"코엑스 컨벤션센터",vd:"서울 강남구",credit:"공식 공지 확인 필요",notes:["육종(sarcoma) 분야 국제학회의 서울 개최","KDDW와 같은 주","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"],["CTOS 2026 일정(OncoDaily)","https://oncodaily.com/event/ctos-586423"]]},
   {id:528,r:"kr",cat:"hema",soc:"대한혈액학회",ev:"제67차 추계학술대회",short:"혈액학회 추계",s:"2026-11-20",e:"2026-11-20",time:"프로그램 확인",venue:"롯데호텔 서울",vd:"서울 중구 을지로 30",credit:"공식 공지 확인 필요",notes:["KDDW 기간 중 하루 개최","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
-  {id:529,r:"kr",cat:"ortho",soc:"대한족부족관절학회",ev:"제36차 추계학술대회",short:"족부족관절 추계",s:"2026-11-26",e:"2026-11-27",time:"프로그램 확인",venue:"그랜드 워커힐 서울",vd:"1층 워커홀",credit:"사전등록 11/22 마감 · 현장등록 가능",notes:["발·발목 질환 분야","11/3 일정·장소 변경 반영"],fix:"대한의학회 일정표에는 11/20–21 고려대 유광사홀로 표기 → 학회 제공 보도자료(11/26–27 그랜드 워커힐) 우선, 사무국 확인 권장",v:"partial",links:[["개최 기사(메디포뉴스)","https://www.medifonews.com/news/article.html?no=217590"],["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
+  {id:529,r:"kr",cat:"ortho",soc:"대한족부족관절학회",ev:"제36차 추계학술대회",short:"족부족관절 추계",s:"2026-11-26",e:"2026-11-27",time:"프로그램 확인",venue:"그랜드 워커힐 서울",vd:"1층 워커홀",credit:"사전등록 11/22 마감 · 현장등록 가능",notes:["발·발목 질환 분야","11/3 일정·장소 변경 반영"],fix:"출처마다 다름: 대한의학회 일정표 11/20–21 고려대 유광사홀, 대한정형외과학회 연간 일정 11/20–21 스위스그랜드호텔, 학회 보도자료 11/26–27 그랜드 워커힐 → 가장 최근 보도자료 기준, 사무국 확인 권장",v:"partial",links:[["개최 기사(메디포뉴스)","https://www.medifonews.com/news/article.html?no=217590"],["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
   {id:530,r:"kr",cat:"etc",soc:"대한통증학회",ev:"KPS 2026 Annual Meeting (제82차 학술대회)",short:"KPS 2026",s:"2026-11-20",e:"2026-11-22",time:"프로그램 확인",venue:"코엑스마곡",vd:"서울 강서구",credit:"공식 공지 확인 필요",notes:["만성 통증·신경병증성 통증 치료제 접점","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
   {id:531,r:"krintl",cat:"ent",soc:"대한두경부종양학회",ev:"ICHNO 2026",short:"ICHNO 2026",s:"2026-11-25",e:"2026-11-27",time:"프로그램 확인",venue:"수원컨벤션센터",vd:"경기 수원",credit:"공식 공지 확인 필요",notes:["두경부암 분야 국제학술대회","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
   {id:532,r:"kr",cat:"peds",soc:"대한소아감염학회",ev:"2026 추계학술대회",short:"소아감염 추계",s:"2026-11-27",e:"2026-11-27",time:"프로그램 확인",venue:"가톨릭대학교 옴니버스파크",vd:"서울 서초구",credit:"공식 공지 확인 필요",notes:["소아 감염·백신 분야","11/2 업데이트로 추가"],v:"ok",links:[["대한의학회 학술대회 일정","https://www.kams.or.kr/bbs/?code=ws"]]},
@@ -776,7 +772,11 @@ const EVENTS_2026 = [
   {id:1302,r:"intl",cat:"basic",soc:"유럽병리학회 (ESP)",ev:"38th European Congress of Pathology (ECP 2026)",short:"ECP 2026",s:"2026-09-12",e:"2026-09-16",time:"현지 기준",venue:"스웨덴 스톡홀름",vd:"Stockholmsmässan",credit:"해외 학회",notes:["유럽 병리 학회","11/3 해외 학회 추가"],v:"ok",links:[["ESP 행사 안내","https://www.esp-pathology.org/?p=12133"]]},
   {id:1310,r:"intl",cat:"ortho",soc:"국제견주관절수술위원회 (IBSES)",ev:"ICSES 2026 (16th International Congress of Shoulder and Elbow Surgery)",short:"ICSES 2026",s:"2026-09-22",e:"2026-09-25",time:"현지 기준",venue:"캐나다 밴쿠버",vd:"Vancouver Convention Centre",credit:"해외 학회",notes:["3년마다 열리는 세계 견·주관절 학회","11/3 해외 학회 추가"],v:"ok",links:[["밴쿠버 컨벤션센터","https://www.vancouverconventioncentre.com/events/international-congress-of-shoulder-and-elbow-surgery-icses"],["관련 기사(메디포뉴스)","https://www.medifonews.com/news/article.html?no=216213"]]},
   {id:1304,r:"intl",cat:"surg",soc:"유럽심장흉부외과학회 (EACTS)",ev:"40th EACTS Annual Meeting",short:"EACTS 2026",s:"2026-10-07",e:"2026-10-10",time:"현지 기준",venue:"스페인 바르셀로나",vd:"",credit:"해외 학회",notes:["유럽 심장흉부외과 학회 (40주년)","11/3 해외 학회 추가"],v:"ok",links:[["EACTS 2026 미리보기(TCTMD)","https://www.tctmd.com/news/eacts-2026-what-expect-barcelona"]]},
-  {id:1306,r:"intl",cat:"basic",soc:"유럽핵의학회 (EANM)",ev:"EANM'26 Annual Congress",short:"EANM 2026",s:"2026-10-17",e:"2026-10-21",time:"현지 기준",venue:"오스트리아 빈",vd:"",credit:"해외 학회",notes:["유럽 핵의학 학회","11/3 해외 학회 추가"],v:"ok",links:[["EANM'26 공식","https://eanm26.eanm.org/information/welcomewords/"]]}
+  {id:1306,r:"intl",cat:"basic",soc:"유럽핵의학회 (EANM)",ev:"EANM'26 Annual Congress",short:"EANM 2026",s:"2026-10-17",e:"2026-10-21",time:"현지 기준",venue:"오스트리아 빈",vd:"",credit:"해외 학회",notes:["유럽 핵의학 학회","11/3 해외 학회 추가"],v:"ok",links:[["EANM'26 공식","https://eanm26.eanm.org/information/welcomewords/"]]},
+  {id:1401,r:"kr",cat:"etc",soc:"대한의사협회",ev:"2026년 제43차 대한의사협회 종합학술대회",short:"의협 종합학술대회",s:"2026-07-10",e:"2026-07-12",time:"프로그램 확인",venue:"그랜드 인터컨티넨탈 서울 파르나스",vd:"서울 강남구",credit:"사전등록 3만원(회비 납부 회원)",notes:["주제 '의사의 전문성으로 여는 지속가능한 미래의료: AI와 초고령화 시대를 재설계하다'","코로나19 이후 첫 대면 개최","11/11 업데이트로 추가"],v:"ok",links:[["개최 안내(대한정형외과학회 게시)","https://www.koa.or.kr/bbs/?mode=view&number=18762&code=event1"]]},
+  {id:1402,r:"kr",cat:"ortho",soc:"대한노년근골격의학회",ev:"추계학술대회",short:"노년근골격 추계",s:"2026-11-15",e:"2026-11-15",time:"프로그램 확인",venue:"그랜드 워커힐 서울",vd:"서울 광진구",credit:"공식 공지 확인 필요",notes:["노인 골다공증·근감소증·골절 분야","11/11 업데이트로 추가"],v:"ok",links:[["대한정형외과학회 연간 일정","https://www.koa.or.kr/schedule/"]]},
+  {id:1403,r:"kr",cat:"ortho",soc:"대한정형외과초음파학회",ev:"제21차 추계학술대회 & 제47차 근골격계 초음파 워크샵",short:"정형외과초음파 추계",s:"2026-11-22",e:"2026-11-22",time:"프로그램 확인",venue:"SC컨벤션센터",vd:"B1 국제회의실",credit:"공식 공지 확인 필요",notes:["근골격 초음파·주사 치료 실습","11/11 업데이트로 추가"],v:"ok",links:[["대한정형외과학회 연간 일정","https://www.koa.or.kr/schedule/"]]},
+  {id:1404,r:"kr",cat:"onc",soc:"대한근골격종양학회",ev:"제36차 추계학술대회",short:"근골격종양 추계",s:"2026-12-04",e:"2026-12-04",time:"프로그램 확인",venue:"서울대학교병원",vd:"서울 종로구",credit:"공식 공지 확인 필요",notes:["11월 CTOS 2026 국제학회와 별도 개최","12/5 연수강좌(세브란스병원 은명대강당)","11/11 업데이트로 추가"],v:"ok",links:[["대한정형외과학회 연간 일정","https://www.koa.or.kr/schedule/"]]}
 ];
 const EVENTS_2027 = [
   {id:1001,r:"kr",cat:"surg",soc:"대한대장항문학회 IBD·복강경대장수술연구회",ev:"IBD & 복강경대장수술연구회 집담회",short:"IBD·복강경 집담회",s:"2027-01-15",e:"2027-01-15",time:"프로그램 확인",venue:"서울아산병원",vd:"서울 송파구",credit:"공식 공지 확인 필요",notes:["대장항문학회 공식 일정표 등재"],v:"ok",links:[["대장항문학회 행사 일정","https://www.colon.or.kr/event_schedule/index.kin?gubun=1&tabs=3"]]},
@@ -820,7 +820,7 @@ const NMON = YEAR===2027 ? 6 : 12;
 const EVENTS = YEAR===2027 ? EVENTS_2027 : EVENTS_2026;
 
 /* 일정 점검 후 이 날짜만 바꾸면 상단·하단 표시가 함께 바뀝니다 */
-const LAST_UPDATED = "2026-11-03";
+const LAST_UPDATED = "2026-11-11";
 (function(){
   const [y,m,d]=LAST_UPDATED.split("-").map(Number);
   document.getElementById("updDate").textContent=`${y}.${String(m).padStart(2,"0")}.${String(d).padStart(2,"0")}`;
@@ -913,6 +913,7 @@ function jumpTo(id){
 }
 
 /* ---------- Desktop year board ---------- */
+let drawBoard=()=>{};
 (function(){
   const y0 = new Date(YEAR,0,1), days = Math.round((new Date(YEAR,NMON,1)-y0)/DAY);
   function lanesFor(list){
@@ -925,9 +926,12 @@ function jumpTo(id){
     });
     return lanes.length;
   }
+  const year=document.getElementById("year");
+  year.addEventListener("click",ev=>{const b=ev.target.closest(".bar");if(b)jumpTo(b.dataset.id)});
+  drawBoard=function(src){
   const groups=[
-    {key:"kr",label:"국내",list:EVENTS.filter(e=>!isIntlGroup(e))},
-    {key:"intl",label:"해외",list:EVENTS.filter(isIntlGroup)}
+    {key:"kr",label:"국내",list:src.filter(e=>!isIntlGroup(e))},
+    {key:"intl",label:"해외",list:src.filter(isIntlGroup)}
   ];
   const tx = today.getFullYear()===YEAR ? (today-y0)/DAY/days*100 : null;
   let html=`<div class="months">${Array.from({length:NMON},(_,i)=>`<div>${i+1}월</div>`).join("")}</div>`;
@@ -941,9 +945,9 @@ function jumpTo(id){
     if(tx!==null) html+=`<div class="todayline" style="left:${tx}%">${gi===0?`<span>오늘 ${today.getMonth()+1}.${today.getDate()}</span>`:""}</div>`;
     html+=`</div>`;
   });
-  const year=document.getElementById("year");
   year.innerHTML=html;
-  year.addEventListener("click",ev=>{const b=ev.target.closest(".bar");if(b)jumpTo(b.dataset.id)});
+  };
+  drawBoard(EVENTS);
 })();
 
 /* ---------- Mobile: today first ---------- */
@@ -1021,6 +1025,7 @@ function render(){
     if(state.q&&!(e.soc+e.ev+e.venue+e.vd+e.short).toLowerCase().includes(state.q)) return false;
     return true;
   });
+  drawBoard(rows);
   document.getElementById("count").textContent=`${rows.length}건 표시 (국내 ${rows.filter(e=>!isIntlGroup(e)).length} · 해외 ${rows.filter(isIntlGroup).length})`;
   const tb=document.getElementById("rows");
   if(!rows.length){tb.innerHTML=`<tr><td colspan="7" class="empty">조건에 맞는 행사가 없습니다. 필터를 줄이거나 검색어를 바꿔 보세요.</td></tr>`;return}
@@ -1044,6 +1049,15 @@ function render(){
   tb.innerHTML=out;
 }
 render();
+
+/* ---------- PC: filter menu sits above the year board ---------- */
+(function(){
+  const ctl=document.getElementById("controls"), board=document.querySelector("section.board");
+  const home=document.createComment("controls-home"); ctl.parentNode.insertBefore(home,ctl);
+  const mq=matchMedia("(min-width:761px)");
+  const place=()=>{ if(mq.matches){ board.parentNode.insertBefore(ctl,board); ctl.classList.add("ctl-top"); } else { home.parentNode.insertBefore(ctl,home.nextSibling); ctl.classList.remove("ctl-top"); } };
+  place(); (mq.addEventListener?mq.addEventListener("change",place):mq.addListener(place));
+})();
 
 /* ---------- Monthly print ---------- */
 (function(){
