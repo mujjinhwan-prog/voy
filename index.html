@@ -486,6 +486,16 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth .err-msg{margin-top:4px;min-height:14px}
 .auth #asub{margin-top:2px}
 .auth .ver-tag{line-height:1.4}
+.land-lock{display:flex;gap:10px;align-items:flex-start;border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:14px;padding:11px 13px;margin:0 0 10px;color:var(--accent)}
+.land-lock>div>b{display:block;font-size:14px;color:var(--accent);margin-bottom:2px}.land-lock span b{color:var(--accent)}.land-lock span{display:block;font-size:12.5px;line-height:1.5;color:var(--text2)}
+.land-btn{font-size:16px;padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.land-how{padding:12px 14px!important}
+.land-tabs{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px;margin-bottom:6px}
+.land-tabs button{flex:1;border:0;background:none;padding:8px 4px;border-radius:9px;font-weight:800;font-size:13px;color:var(--muted);cursor:pointer}
+.land-tabs button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.land-pane .steps{margin:4px 0 0}
+.lk{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:0 6px;margin:1px 1px;font-size:.95em;white-space:nowrap}
+.land-admin{background:none;border:0;color:var(--muted);font-size:11.5px;text-decoration:underline;opacity:.6;cursor:pointer;padding:4px}
 .auth .install{padding:9px 12px;gap:10px;margin-top:0}
 .auth .install img{width:40px;height:40px;border-radius:10px}
 .auth .install .go{padding:7px 12px}
@@ -2771,7 +2781,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = extra || `점검: 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261111.1734`;
+  el.textContent = extra || `점검: 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261111.1955`;
 }
 async function enablePush() {
   if (!pushSupported()) throw new Error('이 환경에서는 알림을 켤 수 없어요');
@@ -2818,7 +2828,36 @@ const Badge = {
 };
 
 /* ---------------- 로그인 ---------------- */
+/* 브라우저(주소창 있는 화면)로 들어오면: 로그인 없이 '설치 안내 + 설치 버튼'만 · 로그인은 바로가기 앱에서만 */
+function landingHTML() {
+  const e = Inst.env(), def = e.ios ? 'ios' : e.android ? 'and' : 'pc', inst = appInstalledHere();
+  const k = t => `<b class="lk">${t}</b>`;
+  const tabs = [
+    ['pc', '💻 PC', [`위 ${k('VOY™ 앱 설치')} 버튼 → 창이 뜨면 ${k('설치')}`, `버튼이 안 되면 주소창 오른쪽 ${k('⊕ 앱 설치')} 아이콘 (또는 Chrome ${k('⋮')} → ${k('전송, 저장 및 공유')} → ${k('페이지를 앱으로 설치')} / Edge ${k('⋯')} → ${k('앱')} → ${k('이 사이트를 앱으로 설치')})`, `바탕화면·작업표시줄의 ${k('VOY™')} 아이콘으로 열고 로그인`], 'Chrome 또는 Edge에서 설치해 주세요.'],
+    ['and', '🤖 안드로이드', [`위 ${k('VOY™ 앱 설치')} 버튼 → ${k('설치')}`, `버튼이 안 되면 · Chrome: ${k('⋮')} → ${k('홈 화면에 추가')} → ${k('설치')} · 삼성 인터넷: 주소창의 ${k('⤓')} 아이콘 → ${k('설치')}`, `홈 화면의 ${k('VOY™')} 아이콘으로 열고 로그인`], '카카오톡·밴드 등 앱 안에서 열었다면 먼저 Chrome(또는 삼성 인터넷)으로 열어 주세요. 아이콘을 눌렀는데 주소창이 보이면 지우고 다시 설치해 주세요.'],
+    ['ios', '🍎 아이폰', [`${k('Safari')}로 이 주소를 엽니다`, `아래 ${k('공유 ⬆')} → ${k('홈 화면에 추가')} (iOS 26은 ${k('웹 앱으로 열기')} 켜기) → ${k('추가')}`, `홈 화면의 ${k('VOY™')} 아이콘으로 열고 로그인`], '아이폰은 Safari에서만 설치할 수 있어요.']];
+  return `<div class="auth"><div class="auth-card land">
+    <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=4" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
+    <div class="land-lock">${I('lock', 18)}<div><b>VOY™는 바로가기 앱(웹앱)으로만 이용할 수 있어요</b><span>익명 보호를 위해 브라우저 주소창 화면에서는 로그인할 수 없어요. 아래 방법으로 설치한 뒤 <b>VOY™ 아이콘</b>으로 열어 주세요.</span></div></div>
+    ${inst ? `<div class="install ok" style="margin:0 0 10px"><img src="icons/voy-192.png?v=4" alt=""><div><b><span class="chk">✓</span>이 기기에 VOY™ 앱이 설치되어 있어요</b><small>${e.mob ? '홈 화면' : '바탕화면·작업표시줄'}의 <b style="display:inline;font-size:inherit">VOY™ 아이콘</b>을 눌러 열어 주세요.</small><button type="button" class="re" data-act="reinstall">아이콘이 없나요? 다시 설치하기</button></div></div>` : ''}
+    <button class="btn primary block land-btn" data-act="install">${I('download', 20)} VOY™ 앱 설치</button>
+    <div class="box land-how"><div class="land-tabs" role="tablist">${tabs.map(([id, t]) => `<button type="button" role="tab" class="${id === def ? 'on' : ''}" data-ltab="${id}">${t}</button>`).join('')}</div>
+      ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
+    </div>
+    <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
+    <p class="ver-tag" title="v261111.1955" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
+  </div></div>`;
+}
 async function renderAuth() {
+  if (!isStandalone() && S.settings.app_only !== false && !S.browserLogin) {
+    root.innerHTML = landingHTML();
+    root.querySelectorAll('[data-ltab]').forEach(b => b.onclick = () => {
+      root.querySelectorAll('[data-ltab]').forEach(x => x.classList.toggle('on', x === b));
+      root.querySelectorAll('[data-lpane]').forEach(p => p.hidden = p.dataset.lpane !== b.dataset.ltab);
+    });
+    Inst.auto(); return;
+  }
   root.innerHTML = `<div class="auth"><div class="auth-card">
     <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=4" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
     <div id="instSlot" style="margin:-2px 0 10px">${installCardHTML()}</div>
@@ -2831,7 +2870,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1734" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261111.1955" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -2912,6 +2951,7 @@ document.addEventListener('click', async e => {
         '생긴 <b>VOY™ 아이콘</b>으로 열면 끝 (주소창이 보이는 브라우저 화면에서는 게시판을 쓸 수 없어요)'], 'VOY 주소는 [VOY 주소 복사] 버튼으로 복사해 메일·메신저로 보내면 편해요.');
       break;
     case 'push-help': pushHelp(); break;
+    case 'browser-login': S.browserLogin = true; renderAuth(); toast('관리자 확인용 로그인입니다. 일반 회원은 로그인 후 앱 설치 안내가 나와요'); break;
     case 'reinstall': try { localStorage.removeItem('voy_app_ok'); } catch (er) {} refreshInstallCard(); Inst.run(); break;
     case 'app-done': markAppInstalled(); document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); route(); maybeShowPopups(); break;
     case 'gate-bypass': S.gateBypass = true; try { sessionStorage.setItem('voy_gate_bypass', '1'); } catch (er) {} route(); maybeShowPopups(); break;
