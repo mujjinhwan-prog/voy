@@ -174,6 +174,12 @@ body{min-height:100vh}
 .logo{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:900;font-size:17px}
 .logo-img{width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12);flex:0 0 auto}
 .brand-txt{line-height:1.1}
+.room-sw{display:flex;align-items:baseline;gap:8px;flex-shrink:0;padding:0 2px;line-height:1}
+.room-sw .rs-on{font-size:19px;font-weight:900;color:var(--accent);letter-spacing:.02em}
+.room-sw .rs-off{font-size:12.5px;font-weight:700;color:var(--muted);opacity:.55;background:none;border:0;padding:4px 2px;cursor:pointer;letter-spacing:.02em}
+.room-sw .rs-off:hover{opacity:1;color:var(--accent);text-decoration:underline}
+@media(max-width:400px){.room-sw{gap:6px}.room-sw .rs-on{font-size:16px}.room-sw .rs-off{font-size:11.5px}}
+@media(max-width:440px){.top-row:has(.room-sw) .brand-txt{display:none}}   /* 좁은 휴대폰: 방 전환이 있으면 로고 옆 글자를 숨겨 닉네임 자리 확보 */
 .brand-txt small{display:block;font-size:11px;color:var(--muted);font-weight:600}
 .brand-txt b{font-size:17px;font-weight:900;letter-spacing:.02em;color:var(--accent)}
 .brand-txt small{color:var(--main2)!important}
@@ -271,10 +277,13 @@ body{min-height:100vh}
 .ver-tag{text-align:center;font-size:10.5px;color:var(--muted);opacity:.6;margin:6px 0 0;font-variant-numeric:tabular-nums}
 .month-pill{display:flex;gap:10px;align-items:center;background:var(--main2-soft);border:1px solid color-mix(in srgb,var(--main2) 30%,transparent);color:var(--main2);padding:9px 16px;border-radius:99px;font-size:13px;margin-bottom:12px}
 .month-pill b{color:var(--point)}
-.event-banner{display:flex;gap:12px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
-.event-banner .gi{width:40px;height:40px;border-radius:50%;background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold);display:grid;place-items:center;flex-shrink:0}
-.event-banner b{display:block;color:var(--gold);font-size:15px}
-.event-banner span{font-size:13px;color:var(--gold)}
+.event-banner{display:flex;gap:10px;align-items:center;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:var(--gold-soft);border-radius:14px;padding:8px 12px;margin-bottom:8px}
+.event-banner .gi{width:32px;height:32px;border-radius:50%;background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold);display:grid;place-items:center;flex-shrink:0}
+.event-banner b{display:block;color:var(--gold);font-size:14px;line-height:1.3}
+.event-banner>div:not(.gi){min-width:0;line-height:1.35}
+.event-banner span{font-size:12.5px;color:var(--gold)}
+.event-banner .eb-now{font-size:11.5px;font-weight:700;opacity:.8;margin-left:4px}
+.event-banner .one{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .event-banner em{font-style:normal;font-weight:800}
 .toolbar{display:flex;gap:8px;margin-bottom:10px}
 .search{flex:1;position:relative}
@@ -465,6 +474,21 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth-hero h1{font-size:24px;font-weight:900}
 .auth-hero p{color:var(--muted);font-size:14px;margin-top:4px}
 .auth .box{padding:22px}
+/* 로그인 화면 컴팩트: 글자 크기는 그대로, 위아래 간격만 줄여 한 화면에 */
+.auth{padding:6px 16px}
+.auth-hero{margin-bottom:10px}
+.auth-hero .hero-ic{width:119px;height:119px;border-radius:27px;margin-bottom:6px}
+.auth-hero p{margin-top:0;line-height:1.45}
+.auth .box{padding:14px 18px 12px}
+.auth .lbl{margin-top:10px;margin-bottom:5px}
+.auth input{padding:9px 14px}
+.auth .hint{margin-top:4px;line-height:1.4}
+.auth .err-msg{margin-top:4px;min-height:14px}
+.auth #asub{margin-top:2px}
+.auth .ver-tag{line-height:1.4}
+.auth .install{padding:9px 12px;gap:10px;margin-top:0}
+.auth .install img{width:40px;height:40px;border-radius:10px}
+.auth .install .go{padding:7px 12px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .two label.lbl{margin-top:14px}
 .err-msg{color:var(--danger);font-size:13px;margin-top:12px;min-height:18px}
@@ -720,6 +744,25 @@ function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$
 function safeUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'https://' + u; return u; }
 function validLoginId(id) { return /^[a-z0-9._-]{3,20}$/.test(id); }
 function isAdminRole(r) { return r === 'admin' || r === 'super'; }
+/* ===== ETC · OTC 두 커뮤니티 =====
+   admin(최고관리자, role 'super') : ETC+OTC 모두 · 운영·실명 확인은 오직 admin만
+   통합 회원(cross=true)          : ETC+OTC 방을 오가며 보기·참여 (닉네임 본인 것)
+   e_admin / o_admin              : ETC만 / OTC만 · 부서 대표 닉네임으로 참여 (운영 권한 없음)
+   일반 회원(org='etc'|'otc')     : 자기 조직 방만
+   시상·점수 집계 대상은 일반 회원뿐 */
+const ORG_NAME = { etc: 'ETC', otc: 'OTC' };
+function roomsOf(p) {
+  if (!p) return ['etc'];
+  if (p.role === 'super' || p.cross_org) return ['etc', 'otc'];
+  if (p.role === 'e_admin') return ['etc'];
+  if (p.role === 'o_admin') return ['otc'];
+  return [p.org === 'otc' ? 'otc' : 'etc'];
+}
+function awardEligible(u) { return !!u && u.role === 'user' && !u.cross_org; }
+function memberKind(u) { return !u ? '' : u.role === 'super' ? 'admin' : u.role === 'e_admin' ? 'e_admin' : u.role === 'o_admin' ? 'o_admin' : u.cross_org ? 'cross' : 'member'; }
+const KIND_LABEL = { admin: '최고관리자', e_admin: 'e_admin (ETC)', o_admin: 'o_admin (OTC)', cross: '통합 회원', member: '회원' };
+const orgOf = x => (x && x.org === 'otc') ? 'otc' : 'etc';
+const orgsOf = x => (x && Array.isArray(x.orgs) && x.orgs.length) ? x.orgs : ['etc', 'otc'];
 const PERMS = [['posts', '게시글'], ['comments', '댓글'], ['members', '회원'], ['rank', '순위·점수'], ['events', '이벤트'], ['popups', '팝업'], ['research', '리서치'], ['settings', '설정']];
 function hasPerm(pr, k) { return !!pr && (pr.role === 'super' || (pr.role === 'admin' && Array.isArray(pr.perms) && pr.perms.includes(k))); }
 function surveyStatus(sv) {
@@ -780,7 +823,7 @@ function fileToDataURL(f) { return new Promise((res, rej) => { const r = new Fil
    데모 모드 (localStorage) — Supabase 연결 전 화면/흐름 확인용
    ===================================================================== */
 const Local = (() => {
-  const K = 'voy_demo_db_v1', S = 'voy_demo_session', DEMO_VER = 8;   // 구조가 바뀌면 숫자를 올려 예전 데모 데이터를 자동 초기화
+  const K = 'voy_demo_db_v1', S = 'voy_demo_session', DEMO_VER = 11;   // 구조가 바뀌면 숫자를 올려 예전 데모 데이터를 자동 초기화
   let db = null, mem = {};
   const ls = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
@@ -801,18 +844,28 @@ const Local = (() => {
       { id: 'tool', name: 'MR Tool 추천', color: '#60a5fa', sort: 2, admin_only: false },
       { id: 'now', name: '오늘 그리고 지금...', color: '#c084fc', sort: 3, admin_only: false },
       { id: 'suggest', name: '건의, 제안합니다', color: '#fb923c', sort: 4, admin_only: false },
-      { id: 'notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true }
+      { id: 'notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true },
+      { id: 'o_field', name: '약국 현장 이야기', color: '#4ade80', sort: 1, admin_only: false, org: 'otc' },
+      { id: 'o_new', name: '신제품·프로모션', color: '#60a5fa', sort: 2, admin_only: false, org: 'otc' },
+      { id: 'o_now', name: '오늘 그리고 지금...', color: '#c084fc', sort: 3, admin_only: false, org: 'otc' },
+      { id: 'o_suggest', name: '건의, 제안합니다', color: '#fb923c', sort: 4, admin_only: false, org: 'otc' },
+      { id: 'o_notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true, org: 'otc' }
     ];
+    db.boards.forEach(b => b.org = b.org || 'etc');
     const mk = curMonth(), pm = shiftMonth(mk, -1);
-    const mkUser = (login_id, email, pw, d, role, nickname, perms) => {
-      const u = { id: uuid(), login_id, email, pw: hash(pw), real_name: d[0], emp_no: d[1], category: d[2], org_branch: d[3], work_branch: d[4], sales_office: d[5], position: d[6], duty: d[7],
+    const mkUser = (login_id, email, pw, d, role, nickname, perms, extra) => {
+      const u = { id: uuid(), login_id, email, pw: hash(pw), org: 'etc', cross_org: false, real_name: d[0], emp_no: d[1], category: d[2], org_branch: d[3], work_branch: d[4], sales_office: d[5], position: d[6], duty: d[7],
         dept: d[3], role: role || 'user', perms: perms || [], must_change_pw: false, status: 'active',
-        nickname: nickname || uniqueNick(), nickname_month: null, created_at: new Date(Date.now() - 86400e3 * (20 + db.users.length * 3)).toISOString(), last_seen: new Date(Date.now() - 3600e3 * (db.users.length * 5 + 1)).toISOString() };
+        nickname: nickname || uniqueNick(), nickname_month: null, created_at: new Date(Date.now() - 86400e3 * (20 + db.users.length * 3)).toISOString(), last_seen: new Date(Date.now() - 3600e3 * (db.users.length * 5 + 1)).toISOString(), ...(extra || {}) };
       db.users.push(u); db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: u.nickname, month_key: pm, created_at: u.created_at });
       return u;
     };
     const admin = mkUser('admin', 'admin@voy-community.app', 'admin1234', ['최고관리자', '', '', '영업기획팀', '', '', '', ''], 'super', '영업기획팀');
-    mkUser('manager', 'manager@voy-community.app', 'manager1234', ['김관리', '20101234', '본사', '영업기획팀', '본사', '', '차장', '파트장'], 'admin', '기획파트', ['posts', 'comments', 'events', 'popups']);
+    const ea = mkUser('e_admin', 'e_admin@voy-community.app', 'demo1234', ['김기획', '20101234', '본사', '영업기획팀', '본사', '', '차장', ''], 'e_admin', 'e_admin', [], { org: 'etc' });
+    const oa = mkUser('o_admin', 'o_admin@voy-community.app', 'demo1234', ['최기획', '20111234', '본사', '영업기획팀', '본사', '', '차장', ''], 'o_admin', 'o_admin', [], { org: 'otc' });
+    const cx = mkUser('cross@yuhan.co.kr', 'cross@yuhan.co.kr', 'demo1234', ['정통합', '20090909', '본사', '영업기획팀', '본사', '', '부장', '팀장'], 'user', '영업기획팀장', [], { cross_org: true });
+    const o1 = mkUser('otc1@yuhan.co.kr', 'otc1@yuhan.co.kr', 'demo1234', ['한오티', '20160505', '영업', 'OTC1부', '강서지점', '', '과장', '팀원'], 'user', null, [], { org: 'otc' });
+    const o2 = mkUser('otc2@yuhan.co.kr', 'otc2@yuhan.co.kr', 'demo1234', ['문약국', '20190707', '영업', 'OTC2부', '부산지점', '', '대리', '팀원'], 'user', null, [], { org: 'otc' });
     const u1 = mkUser('demo@yuhan.co.kr', 'demo@yuhan.co.kr', 'demo1234', ['김유한', '20150101', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원']);
     const u2 = mkUser('lee@yuhan.co.kr', 'lee@yuhan.co.kr', 'demo1234', ['이세현', '20180322', '영업', 'Clinic3부', '서초지점', '서초영업소', '대리', '팀원']);
     const u3 = mkUser('park@yuhan.co.kr', 'park@yuhan.co.kr', 'demo1234', ['박성호', '20050141', '영업', 'Clinic2부', '북부지점', '노원영업소', '차장', '팀장']);
@@ -827,27 +880,34 @@ const Local = (() => {
       [mk, admin, 'notice', '[YH SSPT] 11.1주차 품절이슈', 'BRP insight의 수급대시보드 상황입니다. 좋은 기회 잡으시고 자사 품절에 대한 거래선 대비도 하시길 바랍니다.', 3, 0],
       [mk, u2, 'now', '종근당 지텍 4/4분기 처수확산 인센티브', '종근당 지텍 처수 확산 (10월~12월, 3개월 진행) 거래처별 지텍 15만원 이상 시 1처 인정, 인당 5처 이상 시 인센티브 지급', 0, 2],
       [mk, u3, 'tool', '차는 제2의 생명. 안전운전 앱 추천', '졸음 감지 알림 앱 써보니 장거리 이동할 때 확실히 도움 됩니다.', 2, 1],
-      [mk, u1, 'success', '비만주사 문의 대응 꿀팁', '환자 문의가 많은 원장님께는 보험 여부부터 정리해서 드리면 대화가 훨씬 빨라집니다.', 3, 1]
+      [mk, u1, 'success', '비만주사 문의 대응 꿀팁', '환자 문의가 많은 원장님께는 보험 여부부터 정리해서 드리면 대화가 훨씬 빨라집니다.', 3, 1],
+      [mk, ea, 'tool', 'ETC 11월 디테일 자료 업데이트 안내', '이번 달 디테일 자료가 자료실에 올라왔습니다. 필요한 분은 확인해 주세요. (e_admin 작성 예시)', 2, 1],
+      [mk, admin, 'o_notice', '[OTC] 11월 약국 프로모션 안내', 'OTC 커뮤니티 공지 예시입니다. ETC 회원에게는 보이지 않습니다.', 2, 0],
+      [mk, o1, 'o_field', '약국장님이 먼저 찾는 진열 위치 팁', '계산대 옆 눈높이 진열로 바꾸고 나서 회전율이 확실히 올라갔습니다.', 3, 2],
+      [mk, o2, 'o_new', '겨울 시즌 감기약 프로모션 반응 공유', '부산권은 종합감기약보다 목감기 쪽 문의가 훨씬 많았습니다.', 2, 1],
+      [mk, cx, 'o_now', '통합 회원이 OTC 방에 쓴 글 (예시)', '통합 회원은 ETC·OTC 방을 오가며 글을 쓸 수 있고, 시상에서는 제외됩니다.', 1, 1],
+      [mk, oa, 'o_now', 'OTC 현장 의견을 모읍니다', 'o_admin(부서 대표 닉네임) 작성 예시입니다.', 1, 0]
     ];
     let day = 34;
     samples.forEach(([m, u, board, title, body, likes, cmts]) => {
       day -= (m === pm ? 4 : 2);
       const created = m === pm ? new Date(Date.now() - 86400e3 * (new Date(Date.now() + KST_OFFSET).getUTCDate() + day - 24)).toISOString() : new Date(Date.now() - 3600e3 * (day * 3 + 1)).toISOString();
-      const ck = 'p' + m; if (!isAdminRole(u.role)) db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: board, title, body, link_url: board === 'notice' && m === pm ? 'https://notice.ourclinic.kr' : null,
-        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: isAdminRole(u.role) ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+      const org = (db.boards.find(b => b.id === board) || {}).org || 'etc', elig = awardEligible(u);
+      const ck = 'p' + org + m; if (elig) db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const p = { id: ++db.seq.post, org, user_id: u.id, board_id: board, title, body, link_url: board === 'notice' && m === pm ? 'https://notice.ourclinic.kr' : null,
+        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: elig ? db.counters[ck] : null, author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: created, updated_at: created };
       db.posts.push(p);
-      const others = [admin, u1, u2, u3, u4].filter(x => x.id !== u.id);
+      const others = (org === 'otc' ? [admin, o1, o2, cx, oa] : [admin, u1, u2, u3, u4]).filter(x => x.id !== u.id);
       for (let i = 0; i < likes && i < others.length; i++) { db.reactions.push({ post_id: p.id, user_id: others[i].id, type: 'like', qty: 1, created_at: created }); db.likeLog.push({ user_id: others[i].id, post_id: p.id, month_key: m, created_at: created }); }
       const lines = ['좋은 자료 감사합니다 ㅎㅎ!', '좋은 의견입니다!', '좋은 정보 감사합니다!', '저희 지점도 적용해볼게요'];
       for (let i = 0; i < cmts; i++) { const cu = others[(i + 1) % others.length]; addCommentRaw(p.id, cu, lines[(p.id + i) % lines.length], created); }
       recount(p.id);
     });
     // 핀 공지는 최신 1건만 유지
-    const pins = db.posts.filter(p => p.is_pinned).sort((a, b) => b.id - a.id); pins.slice(2).forEach(p => p.is_pinned = false);
-    db.popups = [{ id: 1, title: '11월 히든보이스 이벤트', media_url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f7a3a"/><stop offset="1" stop-color="#0b3d22"/></linearGradient></defs><rect width="800" height="1000" fill="url(#g)"/><circle cx="650" cy="170" r="190" fill="#7bcf7f" opacity=".18"/><circle cx="120" cy="880" r="230" fill="#e2b04a" opacity=".15"/><text x="80" y="230" font-family="sans-serif" font-size="44" font-weight="700" fill="#bfe9c2">Voice of YUHAN</text><text x="80" y="360" font-family="sans-serif" font-size="92" font-weight="900" fill="#fff">11월 이벤트</text><text x="80" y="480" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">N번째 주인공을</text><text x="80" y="580" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">찾아라!</text><text x="80" y="700" font-family="sans-serif" font-size="36" fill="#e6f5e7">이번 달 N번째 글을 쓴 3명에게</text><text x="80" y="752" font-family="sans-serif" font-size="36" fill="#e6f5e7">특별한 선물을 드립니다 🎁</text><text x="80" y="900" font-family="sans-serif" font-size="28" fill="#9fd3a4">데모 팝업 · 관리자 콘솔 &gt; 팝업 관리에서 교체하세요</text></svg>'), media_type: 'image', media_path: null, media_name: 'demo.svg', media_size: 0, link_url: '', start_at: null, end_at: null, active: true, sort: 0, created_at: new Date().toISOString() }];
-    if (typeof QL_DEFAULTS !== 'undefined') db.settings.quicklinks = QL_DEFAULTS.map(l => ({ ...l, updated_at: l.id === 'dbt' ? new Date(Date.now() - 3600e3).toISOString() : l.id === 'brp' ? new Date(Date.now() - 86400e3 * 2).toISOString() : null }));
+    ['etc', 'otc'].forEach(o => { const pins = db.posts.filter(p => p.is_pinned && p.org === o).sort((a, b) => b.id - a.id); pins.slice(2).forEach(p => p.is_pinned = false); });
+    db.popups = [{ id: 1, title: '11월 히든보이스 이벤트', media_url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f7a3a"/><stop offset="1" stop-color="#0b3d22"/></linearGradient></defs><rect width="800" height="1000" fill="url(#g)"/><circle cx="650" cy="170" r="190" fill="#7bcf7f" opacity=".18"/><circle cx="120" cy="880" r="230" fill="#e2b04a" opacity=".15"/><text x="80" y="230" font-family="sans-serif" font-size="44" font-weight="700" fill="#bfe9c2">Voice of YUHAN</text><text x="80" y="360" font-family="sans-serif" font-size="92" font-weight="900" fill="#fff">11월 이벤트</text><text x="80" y="480" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">N번째 주인공을</text><text x="80" y="580" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">찾아라!</text><text x="80" y="700" font-family="sans-serif" font-size="36" fill="#e6f5e7">이번 달 N번째 글을 쓴 3명에게</text><text x="80" y="752" font-family="sans-serif" font-size="36" fill="#e6f5e7">특별한 선물을 드립니다 🎁</text><text x="80" y="900" font-family="sans-serif" font-size="28" fill="#9fd3a4">데모 팝업 · 관리자 콘솔 &gt; 팝업 관리에서 교체하세요</text></svg>'), media_type: 'image', media_path: null, media_name: 'demo.svg', media_size: 0, link_url: '', start_at: null, end_at: null, active: true, sort: 0, orgs: ['etc', 'otc'], created_at: new Date().toISOString() }];
+    if (typeof QL_DEFAULTS !== 'undefined') db.settings.quicklinks = QL_DEFAULTS.map(l => ({ ...l, orgs: l.orgs || ['etc', 'otc'], updated_at: l.id === 'dbt' ? new Date(Date.now() - 3600e3).toISOString() : l.id === 'brp' ? new Date(Date.now() - 86400e3 * 2).toISOString() : null }));
     db.surveys = [{ id: 1, title: '11월 VOY 커뮤니티 만족도 조사 (예시)', description: '여러분의 의견으로 VOY가 더 좋아집니다. 1분이면 끝나요!',
       questions: [
         { id: 'q1', type: 'choice', text: 'VOY 커뮤니티를 얼마나 자주 방문하시나요?', choices: ['거의 매일', '주 2~3회', '주 1회', '거의 안 함'], required: true },
@@ -858,8 +918,9 @@ const Local = (() => {
     [[u2, { q1: 0, q2: 0, q3: '현장 사례가 더 많이 올라왔으면 좋겠어요' }], [u3, { q1: 1, q2: 1, q3: '' }], [u4, { q1: 0, q2: 3, q3: '건의사항 처리 결과를 공지해주세요' }]]
       .forEach(([u, a], i) => db.surveyResponses.push({ id: i + 1, survey_id: 1, user_id: u.id, answers: a, submitted_at: new Date(Date.now() - 86400e3 * (2 - i)).toISOString() }));
     db.surveyDraws = [];
-    db.events.push({ id: 1, month_key: mk, numbers: [3, 6, 12], status: 'active', memo: '', created_at: now() });
-    db.events.push({ id: 2, month_key: pm, numbers: [1], status: 'closed', memo: '', created_at: now() });
+    db.events.push({ id: 1, org: 'etc', month_key: mk, numbers: [3, 6, 12], status: 'active', memo: '', created_at: now() });
+    db.events.push({ id: 2, org: 'etc', month_key: pm, numbers: [1], status: 'closed', memo: '', created_at: now() });
+    db.events.push({ id: 3, org: 'otc', month_key: mk, numbers: [2, 5], status: 'active', memo: '', created_at: now() });
     save();
   }
   function addCommentRaw(postId, u, body, at) {
@@ -898,6 +959,10 @@ const Local = (() => {
    ===================================================================== */
 const API = {
   uid: null, profile: null, isLocal: LOCAL,
+  /* 지금 보고 있는 방(ETC/OTC) — 들어갈 수 있는 방이 둘인 사람(admin·통합 회원)만 바꿀 수 있음 */
+  get room() { const rs = roomsOf(this.profile); let r = null; try { r = localStorage.getItem('voy_room'); } catch (e) {} return rs.includes(r) ? r : rs[0]; },
+  setRoom(r) { if (!roomsOf(this.profile).includes(r)) return; try { localStorage.setItem('voy_room', r); } catch (e) {} },
+  canSee(row) { return roomsOf(this.profile).includes(orgOf(row)); },
   /* 데모 모드용: 실서비스 DB 뷰(posts_v/comments_v)와 똑같이 — 작성자 계정·소속은 최고관리자에게만, 나머지는 '내 글' 여부만 */
   _vis(row) {
     const sup = this.profile?.role === 'super', r = Local.clone(row);
@@ -990,22 +1055,27 @@ const API = {
     const o = { score: { like: 1, comment: 2 }, depts: [], signup_code: '' };
     rows.forEach(r => o[r.key] = r.value); return o;
   },
+  /* 다른 방의 카테고리 (admin이 ETC+OTC 동시 게시할 때) */
+  async boardsOf(org) {
+    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === org).sort((a, b) => a.sort - b.sort);
+    return must(await sb.from('boards').select('*').eq('org', org).order('sort'));
+  },
   async boards() {
-    if (LOCAL) return Local.clone(Local.db.boards).sort((a, b) => a.sort - b.sort);
-    return must(await sb.from('boards').select('*').order('sort'));
+    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === this.room).sort((a, b) => a.sort - b.sort);
+    return must(await sb.from('boards').select('*').eq('org', this.room).order('sort'));
   },
 
   /* ---------- 게시글 ---------- */
   async listPosts({ month, board, q, mine, pinned, limit = 20, offset = 0 } = {}) {
     if (LOCAL) {
-      let a = Local.db.posts.slice();
+      let a = Local.db.posts.filter(p => orgOf(p) === this.room);
       if (pinned === true) a = a.filter(p => p.is_pinned); if (pinned === false) a = a.filter(p => !p.is_pinned);
       if (month) a = a.filter(p => p.month_key === month); if (board) a = a.filter(p => p.board_id === board);
       if (mine) a = a.filter(p => p.user_id === this.uid);
       if (q) { const s = q.toLowerCase(); a = a.filter(p => (p.title + ' ' + p.body + ' ' + p.author_nickname).toLowerCase().includes(s)); }
       a.sort((x, y) => y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
     }
-    let qy = sb.from('posts_v').select('*').order('id', { ascending: false }).range(offset, offset + limit - 1);
+    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('id', { ascending: false }).range(offset, offset + limit - 1);
     if (pinned === true) qy = qy.eq('is_pinned', true); if (pinned === false) qy = qy.eq('is_pinned', false);
     if (month) qy = qy.eq('month_key', month); if (board) qy = qy.eq('board_id', board);
     if (mine) qy = qy.eq('mine', true);
@@ -1014,11 +1084,11 @@ const API = {
   },
   /* 순위/관리용: 기간 내 전체 게시글 (1000건 단위 페이지) */
   async allPosts({ month, full } = {}) {
-    if (LOCAL) { let a = Local.db.posts.slice(); if (month) a = a.filter(p => p.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
-    const cols = full ? '*' : 'id,mine,user_id,board_id,title,month_key,month_seq,author_nickname,author_dept,author_role,like_count,dislike_count,comment_count,is_pinned,created_at,images,pdf,link_url';
+    if (LOCAL) { let a = Local.db.posts.filter(p => orgOf(p) === this.room); if (month) a = a.filter(p => p.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    const cols = full ? '*' : 'id,org,mine,user_id,board_id,title,month_key,month_seq,author_nickname,author_dept,author_role,like_count,dislike_count,comment_count,is_pinned,created_at,images,pdf,link_url';
     let out = [], from = 0;
     for (;;) {
-      let qy = sb.from('posts_v').select(cols).order('id', { ascending: false }).range(from, from + 999);
+      let qy = sb.from('posts_v').select(cols).eq('org', this.room).order('id', { ascending: false }).range(from, from + 999);
       if (month) qy = qy.eq('month_key', month);
       const rows = must(await qy); out = out.concat(rows); if (rows.length < 1000) break; from += 1000;
     }
@@ -1026,7 +1096,7 @@ const API = {
   },
   async getPost(id) {
     id = +id;
-    if (LOCAL) { const p = Local.db.posts.find(x => x.id === id); if (!p) throw new Error('삭제되었거나 없는 글입니다.'); return this._vis(p); }
+    if (LOCAL) { const p = Local.db.posts.find(x => x.id === id); if (!p || !this.canSee(p)) throw new Error('삭제되었거나 없는 글입니다.'); return this._vis(p); }
     const r = await sb.from('posts_v').select('*').eq('id', id).maybeSingle();
     if (r.error) throw new Error(friendly(r.error)); if (!r.data) throw new Error('삭제되었거나 없는 글입니다.'); return r.data;
   },
@@ -1036,11 +1106,12 @@ const API = {
       const db = Local.db, u = db.users.find(x => x.id === this.uid), b = db.boards.find(x => x.id === d.board_id);
       if (u.status === 'blocked') throw new Error('글쓰기가 제한된 계정입니다');
       if (b?.admin_only && !isAdminRole(u.role)) throw new Error('관리자 전용 게시판입니다');
-      const mk = curMonth(), ck = 'p' + mk; if (!isAdmin) db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null, images: d.images || [], pdf: d.pdf || null,
-        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: isAdmin ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+      const org = d.org || orgOf(b) || this.room; if (!roomsOf(u).includes(org)) throw new Error('이 방에는 글을 쓸 수 없습니다');
+      const elig = awardEligible(u), mk = curMonth(), ck = 'p' + org + mk; if (elig) db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const p = { id: ++db.seq.post, org, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null, images: d.images || [], pdf: d.pdf || null,
+        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: elig ? db.counters[ck] : null, author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      if (p.is_pinned && !keepPinned) db.posts.forEach(x => x.is_pinned = false);
+      if (p.is_pinned && !keepPinned) db.posts.forEach(x => { if (orgOf(x) === org) x.is_pinned = false; });
       db.posts.push(p); Local.save(); return this._vis(p);
     }
     const ins = { user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null,
@@ -1107,12 +1178,13 @@ const API = {
     if (paths.length) await sb.storage.from('voy-files').remove(paths);
   },
   async allComments({ month } = {}) {
-    if (LOCAL) { let a = Local.db.comments.slice(); if (month) a = a.filter(c => c.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    if (LOCAL) { const ids = new Set(Local.db.posts.filter(p => orgOf(p) === this.room).map(p => p.id)); let a = Local.db.comments.filter(c => ids.has(c.post_id)); if (month) a = a.filter(c => c.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    const ids = new Set(); for (let f = 0; ; f += 1000) { const r = must(await sb.from('posts_v').select('id').eq('org', this.room).range(f, f + 999)); r.forEach(x => ids.add(x.id)); if (r.length < 1000) break; }
     let out = [], from = 0;
     for (;;) {
       let qy = sb.from('comments_v').select('*').order('id', { ascending: false }).range(from, from + 999);
       if (month) qy = qy.eq('month_key', month);
-      const rows = must(await qy); out = out.concat(rows); if (rows.length < 1000) break; from += 1000;
+      const rows = must(await qy); out = out.concat(rows.filter(c => ids.has(c.post_id))); if (rows.length < 1000) break; from += 1000;
     }
     return out;
   },
@@ -1156,13 +1228,13 @@ const API = {
   /* ---------- 히든보이스 ---------- */
   async hiddenInfo() {
     if (LOCAL) {
-      const db = Local.db, mk = curMonth(); const ev = db.events.find(e => e.month_key === mk);
-      const isWin = (p, e) => p.month_key === e.month_key && e.numbers.includes(p.month_seq) && p.author_role !== 'admin';
+      const db = Local.db, mk = curMonth(), room = this.room, evs = db.events.filter(e => orgOf(e) === room), ev = evs.find(e => e.month_key === mk);
+      const isWin = (p, e) => orgOf(p) === orgOf(e) && p.month_key === e.month_key && e.numbers.includes(p.month_seq) && p.author_role !== 'admin';
       const winners = [];
-      db.events.forEach(e => db.posts.forEach(p => { if (isWin(p, e)) winners.push({ post_id: p.id, month_key: p.month_key, month_seq: p.month_seq, rank: e.numbers.filter(n => n <= p.month_seq).length }); }));
+      evs.forEach(e => db.posts.forEach(p => { if (isWin(p, e)) winners.push({ post_id: p.id, month_key: p.month_key, month_seq: p.month_seq, rank: e.numbers.filter(n => n <= p.month_seq).length }); }));
       return { current: ev ? { month_key: mk, active: ev.status === 'active', total: ev.numbers.length, found: db.posts.filter(p => isWin(p, ev)).length } : null, winners };
     }
-    const r = await sb.rpc('get_hidden_info'); if (r.error) return { current: null, winners: [] };
+    const r = await sb.rpc('get_hidden_info', { org_: this.room }); if (r.error) return { current: null, winners: [] };
     return r.data || { current: null, winners: [] };
   },
 
@@ -1222,8 +1294,10 @@ const API = {
     if (LOCAL) {
       const u = Local.db.users.find(x => x.id === id), sup = this.profile?.role === 'super';
       if (!sup && isAdminRole(u.role) && id !== this.uid) throw new Error('관리자 계정은 최고관리자만 수정할 수 있습니다');
-      if (!sup) { delete patch.role; delete patch.perms; }
-      if (u.role === 'super') delete patch.role;
+      if (!sup) { delete patch.role; delete patch.perms; delete patch.cross_org; delete patch.org; }
+      if (u.role === 'super') { delete patch.role; delete patch.cross_org; }
+      if (patch.role && !['user', 'e_admin', 'o_admin'].includes(patch.role)) delete patch.role;
+      if (patch.role === 'e_admin') { patch.org = 'etc'; patch.cross_org = false; } if (patch.role === 'o_admin') { patch.org = 'otc'; patch.cross_org = false; }
       if (patch.nickname && patch.nickname !== u.nickname) { await this.changeNickname(patch.nickname, id); delete patch.nickname; }
       Object.assign(u, patch); if (patch.org_branch !== undefined) u.dept = patch.org_branch; Local.save(); return;
     }
@@ -1245,14 +1319,14 @@ const API = {
     must(await sb.rpc('admin_delete_user', { target: id }));
   },
   async adminEvents() {
-    if (LOCAL) return Local.clone(Local.db.events).sort((a, b) => b.month_key.localeCompare(a.month_key));
-    return must(await sb.from('events').select('*').order('month_key', { ascending: false }));
+    if (LOCAL) return Local.clone(Local.db.events).filter(e => orgOf(e) === this.room).sort((a, b) => b.month_key.localeCompare(a.month_key));
+    return must(await sb.from('events').select('*').eq('org', this.room).order('month_key', { ascending: false }));
   },
   async adminSaveEvent(ev) {
-    const row = { month_key: ev.month_key, numbers: ev.numbers, status: ev.status, memo: ev.memo || '' };
+    const row = { month_key: ev.month_key, numbers: ev.numbers, status: ev.status, memo: ev.memo || '', org: ev.org || this.room };
     if (LOCAL) {
       const db = Local.db;
-      if (db.events.some(e => e.month_key === ev.month_key && e.id !== ev.id)) throw new Error('해당 월의 이벤트가 이미 있습니다.');
+      if (db.events.some(e => e.month_key === ev.month_key && orgOf(e) === row.org && e.id !== ev.id)) throw new Error('해당 월의 이벤트가 이미 있습니다.');
       if (ev.id) Object.assign(db.events.find(e => e.id === ev.id), row);
       else db.events.push({ id: Math.max(0, ...db.events.map(e => e.id)) + 1, ...row, created_at: new Date().toISOString() });
       Local.save(); return;
@@ -1266,14 +1340,15 @@ const API = {
     must(await sb.from('events').delete().eq('id', id));
   },
   async adminMonthCounter(mk) {
-    if (LOCAL) return Local.db.counters['p' + mk] || 0;
-    const r = await sb.rpc('admin_month_counter', { mk }); return r.data || 0;
+    if (LOCAL) return Local.db.counters['p' + this.room + mk] || 0;
+    const r = await sb.rpc('admin_month_counter', { mk, org_: this.room }); return r.data || 0;
   },
   async adminSaveSetting(key, value) {
     if (LOCAL) { Local.db.settings[key] = value; Local.save(); return; }
     must(await sb.from('settings').upsert({ key, value, updated_at: new Date().toISOString() }));
   },
   async adminSaveBoard(b) {
+    b = { ...b, org: b.org || this.room };
     if (LOCAL) { const i = Local.db.boards.findIndex(x => x.id === b.id); if (i >= 0) Local.db.boards[i] = { ...b }; else Local.db.boards.push({ ...b }); Local.save(); return; }
     must(await sb.from('boards').upsert(b));
   },
@@ -1291,12 +1366,12 @@ const API = {
         const want = String(r.nickname || '').trim(), okNick = want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want);
         const nu = { id: Local.uuid(), login_id: em, email: em, pw: Local.hash(pw), role: 'user', perms: [], must_change_pw: true, status: 'active', nickname: okNick ? want : Local.uniqueNick(), nickname_month: null,
           created_at: new Date().toISOString(), last_seen: null };
-        MEMBER_FIELDS.forEach(([k]) => nu[k] = r[k] || ''); nu.dept = nu.org_branch;
+        MEMBER_FIELDS.forEach(([k]) => nu[k] = r[k] || ''); nu.dept = nu.org_branch; nu.org = String(r.org || '').toLowerCase() === 'otc' ? 'otc' : 'etc'; nu.cross_org = false;
         db.users.push(nu); db.history.push({ id: db.history.length + 1, user_id: nu.id, nickname: nu.nickname, month_key: curMonth(), created_at: nu.created_at });
         res.push({ email: em, status: 'created', msg: want && !okNick ? `닉네임 [${want}] 사용 불가 → 자동 생성` : null });
       } else if (isAdminRole(u.role)) res.push({ email: em, status: 'error', msg: '관리자 계정은 [관리자 계정] 메뉴에서 수정하세요' });
       else {
-        MEMBER_FIELDS.forEach(([k]) => { if (r[k]) u[k] = r[k]; }); u.dept = u.org_branch;
+        MEMBER_FIELDS.forEach(([k]) => { if (r[k]) u[k] = r[k]; }); u.dept = u.org_branch; if (r.org) u.org = String(r.org).toLowerCase() === 'otc' ? 'otc' : 'etc';
         if (r.reset_pw) { u.pw = Local.hash(r.password || u.emp_no); u.must_change_pw = true; }
         const want = String(r.nickname || '').trim(); let msg = null;
         if (want && want !== u.nickname) { if (want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want)) { u.nickname = want; db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: want, month_key: curMonth(), created_at: new Date().toISOString() }); } else msg = `닉네임 [${want}] 사용 불가 → 기존 유지`; }
@@ -1304,6 +1379,20 @@ const API = {
       }
     }
     Local.save(); return res;
+  },
+  /* e_admin(ETC) · o_admin(OTC) 계정 만들기 — 아이디 = 처음 닉네임 · 운영 권한 없음 */
+  async adminCreateStaff(login, pw, kind) {
+    login = String(login || '').trim().toLowerCase();
+    if (!validLoginId(login)) throw new Error('아이디는 영문 소문자·숫자·._- 3~20자');
+    if (String(pw || '').length < 6) throw new Error('비밀번호는 6자 이상이어야 합니다');
+    if (!['e_admin', 'o_admin'].includes(kind)) throw new Error('구분을 선택하세요');
+    if (!LOCAL) { must(await sb.rpc('admin_create_staff', { p_login: login, p_password: pw, p_kind: kind })); return; }
+    const db = Local.db; if (this.profile?.role !== 'super') throw new Error('admin만 만들 수 있습니다');
+    if (db.users.some(u => u.login_id === login)) throw new Error('이미 있는 아이디입니다');
+    if (db.users.some(u => u.nickname === login)) throw new Error('같은 닉네임이 이미 있습니다');
+    const u = { id: Local.uuid(), login_id: login, email: `${login}@${EMAIL_DOMAIN}`, pw: Local.hash(pw), role: kind, org: kind === 'o_admin' ? 'otc' : 'etc', cross_org: false, perms: [], must_change_pw: false, status: 'active',
+      nickname: login, nickname_month: null, created_at: new Date().toISOString(), last_seen: null, real_name: '', org_branch: '', dept: '' };
+    db.users.push(u); db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: u.nickname, month_key: curMonth(), created_at: u.created_at }); Local.save();
   },
   async adminCreateAdmin(login, pw, details, perms) {
     login = String(login || '').trim().toLowerCase();
@@ -1325,14 +1414,14 @@ const API = {
   },
   async deletePushSub(endpoint) { if (!LOCAL) await sb.rpc('delete_push_subscription', { p_endpoint: endpoint }); },
   async latestPosts(n) {
-    if (LOCAL) return Local.db.posts.slice().sort((a, b) => b.id - a.id).slice(0, n || 30).map(p => ({ id: p.id, mine: p.user_id === this.uid }));
-    return must(await sb.from('posts_v').select('id,mine').order('id', { ascending: false }).limit(n || 30));
+    if (LOCAL) return Local.db.posts.filter(p => orgOf(p) === this.room).sort((a, b) => b.id - a.id).slice(0, n || 30).map(p => ({ id: p.id, mine: p.user_id === this.uid }));
+    return must(await sb.from('posts_v').select('id,mine').eq('org', this.room).order('id', { ascending: false }).limit(n || 30));
   },
   /* 랭킹 (닉네임·점수만 — 계정·소속 정보 없음) */
   /* ---------- 이달의 Voice 시상 ----------
      심사(grand 최우수·excellent 우수·merit 장려) · 결과(popular·reaction·big) · 이벤트(nth·survey)
      회원에게는 관리자가 [게시]한 달의 '닉네임'만 공개 */
-  _aw(mk) { const db = Local.db; db.vawards = db.vawards || {}; return db.vawards[mk] = db.vawards[mk] || { items: [], published: false, published_at: null }; },
+  _aw(mk) { const db = Local.db, k = this.room + ':' + mk; db.vawards = db.vawards || {}; return db.vawards[k] = db.vawards[k] || { items: [], published: false, published_at: null }; },
   _monthNick(uid, mk) { const db = Local.db, u = db.users.find(x => x.id === uid) || {};
     const h = (db.history || []).filter(x => x.user_id === uid && x.month_key === mk).pop(); if (h) return h.nickname;
     const p = db.posts.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (p) return p.author_nickname;
@@ -1341,25 +1430,26 @@ const API = {
   _supRow(u) { const sup = this.profile && this.profile.role === 'super';
     return { real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null, dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null }; },
   async adminVoiceStats(mk) {
-    if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk }));
+    if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk, org_: this.room }));
     const db = Local.db, w = db.settings.score || { like: 1, comment: 2 }, g = {};
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
-    const adm = new Set(db.users.filter(u => isAdminRole(u.role)).map(u => u.id));
-    db.posts.filter(p => p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
+    const adm = new Set(db.users.filter(u => !awardEligible(u)).map(u => u.id)), room = this.room;   // 운영진·통합 회원의 댓글은 점수에서 제외
+    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
       // 인기 Voice: 본인 제외 좋아요(관리자 포함, 최고관리자는 누른 횟수만큼) + 본인·관리자 제외 다른 회원 댓글(한 글에 같은 사람은 1번)
       o.likes += db.reactions.filter(r => r.post_id === p.id && r.type === 'like' && r.user_id !== p.user_id).reduce((a, r) => a + (r.qty || 1), 0);
       o.comments_received += new Set(db.comments.filter(c => c.post_id === p.id && c.user_id && c.user_id !== p.user_id && !adm.has(c.user_id)).map(c => c.user_id)).size; });
-    db.comments.filter(c => c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
+    const roomPosts = new Set(db.posts.filter(p => orgOf(p) === room).map(p => p.id));
+    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
     const items = this._aw(mk).items;
-    return Object.values(g).filter(o => users[o.uid] && users[o.uid].role === 'user').map(o => { const u = users[o.uid];
+    return Object.values(g).filter(o => awardEligible(users[o.uid]) && orgOf(users[o.uid]) === room).map(o => { const u = users[o.uid];
       return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
         score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
   async adminAwardCandidates(mk) {
-    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk }));
+    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk, org_: this.room }));
     const db = Local.db;
-    return db.users.filter(u => u.role === 'user').map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
+    return db.users.filter(u => awardEligible(u) && orgOf(u) === this.room).map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
       survey_wins: (db.surveyDraws || []).filter(d => (d.winner_ids || []).includes(u.id) && monthKeyOf(d.drawn_at) >= mk)
         .map(d => (db.surveys.find(x => x.id === d.survey_id) || {}).title || '설문'), ...this._supRow(u) }));
   },
@@ -1379,7 +1469,7 @@ const API = {
   },
   async adminGetAwards(mk) {
     if (!LOCAL) {
-      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk }).then(must), sb.rpc('admin_award_pub_state', { mk }).then(must)]);
+      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk, org_: this.room }).then(must), sb.rpc('admin_award_pub_state', { mk, org_: this.room }).then(must)]);
       return { list: list || [], published: !!(st && st.published), published_at: st && st.published_at };
     }
     const A = this._aw(mk), db = Local.db;
@@ -1387,22 +1477,23 @@ const API = {
       return { category: a.category, token: this._tok(mk, a.user_id), nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note, ...this._supRow(u) }; }) };
   },
   async adminPublishAwards(mk, on) {
-    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on })); return; }
+    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on, org_: this.room })); return; }
     const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
   },
   async voiceAwardsPublic(mk) {
-    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk })) || [];
+    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk, org_: this.room })) || [];
     const A = this._aw(mk), db = Local.db; if (!A.published) return [];
     return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note }; });
   },
   async voiceAwardMonths() {
-    if (!LOCAL) return (must(await sb.rpc('voice_award_months')) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
-    return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published).map(([k]) => k).sort().reverse();
+    if (!LOCAL) return (must(await sb.rpc('voice_award_months', { org_: this.room })) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
+    const pre = this.room + ':'; return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published && k.startsWith(pre)).map(([k]) => k.slice(pre.length)).sort().reverse();
   },
   async ranking(mk) {
-    if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '' }));
+    if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '', org_: this.room }));
     const w = Local.db.settings.score || { like: 1, comment: 2 }, g = {};
-    Local.db.posts.filter(p => p.author_role !== 'admin' && p.user_id && (!mk || p.month_key === mk)).forEach(p => {
+    const users = {}; Local.db.users.forEach(u => users[u.id] = u);
+    Local.db.posts.filter(p => orgOf(p) === this.room && awardEligible(users[p.user_id]) && (!mk || p.month_key === mk)).forEach(p => {
       const o = g[p.user_id] = g[p.user_id] || { uid: p.user_id, posts: 0, likes: 0, comments: 0, last: 0, nickname: '' };
       o.posts++; o.likes += p.like_count; o.comments += p.comment_count; if (p.id > o.last) { o.last = p.id; o.nickname = p.author_nickname; } });
     return Object.values(g).map(o => ({ nickname: o.nickname, posts: o.posts, likes: o.likes, comments: o.comments, score: o.likes * w.like + o.comments * w.comment, is_me: o.uid === this.uid }))
@@ -1526,7 +1617,7 @@ const API = {
   },
   async adminSavePopup(p) {
     const row = { title: p.title || '', media_url: p.media_url, media_type: p.media_type, media_path: p.media_path || null, media_name: p.media_name || null, media_size: p.media_size || null,
-      link_url: p.link_url || null, start_at: p.start_at || null, end_at: p.end_at || null, active: !!p.active, sort: +p.sort || 0 };
+      link_url: p.link_url || null, start_at: p.start_at || null, end_at: p.end_at || null, active: !!p.active, sort: +p.sort || 0, orgs: orgsOf(p) };
     if (LOCAL) {
       const db = Local.db; db.popups = db.popups || [];
       if (p.id) Object.assign(db.popups.find(x => x.id === p.id), row);
@@ -1542,7 +1633,7 @@ const API = {
   },
   async removeMedia(path) { if (!LOCAL && path) await sb.storage.from('voy-files').remove([path]); },
   async adminSetPinned(id, pinned, keepOthers) {
-    if (LOCAL) { const db = Local.db; if (pinned && !keepOthers) db.posts.forEach(p => p.is_pinned = false); db.posts.find(p => p.id === +id).is_pinned = pinned; Local.save(); return; }
+    if (LOCAL) { const db = Local.db, t = db.posts.find(p => p.id === +id); if (pinned && !keepOthers) db.posts.forEach(p => { if (orgOf(p) === orgOf(t)) p.is_pinned = false; }); t.is_pinned = pinned; Local.save(); return; }
     if (pinned && !keepOthers) must(await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', +id));
     must(await sb.from('posts').update({ is_pinned: pinned }).eq('id', +id));
   }
@@ -1561,7 +1652,8 @@ const QL_DEFAULTS = [
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
-  { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
+  { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, orgs: ['etc'], updated_at: null },   // ETC 품목 PM 검색
+  { id: 'opm',      name: '품목PM검색',              url: 'yhopm/',    icon: 'pm_otc',   auto: true, on: true, orgs: ['otc'], updated_at: null },   // OTC 품목 PM 검색
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -1587,6 +1679,7 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
+  pm_otc: { name: '품목PM검색 · OTC (청록)', c: ['#4FD8C4', '#0E8F86'], g: '' },
   rest: { name: 'FunVOY!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
     '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
@@ -1595,6 +1688,7 @@ const QL_ICONS = {
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
+QL_ICONS.pm_otc.g = QL_ICONS.pm.g.replace(/#7B3FE4/g, '#0E8F86');   // OTC 품목PM검색: 같은 모양, 청록색
 function qlIconSVG(key, size) {
   const ic = QL_ICONS[key] || QL_ICONS.link, id = 'qg' + key + Math.random().toString(36).slice(2, 6);
   return `<svg width="${size || 56}" height="${size || 56}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${ic.c[0]}"/><stop offset="1" stop-color="${ic.c[1]}"/></linearGradient></defs>
@@ -1608,7 +1702,8 @@ function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
   if (!(Array.isArray(raw) && raw.length)) return QL_DEFAULTS.map(l => ({ ...l }));
   const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
-  out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name; });
+  out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name;
+    if (d && d.orgs && !Array.isArray(l.orgs)) l.orgs = d.orgs.slice(); });   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
   QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
   return out;
 }
@@ -1619,7 +1714,7 @@ const QL = {
   resolve(u) { u = String(u || '').trim(); if (!u) return '';
     if (!/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(u)) { const [path, rest = ''] = u.split(/(?=[?#])/); if (path.endsWith('/')) u = path + 'index.html' + rest; else if (!/\.[a-z0-9]{2,5}$/i.test(path.split('/').pop())) u = path + '/index.html' + rest; }
     try { return new URL(u, this.base).href; } catch (e) { return u; } },
-  init(raw) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed); },
+  init(raw, room) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed && (!room || !Array.isArray(l.orgs) || !l.orgs.length || l.orgs.includes(room))); },   // room: 회원 화면은 지금 방(ETC/OTC)에 체크된 메뉴만
   /* 빨간 점 기준 (이 기기·이 브라우저 기준으로 기억)
      ① 관리자가 [업데이트 알림]을 누른 뒤 아직 안 열어봤으면 표시
      ② 페이지 '내용'이 마지막으로 열어본 때와 달라졌으면 표시 — 파일 크기·ETag로 비교
@@ -1801,7 +1896,7 @@ async function maybeShowPopups() {
   try { if (sessionStorage.getItem('voy_pop_shown')) return; sessionStorage.setItem('voy_pop_shown', '1'); } catch (e) {}
   try {
     const hide = popupHideMap(), t = kstToday(), closed = popupClosedMap();
-    const list = (await API.popups()).filter(p => popupActiveNow(p) && hide[p.id] !== t && !closed[p.id]);
+    const list = (await API.popups()).filter(p => popupActiveNow(p) && orgsOf(p).includes(API.room) && hide[p.id] !== t && !closed[p.id]);
     if (list.length) setTimeout(() => showPopups(list), 300);
   } catch (e) {}
 }
@@ -1944,7 +2039,8 @@ async function boot() {
     let first = false; try { first = !sessionStorage.getItem('voy_splash'); sessionStorage.setItem('voy_splash', '1'); } catch (e) {}
     const [me, boards, settings] = await Promise.all([API.init(), API.boards(), API.settings(), new Promise(r => setTimeout(r, first ? 2100 : 0))]);   // 앱을 처음 열 때는 로고가 다가오는 동작을 끝까지 보여줌
     S.me = me; S.boards = boards; S.settings = settings;
-    QL.init(settings.quicklinks); QL.bind(); QL.checkAuto(refreshQL);
+    if (me) { const b2 = await API.boards(); S.boards = b2; }   // 로그인 정보가 생긴 뒤 지금 방(ETC/OTC)의 카테고리로
+    QL.init(settings.quicklinks, API.room); QL.bind(); QL.checkAuto(refreshQL);
   } catch (e) { root.innerHTML = `<div class="empty">${esc(friendly(e))}</div>`; return; }
   if (!S.me) { await splashOut(); return renderAuth(); }
   API.touch(); await loadHidden(); await splashOut(); route(); Badge.start(); Badge.seen(); refreshResearch();
@@ -2008,11 +2104,31 @@ function route() {
 }
 const go = h => { if (location.hash === h) route(); else location.hash = h; };
 
+/* ETC ⇄ OTC 방 전환 — 두 방에 들어갈 수 있는 사람(admin·통합 회원)에게만 보임 */
+function roomSwitchHTML() {
+  const rs = roomsOf(S.me); if (rs.length < 2) return '';
+  const cur = API.room;
+  return `<div class="room-sw" role="tablist" aria-label="커뮤니티 선택">${['etc', 'otc'].map(o => o === cur
+    ? `<b class="rs-on" role="tab" aria-selected="true">${ORG_NAME[o]}</b>`
+    : `<button class="rs-off" role="tab" data-act="room" data-org="${o}" title="${ORG_NAME[o]} 커뮤니티로 이동">${ORG_NAME[o]}</button>`).join('')}</div>`;
+}
+async function switchRoom(org) {
+  if (org === API.room) return;
+  API.setRoom(org);
+  try { S.boards = await API.boards(); } catch (e) {}
+  S.feed = { board: '', month: S.feed ? S.feed.month : '', q: '', items: [], pinned: [], offset: 0, done: false, showPinned: true };
+  QL.init(S.settings.quicklinks, API.room); QL.checkAuto(refreshQL);
+  await loadHidden(); toast(`${ORG_NAME[org]} 커뮤니티로 이동했어요`);
+  try { sessionStorage.removeItem('voy_pop_shown'); } catch (e) {}
+  if (location.hash === '#/feed' || !location.hash) route(); else location.hash = '#/feed';
+  maybeShowPopups();
+}
 function shell(inner, tab, fab = true) {
   const me = S.me; document.body.classList.add('has-bnav');
   root.innerHTML = `<div class="app">
     <header class="top"><div class="top-row">
       <div class="brand" data-act="home"><img class="logo-img" src="icons/voy-mark.png?v=2" alt="VOY"><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
+      ${roomSwitchHTML()}
       <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth(), true)}의</span><b>${esc(me.nickname)}</b></div>
       <button class="avatar sm" style="background:${avColor(me.nickname)}" data-act="go" data-to="#/me" aria-label="내 정보">${esc(me.nickname[0])}</button></div>
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
@@ -2063,8 +2179,8 @@ function viewFeed() {
   const f = S.feed, me = S.me, cur = S.hidden.current;
   const months = recentMonths(12);
   shell(`<div class="page">
-    ${cur && cur.active ? `<div class="event-banner"><div class="gi">${I('gift', 20)}</div><div>
-      <b>N번째 주인공을 찾아라!</b><span>이번 달 <em>N번째</em> 글을 쓴 <em>${cur.total}명</em>의 주인공에게 특별한 선물이!! ${cur.found ? `(현재 ${cur.found}명 탄생)` : ''}</span></div></div>` : ''}
+    ${cur && cur.active ? `<div class="event-banner"><div class="gi">${I('gift', 17)}</div><div>
+      <b>N번째 주인공을 찾아라!${cur.found ? ` <small class="eb-now">현재 ${cur.found}명 탄생</small>` : ''}</b><span class="one">이번 달 <em>N번째</em> 글을 쓴 <em>${cur.total}명</em>에게 특별한 선물이!!</span></div></div>` : ''}
     ${pushPromptHTML()}
     ${researchBannerHTML()}
     <div class="toolbar">
@@ -2268,7 +2384,7 @@ function openLightbox(src, orig, name) {
 async function viewWrite(editId) {
   const admin = isAdminRole(S.me.role);
   if (S.me.status === 'blocked') { toast('글쓰기가 제한된 계정입니다', 'err'); return go('#/feed'); }
-  let W = { id: null, board: S.feed.board && (!boardOf(S.feed.board).admin_only || admin) ? S.feed.board : '', title: '', body: '', link: '', linkTitle: '', images: [], pdf: null, pin: true, keep: false, linkOpen: false };
+  let W = { id: null, target: API.room, board: S.feed.board && (!boardOf(S.feed.board).admin_only || admin) ? S.feed.board : '', title: '', body: '', link: '', linkTitle: '', images: [], pdf: null, pin: true, keep: false, linkOpen: false };
   if (editId) {
     try {
       const p = await API.getPost(editId);
@@ -2313,9 +2429,12 @@ function renderWriteParts() {
     .map(b => `<button class="chip ${W.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="w-board" data-id="${b.id}">${esc(b.name)}</button>`).join('');
   const nb = document.getElementById('wnotice');
   nb.innerHTML = admin ? `<div class="notice-box">
+    ${S.me.role === 'super' && !W.id ? `<div class="row"><div><b>📣 올릴 커뮤니티</b><p>지금 ${ORG_NAME[API.room]} 방에서 쓰는 중 · 동시에 올리면 두 방에 같은 글이 따로 올라가요</p></div></div>
+    <div class="seg" id="wtarget" style="margin:2px 0 10px">${[['both', 'ETC+OTC'], ['etc', 'ETC만'], ['otc', 'OTC만']].map(([v, l]) => `<button type="button" class="${W.target === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div>` : ''}
     <div class="row"><div><b>📌 최상단 공지로 올리기</b><p>${W.pin ? '피드 맨 위에 공지로 고정됩니다' : '일반 글처럼 날짜순으로 보입니다'} · 나중에 [수정]에서 언제든 올리고 내릴 수 있어요</p></div><label class="switch"><input type="checkbox" id="wpin" ${W.pin ? 'checked' : ''}><span></span></label></div>
     ${W.pin && !(W.id && W.wasPinned) ? `<div class="row"><div><p><b style="font-size:13px">기존 공지 함께 유지</b><br>끄면 기존 공지를 내리고 이 글로 교체합니다</p></div><label class="switch"><input type="checkbox" id="wkeep" ${W.keep ? 'checked' : ''}><span></span></label></div>` : ''}
     <p class="hint" style="margin:6px 0 0">관리자 글은 글번호(YYMM_NNN)에 포함되지 않아요</p></div>` : '';
+  const wt = document.getElementById('wtarget'); if (wt) wt.onclick = e => { const b = e.target.closest('[data-v]'); if (b) { W.target = b.dataset.v; renderWriteParts(); } };
   const pin = document.getElementById('wpin'); if (pin) pin.onchange = () => { W.pin = pin.checked; renderWriteParts(); };
   const keep = document.getElementById('wkeep'); if (keep) keep.onchange = () => { W.keep = keep.checked; };
   document.getElementById('wlinkbox').innerHTML = W.linkOpen ? `<input id="wlink" placeholder="https://" value="${esc(W.link)}" inputmode="url">
@@ -2356,7 +2475,15 @@ async function submitPost(btn) {
       post = await API.updatePost(W.id, { board_id: W.board, title: W.title, body: W.body, link_url, link_title, link_image, images, pdf });
       if (admin && pinOn !== !!W.wasPinned) await API.adminSetPinned(W.id, pinOn, pinOn ? !!W.keep : true);
     } else {
-      post = await API.createPost({ board_id: W.board, title: W.title, body: W.body, link_url, link_title, link_image, images, pdf, is_pinned: pinOn }, { keepPinned: W.keep });
+      const here = API.room, tg = S.me.role === 'super' ? (W.target || here) : here, d = { title: W.title, body: W.body, link_url, link_title, link_image, images, pdf, is_pinned: pinOn };
+      const orgs = tg === 'both' ? [here, here === 'etc' ? 'otc' : 'etc'] : [tg];
+      for (const o of orgs) {   // admin: ETC·OTC 각 방에 따로 올림 (다른 방은 같은 이름 카테고리 → 없으면 공지 카테고리)
+        let bid = W.board;
+        if (o !== here) { const ob = await API.boardsOf(o), cb = boardOf(W.board); const m = ob.find(b => b.name === cb.name && !!b.admin_only === !!cb.admin_only) || ob.find(b => b.admin_only) || ob[0]; bid = m && m.id; }
+        if (!bid) continue;
+        const r = await API.createPost({ ...d, board_id: bid, org: o }, { keepPinned: W.keep });
+        if (o === here || !post) post = r;
+      }
     }
     S.feed.items = []; await loadHidden();
     const win = S.winMap[post.id];
@@ -2430,8 +2557,8 @@ function researchBannerHTML() {
   const todo = (S.surveys || []).filter(x => surveyStatus(x) === 'open' && !(S.mySurveys || new Set()).has(x.id));
   if (!todo.length) return '<div id="rsBanner"></div>';
   return `<div class="event-banner" id="rsBanner" style="border-color:color-mix(in srgb,var(--point2) 40%,transparent);background:var(--point2-soft);cursor:pointer" data-act="go" data-to="#/research">
-    <div class="gi" style="background:color-mix(in srgb,var(--point2) 15%,transparent);color:var(--point2)">${I('clipboard', 20)}</div>
-    <div style="flex:1"><b style="color:var(--point2)">VOY Research 참여하기</b><span style="color:var(--text2)">진행 중인 설문 <em>${todo.length}개</em> · ${esc(todo[0].title)}</span></div>${I('right')}</div>`;
+    <div class="gi" style="background:color-mix(in srgb,var(--point2) 15%,transparent);color:var(--point2)">${I('clipboard', 17)}</div>
+    <div style="flex:1"><b style="color:var(--point2)">VOY Research 참여하기</b><span class="one" style="color:var(--text2)">${esc(todo[0].title)}${todo.length > 1 ? ` <em>외 ${todo.length - 1}개</em>` : ''}</span></div>${I('right')}</div>`;
 }
 async function viewResearch() {
   shell(`<div class="page"><div class="subbar"><button class="back" data-act="back">${I('left')}</button><b>VOY Research</b></div>
@@ -2492,7 +2619,7 @@ async function viewMe() {
   const changed = me.nickname_month === curMonth(), pref = themePref();
   shell(`<div class="page">
     ${me.status === 'blocked' ? `<div class="blocked">관리자에 의해 글쓰기·댓글이 제한된 계정입니다.</div>` : ''}
-    <div class="box profile"><div class="avatar lg" style="background:${avColor(me.nickname)}">${esc(me.nickname[0])}</div><div><b>${esc(me.nickname)}</b><small>${esc(me.email || me.login_id)}${isAdminRole(me.role) ? (me.role === 'super' ? ' · 최고관리자' : ' · 관리자') : ''}</small><small>${esc([me.real_name, me.org_branch, me.work_branch, me.position].filter(Boolean).join(' · '))}</small></div></div>
+    <div class="box profile"><div class="avatar lg" style="background:${avColor(me.nickname)}">${esc(me.nickname[0])}</div><div><b>${esc(me.nickname)}</b><small>${esc(me.email || me.login_id)} · ${KIND_LABEL[memberKind(me)]}${roomsOf(me).length > 1 ? ' · ETC·OTC' : ' · ' + ORG_NAME[roomsOf(me)[0]]}</small><small>${esc([me.real_name, me.org_branch, me.work_branch, me.position].filter(Boolean).join(' · '))}</small></div></div>
     <div class="nick-card"><small>${monthLabel(curMonth())} 이달의 닉네임</small>
       <div class="nrow"><b>${esc(me.nickname)}</b><button class="nbtn" data-act="nick" ${changed && !isAdminRole(me.role) ? 'disabled' : ''}>${I('pen', 13)} ${changed && !isAdminRole(me.role) ? '이번 달 변경 완료' : '닉네임 변경'}</button></div>
       <p>이달 닉네임을 1회 변경할 수 있습니다. (매월 1일 자동 초기화)</p></div>
@@ -2650,7 +2777,7 @@ const Badge = {
 async function renderAuth() {
   root.innerHTML = `<div class="auth"><div class="auth-card">
     <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=4" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
-    <div id="instSlot" style="margin:-8px 0 14px">${installCardHTML()}</div>
+    <div id="instSlot" style="margin:-2px 0 10px">${installCardHTML()}</div>
     <form class="box" id="authform" autocomplete="on">
       <label class="lbl" style="margin-top:0">ID (회사 이메일)</label>
       <input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@${COMPANY_DOMAIN}" required>
@@ -2659,10 +2786,10 @@ async function renderAuth() {
       <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>(사번은 사번 숫자 전체 <b>8자리</b>입니다.)</p>
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
-      <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1153" style="margin-top:18px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
+      <p class="ver-tag" title="v261111.1622" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
-    ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
+    ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
   Inst.auto();
   const ae = document.getElementById('apwEye'), ap = document.getElementById('apw');
@@ -2675,7 +2802,9 @@ async function renderAuth() {
       S.me = await API.signIn(document.getElementById('aid').value, pw);
       root.innerHTML = SPLASH;   // 로그인 성공 → VOY 로고가 크게 다가오는 화면을 끝까지 보여준 뒤 피드로
       try { sessionStorage.setItem('voy_splash', '1'); } catch (x) {}
-      API.touch(); await Promise.all([loadHidden(), new Promise(r => setTimeout(r, 2100))]); await splashOut(); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
+      API.touch(); await Promise.all([loadHidden(), API.boards().then(b => { S.boards = b; }).catch(() => {}), new Promise(r => setTimeout(r, 2100))]);   // 내 방(ETC/OTC)의 카테고리
+      QL.init(S.settings.quicklinks, API.room); refreshQL(); QL.checkAuto(refreshQL);
+      await splashOut(); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
       if (S.me.must_change_pw) pwModal(true, pw); else maybeShowPopups();
     } catch (er) { err.textContent = friendly(er); busy(btn, false); }
   };
@@ -2717,6 +2846,7 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'w-board': S.write.board = id; renderWriteParts(); break;
+    case 'room': switchRoom(t.dataset.org); break;
     case 'w-link': S.write.linkOpen = !S.write.linkOpen; renderWriteParts(); if (S.write.linkOpen) document.getElementById('wlink').focus(); break;
     case 'w-img': if (S.write.images.length >= 2) toast('사진은 최대 2장까지 첨부할 수 있어요'); else document.getElementById('fimg').click(); break;
     case 'w-pdf': document.getElementById('fpdf').click(); break;
@@ -2726,7 +2856,7 @@ document.addEventListener('click', async e => {
     case 'nick': nickModal(); break;
     case 'pw': pwModal(); break;
     case 'theme': setTheme(t.dataset.v); document.querySelectorAll('.theme-seg button').forEach(b => b.classList.toggle('on', b === t)); break;
-    case 'logout': if (await confirmBox('로그아웃할까요?', '로그아웃')) { await API.signOut(); S.me = null; location.hash = ''; document.body.classList.remove('has-bnav'); renderAuth(); } break;
+    case 'logout': if (await confirmBox('로그아웃할까요?', '로그아웃')) { await API.signOut(); try { localStorage.removeItem('voy_room'); } catch (x) {} S.me = null; location.hash = ''; document.body.classList.remove('has-bnav'); renderAuth(); } break;
     case 'logout-gate': await API.signOut(); S.me = null; renderAuth(); break;
     case 'copy-voy-url': { const u = location.origin + location.pathname.replace(/index\.html$/, ''); (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(() => toast('VOY 주소를 복사했어요: ' + u)).catch(() => prompt('VOY 주소', u)); break; }
     case 'inst-help':

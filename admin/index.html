@@ -153,6 +153,22 @@ html.sv-open,html.sv-open body{overflow:hidden}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);position:sticky;top:0;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);z-index:20}
 .topbar h1{font-size:17px}
+.topbar{gap:14px}.topbar .who{margin-left:auto}
+.org-sw{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px}
+.org-sw button{padding:6px 16px;border-radius:99px;font-weight:800;font-size:13px;color:var(--muted);letter-spacing:.03em}
+.org-sw button.on{background:var(--accent);color:var(--accent-ink)}
+.org-all{font-size:12px;font-weight:700;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 12px}
+.kind-b{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:99px;border:1px solid var(--border);white-space:nowrap}
+.kind-b.admin{color:var(--gold);border-color:var(--gold);background:var(--gold-soft)}
+.kind-b.e_admin{color:#0b7a3e;border-color:#0b7a3e55;background:#0b7a3e12}
+.kind-b.o_admin{color:#1d6fd6;border-color:#1d6fd655;background:#1d6fd612}
+.kind-b.cross{color:#9b4dd6;border-color:#9b4dd655;background:#9b4dd612}
+.mem-sel{padding:5px 22px 5px 8px!important;font-size:12.5px!important;border-radius:8px;width:auto!important;min-width:70px}
+select.mem-sel[data-mem-kind]{min-width:104px}
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:4px}
+.rule-grid>div{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--surface2)}
+.rule-grid b{display:block;margin:6px 0 4px;font-size:14px}.rule-grid small{color:var(--muted);font-size:12.5px;line-height:1.5;display:block}
+.pop-org{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);margin-right:3px}
 .who{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
 .adm-badge{background:var(--accent-soft);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px}
 .content{padding:24px 28px 60px;max-width:1500px;width:100%}
@@ -225,7 +241,7 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .preview-body{white-space:pre-wrap;word-break:break-all;line-height:1.7;font-size:14px;max-height:50vh;overflow:auto;background:var(--surface2);border-radius:12px;padding:14px}
 .slot{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
 .slot:last-child{border-bottom:0}
-.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 70px 70px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 92px 70px 70px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
 .ql-row.head{font-size:12px;color:var(--muted);font-weight:700;padding-top:0}
 .ql-row .ql-prev{line-height:0;position:relative;width:52px}
 .ql-row small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
@@ -362,6 +378,7 @@ td.tt span{cursor:pointer}
 .dt-search input{border:0!important;background:transparent!important;box-shadow:none!important;height:42px;flex:1;min-width:0;padding:0!important;font-size:14px}
 
 .seg-radio{display:flex;flex-wrap:wrap;gap:6px}.seg-radio label{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border:1px solid var(--border);border-radius:99px;font-size:13.5px;cursor:pointer;background:var(--surface)}
+.seg-radio label{white-space:nowrap}.seg-radio input{width:auto!important;margin:0;flex:none}
 .seg-radio label:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700}
 
 .aw-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
@@ -643,6 +660,25 @@ function linkify(t) { return esc(t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$
 function safeUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'https://' + u; return u; }
 function validLoginId(id) { return /^[a-z0-9._-]{3,20}$/.test(id); }
 function isAdminRole(r) { return r === 'admin' || r === 'super'; }
+/* ===== ETC · OTC 두 커뮤니티 =====
+   admin(최고관리자, role 'super') : ETC+OTC 모두 · 운영·실명 확인은 오직 admin만
+   통합 회원(cross=true)          : ETC+OTC 방을 오가며 보기·참여 (닉네임 본인 것)
+   e_admin / o_admin              : ETC만 / OTC만 · 부서 대표 닉네임으로 참여 (운영 권한 없음)
+   일반 회원(org='etc'|'otc')     : 자기 조직 방만
+   시상·점수 집계 대상은 일반 회원뿐 */
+const ORG_NAME = { etc: 'ETC', otc: 'OTC' };
+function roomsOf(p) {
+  if (!p) return ['etc'];
+  if (p.role === 'super' || p.cross_org) return ['etc', 'otc'];
+  if (p.role === 'e_admin') return ['etc'];
+  if (p.role === 'o_admin') return ['otc'];
+  return [p.org === 'otc' ? 'otc' : 'etc'];
+}
+function awardEligible(u) { return !!u && u.role === 'user' && !u.cross_org; }
+function memberKind(u) { return !u ? '' : u.role === 'super' ? 'admin' : u.role === 'e_admin' ? 'e_admin' : u.role === 'o_admin' ? 'o_admin' : u.cross_org ? 'cross' : 'member'; }
+const KIND_LABEL = { admin: '최고관리자', e_admin: 'e_admin (ETC)', o_admin: 'o_admin (OTC)', cross: '통합 회원', member: '회원' };
+const orgOf = x => (x && x.org === 'otc') ? 'otc' : 'etc';
+const orgsOf = x => (x && Array.isArray(x.orgs) && x.orgs.length) ? x.orgs : ['etc', 'otc'];
 const PERMS = [['posts', '게시글'], ['comments', '댓글'], ['members', '회원'], ['rank', '순위·점수'], ['events', '이벤트'], ['popups', '팝업'], ['research', '리서치'], ['settings', '설정']];
 function hasPerm(pr, k) { return !!pr && (pr.role === 'super' || (pr.role === 'admin' && Array.isArray(pr.perms) && pr.perms.includes(k))); }
 function surveyStatus(sv) {
@@ -703,7 +739,7 @@ function fileToDataURL(f) { return new Promise((res, rej) => { const r = new Fil
    데모 모드 (localStorage) — Supabase 연결 전 화면/흐름 확인용
    ===================================================================== */
 const Local = (() => {
-  const K = 'voy_demo_db_v1', S = 'voy_demo_session', DEMO_VER = 8;   // 구조가 바뀌면 숫자를 올려 예전 데모 데이터를 자동 초기화
+  const K = 'voy_demo_db_v1', S = 'voy_demo_session', DEMO_VER = 11;   // 구조가 바뀌면 숫자를 올려 예전 데모 데이터를 자동 초기화
   let db = null, mem = {};
   const ls = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return mem[k] ?? null; } },
@@ -724,18 +760,28 @@ const Local = (() => {
       { id: 'tool', name: 'MR Tool 추천', color: '#60a5fa', sort: 2, admin_only: false },
       { id: 'now', name: '오늘 그리고 지금...', color: '#c084fc', sort: 3, admin_only: false },
       { id: 'suggest', name: '건의, 제안합니다', color: '#fb923c', sort: 4, admin_only: false },
-      { id: 'notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true }
+      { id: 'notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true },
+      { id: 'o_field', name: '약국 현장 이야기', color: '#4ade80', sort: 1, admin_only: false, org: 'otc' },
+      { id: 'o_new', name: '신제품·프로모션', color: '#60a5fa', sort: 2, admin_only: false, org: 'otc' },
+      { id: 'o_now', name: '오늘 그리고 지금...', color: '#c084fc', sort: 3, admin_only: false, org: 'otc' },
+      { id: 'o_suggest', name: '건의, 제안합니다', color: '#fb923c', sort: 4, admin_only: false, org: 'otc' },
+      { id: 'o_notice', name: '영업기획팀', color: '#38bdf8', sort: 5, admin_only: true, org: 'otc' }
     ];
+    db.boards.forEach(b => b.org = b.org || 'etc');
     const mk = curMonth(), pm = shiftMonth(mk, -1);
-    const mkUser = (login_id, email, pw, d, role, nickname, perms) => {
-      const u = { id: uuid(), login_id, email, pw: hash(pw), real_name: d[0], emp_no: d[1], category: d[2], org_branch: d[3], work_branch: d[4], sales_office: d[5], position: d[6], duty: d[7],
+    const mkUser = (login_id, email, pw, d, role, nickname, perms, extra) => {
+      const u = { id: uuid(), login_id, email, pw: hash(pw), org: 'etc', cross_org: false, real_name: d[0], emp_no: d[1], category: d[2], org_branch: d[3], work_branch: d[4], sales_office: d[5], position: d[6], duty: d[7],
         dept: d[3], role: role || 'user', perms: perms || [], must_change_pw: false, status: 'active',
-        nickname: nickname || uniqueNick(), nickname_month: null, created_at: new Date(Date.now() - 86400e3 * (20 + db.users.length * 3)).toISOString(), last_seen: new Date(Date.now() - 3600e3 * (db.users.length * 5 + 1)).toISOString() };
+        nickname: nickname || uniqueNick(), nickname_month: null, created_at: new Date(Date.now() - 86400e3 * (20 + db.users.length * 3)).toISOString(), last_seen: new Date(Date.now() - 3600e3 * (db.users.length * 5 + 1)).toISOString(), ...(extra || {}) };
       db.users.push(u); db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: u.nickname, month_key: pm, created_at: u.created_at });
       return u;
     };
     const admin = mkUser('admin', 'admin@voy-community.app', 'admin1234', ['최고관리자', '', '', '영업기획팀', '', '', '', ''], 'super', '영업기획팀');
-    mkUser('manager', 'manager@voy-community.app', 'manager1234', ['김관리', '20101234', '본사', '영업기획팀', '본사', '', '차장', '파트장'], 'admin', '기획파트', ['posts', 'comments', 'events', 'popups']);
+    const ea = mkUser('e_admin', 'e_admin@voy-community.app', 'demo1234', ['김기획', '20101234', '본사', '영업기획팀', '본사', '', '차장', ''], 'e_admin', 'e_admin', [], { org: 'etc' });
+    const oa = mkUser('o_admin', 'o_admin@voy-community.app', 'demo1234', ['최기획', '20111234', '본사', '영업기획팀', '본사', '', '차장', ''], 'o_admin', 'o_admin', [], { org: 'otc' });
+    const cx = mkUser('cross@yuhan.co.kr', 'cross@yuhan.co.kr', 'demo1234', ['정통합', '20090909', '본사', '영업기획팀', '본사', '', '부장', '팀장'], 'user', '영업기획팀장', [], { cross_org: true });
+    const o1 = mkUser('otc1@yuhan.co.kr', 'otc1@yuhan.co.kr', 'demo1234', ['한오티', '20160505', '영업', 'OTC1부', '강서지점', '', '과장', '팀원'], 'user', null, [], { org: 'otc' });
+    const o2 = mkUser('otc2@yuhan.co.kr', 'otc2@yuhan.co.kr', 'demo1234', ['문약국', '20190707', '영업', 'OTC2부', '부산지점', '', '대리', '팀원'], 'user', null, [], { org: 'otc' });
     const u1 = mkUser('demo@yuhan.co.kr', 'demo@yuhan.co.kr', 'demo1234', ['김유한', '20150101', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원']);
     const u2 = mkUser('lee@yuhan.co.kr', 'lee@yuhan.co.kr', 'demo1234', ['이세현', '20180322', '영업', 'Clinic3부', '서초지점', '서초영업소', '대리', '팀원']);
     const u3 = mkUser('park@yuhan.co.kr', 'park@yuhan.co.kr', 'demo1234', ['박성호', '20050141', '영업', 'Clinic2부', '북부지점', '노원영업소', '차장', '팀장']);
@@ -750,27 +796,34 @@ const Local = (() => {
       [mk, admin, 'notice', '[YH SSPT] 11.1주차 품절이슈', 'BRP insight의 수급대시보드 상황입니다. 좋은 기회 잡으시고 자사 품절에 대한 거래선 대비도 하시길 바랍니다.', 3, 0],
       [mk, u2, 'now', '종근당 지텍 4/4분기 처수확산 인센티브', '종근당 지텍 처수 확산 (10월~12월, 3개월 진행) 거래처별 지텍 15만원 이상 시 1처 인정, 인당 5처 이상 시 인센티브 지급', 0, 2],
       [mk, u3, 'tool', '차는 제2의 생명. 안전운전 앱 추천', '졸음 감지 알림 앱 써보니 장거리 이동할 때 확실히 도움 됩니다.', 2, 1],
-      [mk, u1, 'success', '비만주사 문의 대응 꿀팁', '환자 문의가 많은 원장님께는 보험 여부부터 정리해서 드리면 대화가 훨씬 빨라집니다.', 3, 1]
+      [mk, u1, 'success', '비만주사 문의 대응 꿀팁', '환자 문의가 많은 원장님께는 보험 여부부터 정리해서 드리면 대화가 훨씬 빨라집니다.', 3, 1],
+      [mk, ea, 'tool', 'ETC 11월 디테일 자료 업데이트 안내', '이번 달 디테일 자료가 자료실에 올라왔습니다. 필요한 분은 확인해 주세요. (e_admin 작성 예시)', 2, 1],
+      [mk, admin, 'o_notice', '[OTC] 11월 약국 프로모션 안내', 'OTC 커뮤니티 공지 예시입니다. ETC 회원에게는 보이지 않습니다.', 2, 0],
+      [mk, o1, 'o_field', '약국장님이 먼저 찾는 진열 위치 팁', '계산대 옆 눈높이 진열로 바꾸고 나서 회전율이 확실히 올라갔습니다.', 3, 2],
+      [mk, o2, 'o_new', '겨울 시즌 감기약 프로모션 반응 공유', '부산권은 종합감기약보다 목감기 쪽 문의가 훨씬 많았습니다.', 2, 1],
+      [mk, cx, 'o_now', '통합 회원이 OTC 방에 쓴 글 (예시)', '통합 회원은 ETC·OTC 방을 오가며 글을 쓸 수 있고, 시상에서는 제외됩니다.', 1, 1],
+      [mk, oa, 'o_now', 'OTC 현장 의견을 모읍니다', 'o_admin(부서 대표 닉네임) 작성 예시입니다.', 1, 0]
     ];
     let day = 34;
     samples.forEach(([m, u, board, title, body, likes, cmts]) => {
       day -= (m === pm ? 4 : 2);
       const created = m === pm ? new Date(Date.now() - 86400e3 * (new Date(Date.now() + KST_OFFSET).getUTCDate() + day - 24)).toISOString() : new Date(Date.now() - 3600e3 * (day * 3 + 1)).toISOString();
-      const ck = 'p' + m; if (!isAdminRole(u.role)) db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: board, title, body, link_url: board === 'notice' && m === pm ? 'https://notice.ourclinic.kr' : null,
-        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: isAdminRole(u.role) ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+      const org = (db.boards.find(b => b.id === board) || {}).org || 'etc', elig = awardEligible(u);
+      const ck = 'p' + org + m; if (elig) db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const p = { id: ++db.seq.post, org, user_id: u.id, board_id: board, title, body, link_url: board === 'notice' && m === pm ? 'https://notice.ourclinic.kr' : null,
+        images: [], pdf: null, is_pinned: isAdminRole(u.role), month_key: m, month_seq: elig ? db.counters[ck] : null, author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: created, updated_at: created };
       db.posts.push(p);
-      const others = [admin, u1, u2, u3, u4].filter(x => x.id !== u.id);
+      const others = (org === 'otc' ? [admin, o1, o2, cx, oa] : [admin, u1, u2, u3, u4]).filter(x => x.id !== u.id);
       for (let i = 0; i < likes && i < others.length; i++) { db.reactions.push({ post_id: p.id, user_id: others[i].id, type: 'like', qty: 1, created_at: created }); db.likeLog.push({ user_id: others[i].id, post_id: p.id, month_key: m, created_at: created }); }
       const lines = ['좋은 자료 감사합니다 ㅎㅎ!', '좋은 의견입니다!', '좋은 정보 감사합니다!', '저희 지점도 적용해볼게요'];
       for (let i = 0; i < cmts; i++) { const cu = others[(i + 1) % others.length]; addCommentRaw(p.id, cu, lines[(p.id + i) % lines.length], created); }
       recount(p.id);
     });
     // 핀 공지는 최신 1건만 유지
-    const pins = db.posts.filter(p => p.is_pinned).sort((a, b) => b.id - a.id); pins.slice(2).forEach(p => p.is_pinned = false);
-    db.popups = [{ id: 1, title: '11월 히든보이스 이벤트', media_url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f7a3a"/><stop offset="1" stop-color="#0b3d22"/></linearGradient></defs><rect width="800" height="1000" fill="url(#g)"/><circle cx="650" cy="170" r="190" fill="#7bcf7f" opacity=".18"/><circle cx="120" cy="880" r="230" fill="#e2b04a" opacity=".15"/><text x="80" y="230" font-family="sans-serif" font-size="44" font-weight="700" fill="#bfe9c2">Voice of YUHAN</text><text x="80" y="360" font-family="sans-serif" font-size="92" font-weight="900" fill="#fff">11월 이벤트</text><text x="80" y="480" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">N번째 주인공을</text><text x="80" y="580" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">찾아라!</text><text x="80" y="700" font-family="sans-serif" font-size="36" fill="#e6f5e7">이번 달 N번째 글을 쓴 3명에게</text><text x="80" y="752" font-family="sans-serif" font-size="36" fill="#e6f5e7">특별한 선물을 드립니다 🎁</text><text x="80" y="900" font-family="sans-serif" font-size="28" fill="#9fd3a4">데모 팝업 · 관리자 콘솔 &gt; 팝업 관리에서 교체하세요</text></svg>'), media_type: 'image', media_path: null, media_name: 'demo.svg', media_size: 0, link_url: '', start_at: null, end_at: null, active: true, sort: 0, created_at: new Date().toISOString() }];
-    if (typeof QL_DEFAULTS !== 'undefined') db.settings.quicklinks = QL_DEFAULTS.map(l => ({ ...l, updated_at: l.id === 'dbt' ? new Date(Date.now() - 3600e3).toISOString() : l.id === 'brp' ? new Date(Date.now() - 86400e3 * 2).toISOString() : null }));
+    ['etc', 'otc'].forEach(o => { const pins = db.posts.filter(p => p.is_pinned && p.org === o).sort((a, b) => b.id - a.id); pins.slice(2).forEach(p => p.is_pinned = false); });
+    db.popups = [{ id: 1, title: '11월 히든보이스 이벤트', media_url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f7a3a"/><stop offset="1" stop-color="#0b3d22"/></linearGradient></defs><rect width="800" height="1000" fill="url(#g)"/><circle cx="650" cy="170" r="190" fill="#7bcf7f" opacity=".18"/><circle cx="120" cy="880" r="230" fill="#e2b04a" opacity=".15"/><text x="80" y="230" font-family="sans-serif" font-size="44" font-weight="700" fill="#bfe9c2">Voice of YUHAN</text><text x="80" y="360" font-family="sans-serif" font-size="92" font-weight="900" fill="#fff">11월 이벤트</text><text x="80" y="480" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">N번째 주인공을</text><text x="80" y="580" font-family="sans-serif" font-size="78" font-weight="900" fill="#ffd36b">찾아라!</text><text x="80" y="700" font-family="sans-serif" font-size="36" fill="#e6f5e7">이번 달 N번째 글을 쓴 3명에게</text><text x="80" y="752" font-family="sans-serif" font-size="36" fill="#e6f5e7">특별한 선물을 드립니다 🎁</text><text x="80" y="900" font-family="sans-serif" font-size="28" fill="#9fd3a4">데모 팝업 · 관리자 콘솔 &gt; 팝업 관리에서 교체하세요</text></svg>'), media_type: 'image', media_path: null, media_name: 'demo.svg', media_size: 0, link_url: '', start_at: null, end_at: null, active: true, sort: 0, orgs: ['etc', 'otc'], created_at: new Date().toISOString() }];
+    if (typeof QL_DEFAULTS !== 'undefined') db.settings.quicklinks = QL_DEFAULTS.map(l => ({ ...l, orgs: l.orgs || ['etc', 'otc'], updated_at: l.id === 'dbt' ? new Date(Date.now() - 3600e3).toISOString() : l.id === 'brp' ? new Date(Date.now() - 86400e3 * 2).toISOString() : null }));
     db.surveys = [{ id: 1, title: '11월 VOY 커뮤니티 만족도 조사 (예시)', description: '여러분의 의견으로 VOY가 더 좋아집니다. 1분이면 끝나요!',
       questions: [
         { id: 'q1', type: 'choice', text: 'VOY 커뮤니티를 얼마나 자주 방문하시나요?', choices: ['거의 매일', '주 2~3회', '주 1회', '거의 안 함'], required: true },
@@ -781,8 +834,9 @@ const Local = (() => {
     [[u2, { q1: 0, q2: 0, q3: '현장 사례가 더 많이 올라왔으면 좋겠어요' }], [u3, { q1: 1, q2: 1, q3: '' }], [u4, { q1: 0, q2: 3, q3: '건의사항 처리 결과를 공지해주세요' }]]
       .forEach(([u, a], i) => db.surveyResponses.push({ id: i + 1, survey_id: 1, user_id: u.id, answers: a, submitted_at: new Date(Date.now() - 86400e3 * (2 - i)).toISOString() }));
     db.surveyDraws = [];
-    db.events.push({ id: 1, month_key: mk, numbers: [3, 6, 12], status: 'active', memo: '', created_at: now() });
-    db.events.push({ id: 2, month_key: pm, numbers: [1], status: 'closed', memo: '', created_at: now() });
+    db.events.push({ id: 1, org: 'etc', month_key: mk, numbers: [3, 6, 12], status: 'active', memo: '', created_at: now() });
+    db.events.push({ id: 2, org: 'etc', month_key: pm, numbers: [1], status: 'closed', memo: '', created_at: now() });
+    db.events.push({ id: 3, org: 'otc', month_key: mk, numbers: [2, 5], status: 'active', memo: '', created_at: now() });
     save();
   }
   function addCommentRaw(postId, u, body, at) {
@@ -821,6 +875,10 @@ const Local = (() => {
    ===================================================================== */
 const API = {
   uid: null, profile: null, isLocal: LOCAL,
+  /* 지금 보고 있는 방(ETC/OTC) — 들어갈 수 있는 방이 둘인 사람(admin·통합 회원)만 바꿀 수 있음 */
+  get room() { const rs = roomsOf(this.profile); let r = null; try { r = localStorage.getItem('voy_room'); } catch (e) {} return rs.includes(r) ? r : rs[0]; },
+  setRoom(r) { if (!roomsOf(this.profile).includes(r)) return; try { localStorage.setItem('voy_room', r); } catch (e) {} },
+  canSee(row) { return roomsOf(this.profile).includes(orgOf(row)); },
   /* 데모 모드용: 실서비스 DB 뷰(posts_v/comments_v)와 똑같이 — 작성자 계정·소속은 최고관리자에게만, 나머지는 '내 글' 여부만 */
   _vis(row) {
     const sup = this.profile?.role === 'super', r = Local.clone(row);
@@ -913,22 +971,27 @@ const API = {
     const o = { score: { like: 1, comment: 2 }, depts: [], signup_code: '' };
     rows.forEach(r => o[r.key] = r.value); return o;
   },
+  /* 다른 방의 카테고리 (admin이 ETC+OTC 동시 게시할 때) */
+  async boardsOf(org) {
+    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === org).sort((a, b) => a.sort - b.sort);
+    return must(await sb.from('boards').select('*').eq('org', org).order('sort'));
+  },
   async boards() {
-    if (LOCAL) return Local.clone(Local.db.boards).sort((a, b) => a.sort - b.sort);
-    return must(await sb.from('boards').select('*').order('sort'));
+    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === this.room).sort((a, b) => a.sort - b.sort);
+    return must(await sb.from('boards').select('*').eq('org', this.room).order('sort'));
   },
 
   /* ---------- 게시글 ---------- */
   async listPosts({ month, board, q, mine, pinned, limit = 20, offset = 0 } = {}) {
     if (LOCAL) {
-      let a = Local.db.posts.slice();
+      let a = Local.db.posts.filter(p => orgOf(p) === this.room);
       if (pinned === true) a = a.filter(p => p.is_pinned); if (pinned === false) a = a.filter(p => !p.is_pinned);
       if (month) a = a.filter(p => p.month_key === month); if (board) a = a.filter(p => p.board_id === board);
       if (mine) a = a.filter(p => p.user_id === this.uid);
       if (q) { const s = q.toLowerCase(); a = a.filter(p => (p.title + ' ' + p.body + ' ' + p.author_nickname).toLowerCase().includes(s)); }
       a.sort((x, y) => y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
     }
-    let qy = sb.from('posts_v').select('*').order('id', { ascending: false }).range(offset, offset + limit - 1);
+    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('id', { ascending: false }).range(offset, offset + limit - 1);
     if (pinned === true) qy = qy.eq('is_pinned', true); if (pinned === false) qy = qy.eq('is_pinned', false);
     if (month) qy = qy.eq('month_key', month); if (board) qy = qy.eq('board_id', board);
     if (mine) qy = qy.eq('mine', true);
@@ -937,11 +1000,11 @@ const API = {
   },
   /* 순위/관리용: 기간 내 전체 게시글 (1000건 단위 페이지) */
   async allPosts({ month, full } = {}) {
-    if (LOCAL) { let a = Local.db.posts.slice(); if (month) a = a.filter(p => p.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
-    const cols = full ? '*' : 'id,mine,user_id,board_id,title,month_key,month_seq,author_nickname,author_dept,author_role,like_count,dislike_count,comment_count,is_pinned,created_at,images,pdf,link_url';
+    if (LOCAL) { let a = Local.db.posts.filter(p => orgOf(p) === this.room); if (month) a = a.filter(p => p.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    const cols = full ? '*' : 'id,org,mine,user_id,board_id,title,month_key,month_seq,author_nickname,author_dept,author_role,like_count,dislike_count,comment_count,is_pinned,created_at,images,pdf,link_url';
     let out = [], from = 0;
     for (;;) {
-      let qy = sb.from('posts_v').select(cols).order('id', { ascending: false }).range(from, from + 999);
+      let qy = sb.from('posts_v').select(cols).eq('org', this.room).order('id', { ascending: false }).range(from, from + 999);
       if (month) qy = qy.eq('month_key', month);
       const rows = must(await qy); out = out.concat(rows); if (rows.length < 1000) break; from += 1000;
     }
@@ -949,7 +1012,7 @@ const API = {
   },
   async getPost(id) {
     id = +id;
-    if (LOCAL) { const p = Local.db.posts.find(x => x.id === id); if (!p) throw new Error('삭제되었거나 없는 글입니다.'); return this._vis(p); }
+    if (LOCAL) { const p = Local.db.posts.find(x => x.id === id); if (!p || !this.canSee(p)) throw new Error('삭제되었거나 없는 글입니다.'); return this._vis(p); }
     const r = await sb.from('posts_v').select('*').eq('id', id).maybeSingle();
     if (r.error) throw new Error(friendly(r.error)); if (!r.data) throw new Error('삭제되었거나 없는 글입니다.'); return r.data;
   },
@@ -959,11 +1022,12 @@ const API = {
       const db = Local.db, u = db.users.find(x => x.id === this.uid), b = db.boards.find(x => x.id === d.board_id);
       if (u.status === 'blocked') throw new Error('글쓰기가 제한된 계정입니다');
       if (b?.admin_only && !isAdminRole(u.role)) throw new Error('관리자 전용 게시판입니다');
-      const mk = curMonth(), ck = 'p' + mk; if (!isAdmin) db.counters[ck] = (db.counters[ck] || 0) + 1;
-      const p = { id: ++db.seq.post, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null, images: d.images || [], pdf: d.pdf || null,
-        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: isAdmin ? null : db.counters[ck], author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
+      const org = d.org || orgOf(b) || this.room; if (!roomsOf(u).includes(org)) throw new Error('이 방에는 글을 쓸 수 없습니다');
+      const elig = awardEligible(u), mk = curMonth(), ck = 'p' + org + mk; if (elig) db.counters[ck] = (db.counters[ck] || 0) + 1;
+      const p = { id: ++db.seq.post, org, user_id: u.id, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null, images: d.images || [], pdf: d.pdf || null,
+        is_pinned: isAdmin && !!d.is_pinned, month_key: mk, month_seq: elig ? db.counters[ck] : null, author_nickname: u.nickname, author_dept: u.org_branch || u.dept, author_role: isAdminRole(u.role) ? 'admin' : 'user',
         like_count: 0, dislike_count: 0, comment_count: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
-      if (p.is_pinned && !keepPinned) db.posts.forEach(x => x.is_pinned = false);
+      if (p.is_pinned && !keepPinned) db.posts.forEach(x => { if (orgOf(x) === org) x.is_pinned = false; });
       db.posts.push(p); Local.save(); return this._vis(p);
     }
     const ins = { user_id: this.uid, board_id: d.board_id, title: d.title, body: d.body, link_url: d.link_url || null, link_title: d.link_title || null, link_image: d.link_image || null,
@@ -1030,12 +1094,13 @@ const API = {
     if (paths.length) await sb.storage.from('voy-files').remove(paths);
   },
   async allComments({ month } = {}) {
-    if (LOCAL) { let a = Local.db.comments.slice(); if (month) a = a.filter(c => c.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    if (LOCAL) { const ids = new Set(Local.db.posts.filter(p => orgOf(p) === this.room).map(p => p.id)); let a = Local.db.comments.filter(c => ids.has(c.post_id)); if (month) a = a.filter(c => c.month_key === month); return a.sort((x, y) => y.id - x.id).map(x => this._vis(x)); }
+    const ids = new Set(); for (let f = 0; ; f += 1000) { const r = must(await sb.from('posts_v').select('id').eq('org', this.room).range(f, f + 999)); r.forEach(x => ids.add(x.id)); if (r.length < 1000) break; }
     let out = [], from = 0;
     for (;;) {
       let qy = sb.from('comments_v').select('*').order('id', { ascending: false }).range(from, from + 999);
       if (month) qy = qy.eq('month_key', month);
-      const rows = must(await qy); out = out.concat(rows); if (rows.length < 1000) break; from += 1000;
+      const rows = must(await qy); out = out.concat(rows.filter(c => ids.has(c.post_id))); if (rows.length < 1000) break; from += 1000;
     }
     return out;
   },
@@ -1079,13 +1144,13 @@ const API = {
   /* ---------- 히든보이스 ---------- */
   async hiddenInfo() {
     if (LOCAL) {
-      const db = Local.db, mk = curMonth(); const ev = db.events.find(e => e.month_key === mk);
-      const isWin = (p, e) => p.month_key === e.month_key && e.numbers.includes(p.month_seq) && p.author_role !== 'admin';
+      const db = Local.db, mk = curMonth(), room = this.room, evs = db.events.filter(e => orgOf(e) === room), ev = evs.find(e => e.month_key === mk);
+      const isWin = (p, e) => orgOf(p) === orgOf(e) && p.month_key === e.month_key && e.numbers.includes(p.month_seq) && p.author_role !== 'admin';
       const winners = [];
-      db.events.forEach(e => db.posts.forEach(p => { if (isWin(p, e)) winners.push({ post_id: p.id, month_key: p.month_key, month_seq: p.month_seq, rank: e.numbers.filter(n => n <= p.month_seq).length }); }));
+      evs.forEach(e => db.posts.forEach(p => { if (isWin(p, e)) winners.push({ post_id: p.id, month_key: p.month_key, month_seq: p.month_seq, rank: e.numbers.filter(n => n <= p.month_seq).length }); }));
       return { current: ev ? { month_key: mk, active: ev.status === 'active', total: ev.numbers.length, found: db.posts.filter(p => isWin(p, ev)).length } : null, winners };
     }
-    const r = await sb.rpc('get_hidden_info'); if (r.error) return { current: null, winners: [] };
+    const r = await sb.rpc('get_hidden_info', { org_: this.room }); if (r.error) return { current: null, winners: [] };
     return r.data || { current: null, winners: [] };
   },
 
@@ -1145,8 +1210,10 @@ const API = {
     if (LOCAL) {
       const u = Local.db.users.find(x => x.id === id), sup = this.profile?.role === 'super';
       if (!sup && isAdminRole(u.role) && id !== this.uid) throw new Error('관리자 계정은 최고관리자만 수정할 수 있습니다');
-      if (!sup) { delete patch.role; delete patch.perms; }
-      if (u.role === 'super') delete patch.role;
+      if (!sup) { delete patch.role; delete patch.perms; delete patch.cross_org; delete patch.org; }
+      if (u.role === 'super') { delete patch.role; delete patch.cross_org; }
+      if (patch.role && !['user', 'e_admin', 'o_admin'].includes(patch.role)) delete patch.role;
+      if (patch.role === 'e_admin') { patch.org = 'etc'; patch.cross_org = false; } if (patch.role === 'o_admin') { patch.org = 'otc'; patch.cross_org = false; }
       if (patch.nickname && patch.nickname !== u.nickname) { await this.changeNickname(patch.nickname, id); delete patch.nickname; }
       Object.assign(u, patch); if (patch.org_branch !== undefined) u.dept = patch.org_branch; Local.save(); return;
     }
@@ -1168,14 +1235,14 @@ const API = {
     must(await sb.rpc('admin_delete_user', { target: id }));
   },
   async adminEvents() {
-    if (LOCAL) return Local.clone(Local.db.events).sort((a, b) => b.month_key.localeCompare(a.month_key));
-    return must(await sb.from('events').select('*').order('month_key', { ascending: false }));
+    if (LOCAL) return Local.clone(Local.db.events).filter(e => orgOf(e) === this.room).sort((a, b) => b.month_key.localeCompare(a.month_key));
+    return must(await sb.from('events').select('*').eq('org', this.room).order('month_key', { ascending: false }));
   },
   async adminSaveEvent(ev) {
-    const row = { month_key: ev.month_key, numbers: ev.numbers, status: ev.status, memo: ev.memo || '' };
+    const row = { month_key: ev.month_key, numbers: ev.numbers, status: ev.status, memo: ev.memo || '', org: ev.org || this.room };
     if (LOCAL) {
       const db = Local.db;
-      if (db.events.some(e => e.month_key === ev.month_key && e.id !== ev.id)) throw new Error('해당 월의 이벤트가 이미 있습니다.');
+      if (db.events.some(e => e.month_key === ev.month_key && orgOf(e) === row.org && e.id !== ev.id)) throw new Error('해당 월의 이벤트가 이미 있습니다.');
       if (ev.id) Object.assign(db.events.find(e => e.id === ev.id), row);
       else db.events.push({ id: Math.max(0, ...db.events.map(e => e.id)) + 1, ...row, created_at: new Date().toISOString() });
       Local.save(); return;
@@ -1189,14 +1256,15 @@ const API = {
     must(await sb.from('events').delete().eq('id', id));
   },
   async adminMonthCounter(mk) {
-    if (LOCAL) return Local.db.counters['p' + mk] || 0;
-    const r = await sb.rpc('admin_month_counter', { mk }); return r.data || 0;
+    if (LOCAL) return Local.db.counters['p' + this.room + mk] || 0;
+    const r = await sb.rpc('admin_month_counter', { mk, org_: this.room }); return r.data || 0;
   },
   async adminSaveSetting(key, value) {
     if (LOCAL) { Local.db.settings[key] = value; Local.save(); return; }
     must(await sb.from('settings').upsert({ key, value, updated_at: new Date().toISOString() }));
   },
   async adminSaveBoard(b) {
+    b = { ...b, org: b.org || this.room };
     if (LOCAL) { const i = Local.db.boards.findIndex(x => x.id === b.id); if (i >= 0) Local.db.boards[i] = { ...b }; else Local.db.boards.push({ ...b }); Local.save(); return; }
     must(await sb.from('boards').upsert(b));
   },
@@ -1214,12 +1282,12 @@ const API = {
         const want = String(r.nickname || '').trim(), okNick = want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want);
         const nu = { id: Local.uuid(), login_id: em, email: em, pw: Local.hash(pw), role: 'user', perms: [], must_change_pw: true, status: 'active', nickname: okNick ? want : Local.uniqueNick(), nickname_month: null,
           created_at: new Date().toISOString(), last_seen: null };
-        MEMBER_FIELDS.forEach(([k]) => nu[k] = r[k] || ''); nu.dept = nu.org_branch;
+        MEMBER_FIELDS.forEach(([k]) => nu[k] = r[k] || ''); nu.dept = nu.org_branch; nu.org = String(r.org || '').toLowerCase() === 'otc' ? 'otc' : 'etc'; nu.cross_org = false;
         db.users.push(nu); db.history.push({ id: db.history.length + 1, user_id: nu.id, nickname: nu.nickname, month_key: curMonth(), created_at: nu.created_at });
         res.push({ email: em, status: 'created', msg: want && !okNick ? `닉네임 [${want}] 사용 불가 → 자동 생성` : null });
       } else if (isAdminRole(u.role)) res.push({ email: em, status: 'error', msg: '관리자 계정은 [관리자 계정] 메뉴에서 수정하세요' });
       else {
-        MEMBER_FIELDS.forEach(([k]) => { if (r[k]) u[k] = r[k]; }); u.dept = u.org_branch;
+        MEMBER_FIELDS.forEach(([k]) => { if (r[k]) u[k] = r[k]; }); u.dept = u.org_branch; if (r.org) u.org = String(r.org).toLowerCase() === 'otc' ? 'otc' : 'etc';
         if (r.reset_pw) { u.pw = Local.hash(r.password || u.emp_no); u.must_change_pw = true; }
         const want = String(r.nickname || '').trim(); let msg = null;
         if (want && want !== u.nickname) { if (want.length >= 2 && want.length <= 12 && !db.users.some(x => x.nickname === want)) { u.nickname = want; db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: want, month_key: curMonth(), created_at: new Date().toISOString() }); } else msg = `닉네임 [${want}] 사용 불가 → 기존 유지`; }
@@ -1227,6 +1295,20 @@ const API = {
       }
     }
     Local.save(); return res;
+  },
+  /* e_admin(ETC) · o_admin(OTC) 계정 만들기 — 아이디 = 처음 닉네임 · 운영 권한 없음 */
+  async adminCreateStaff(login, pw, kind) {
+    login = String(login || '').trim().toLowerCase();
+    if (!validLoginId(login)) throw new Error('아이디는 영문 소문자·숫자·._- 3~20자');
+    if (String(pw || '').length < 6) throw new Error('비밀번호는 6자 이상이어야 합니다');
+    if (!['e_admin', 'o_admin'].includes(kind)) throw new Error('구분을 선택하세요');
+    if (!LOCAL) { must(await sb.rpc('admin_create_staff', { p_login: login, p_password: pw, p_kind: kind })); return; }
+    const db = Local.db; if (this.profile?.role !== 'super') throw new Error('admin만 만들 수 있습니다');
+    if (db.users.some(u => u.login_id === login)) throw new Error('이미 있는 아이디입니다');
+    if (db.users.some(u => u.nickname === login)) throw new Error('같은 닉네임이 이미 있습니다');
+    const u = { id: Local.uuid(), login_id: login, email: `${login}@${EMAIL_DOMAIN}`, pw: Local.hash(pw), role: kind, org: kind === 'o_admin' ? 'otc' : 'etc', cross_org: false, perms: [], must_change_pw: false, status: 'active',
+      nickname: login, nickname_month: null, created_at: new Date().toISOString(), last_seen: null, real_name: '', org_branch: '', dept: '' };
+    db.users.push(u); db.history.push({ id: db.history.length + 1, user_id: u.id, nickname: u.nickname, month_key: curMonth(), created_at: u.created_at }); Local.save();
   },
   async adminCreateAdmin(login, pw, details, perms) {
     login = String(login || '').trim().toLowerCase();
@@ -1248,14 +1330,14 @@ const API = {
   },
   async deletePushSub(endpoint) { if (!LOCAL) await sb.rpc('delete_push_subscription', { p_endpoint: endpoint }); },
   async latestPosts(n) {
-    if (LOCAL) return Local.db.posts.slice().sort((a, b) => b.id - a.id).slice(0, n || 30).map(p => ({ id: p.id, mine: p.user_id === this.uid }));
-    return must(await sb.from('posts_v').select('id,mine').order('id', { ascending: false }).limit(n || 30));
+    if (LOCAL) return Local.db.posts.filter(p => orgOf(p) === this.room).sort((a, b) => b.id - a.id).slice(0, n || 30).map(p => ({ id: p.id, mine: p.user_id === this.uid }));
+    return must(await sb.from('posts_v').select('id,mine').eq('org', this.room).order('id', { ascending: false }).limit(n || 30));
   },
   /* 랭킹 (닉네임·점수만 — 계정·소속 정보 없음) */
   /* ---------- 이달의 Voice 시상 ----------
      심사(grand 최우수·excellent 우수·merit 장려) · 결과(popular·reaction·big) · 이벤트(nth·survey)
      회원에게는 관리자가 [게시]한 달의 '닉네임'만 공개 */
-  _aw(mk) { const db = Local.db; db.vawards = db.vawards || {}; return db.vawards[mk] = db.vawards[mk] || { items: [], published: false, published_at: null }; },
+  _aw(mk) { const db = Local.db, k = this.room + ':' + mk; db.vawards = db.vawards || {}; return db.vawards[k] = db.vawards[k] || { items: [], published: false, published_at: null }; },
   _monthNick(uid, mk) { const db = Local.db, u = db.users.find(x => x.id === uid) || {};
     const h = (db.history || []).filter(x => x.user_id === uid && x.month_key === mk).pop(); if (h) return h.nickname;
     const p = db.posts.filter(x => x.user_id === uid && x.month_key === mk).pop(); if (p) return p.author_nickname;
@@ -1264,25 +1346,26 @@ const API = {
   _supRow(u) { const sup = this.profile && this.profile.role === 'super';
     return { real_name: sup ? u.real_name : null, emp_no: sup ? u.emp_no : null, dept: sup ? [u.org_branch, u.work_branch].filter(Boolean).join(' ') : null }; },
   async adminVoiceStats(mk) {
-    if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk }));
+    if (!LOCAL) return must(await sb.rpc('admin_voice_stats', { mk, org_: this.room }));
     const db = Local.db, w = db.settings.score || { like: 1, comment: 2 }, g = {};
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
-    const adm = new Set(db.users.filter(u => isAdminRole(u.role)).map(u => u.id));
-    db.posts.filter(p => p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
+    const adm = new Set(db.users.filter(u => !awardEligible(u)).map(u => u.id)), room = this.room;   // 운영진·통합 회원의 댓글은 점수에서 제외
+    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
       // 인기 Voice: 본인 제외 좋아요(관리자 포함, 최고관리자는 누른 횟수만큼) + 본인·관리자 제외 다른 회원 댓글(한 글에 같은 사람은 1번)
       o.likes += db.reactions.filter(r => r.post_id === p.id && r.type === 'like' && r.user_id !== p.user_id).reduce((a, r) => a + (r.qty || 1), 0);
       o.comments_received += new Set(db.comments.filter(c => c.post_id === p.id && c.user_id && c.user_id !== p.user_id && !adm.has(c.user_id)).map(c => c.user_id)).size; });
-    db.comments.filter(c => c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
+    const roomPosts = new Set(db.posts.filter(p => orgOf(p) === room).map(p => p.id));
+    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
     const items = this._aw(mk).items;
-    return Object.values(g).filter(o => users[o.uid] && users[o.uid].role === 'user').map(o => { const u = users[o.uid];
+    return Object.values(g).filter(o => awardEligible(users[o.uid]) && orgOf(users[o.uid]) === room).map(o => { const u = users[o.uid];
       return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
         score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
   async adminAwardCandidates(mk) {
-    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk }));
+    if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk, org_: this.room }));
     const db = Local.db;
-    return db.users.filter(u => u.role === 'user').map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
+    return db.users.filter(u => awardEligible(u) && orgOf(u) === this.room).map(u => ({ token: this._tok(mk, u.id), nickname: this._monthNick(u.id, mk),
       survey_wins: (db.surveyDraws || []).filter(d => (d.winner_ids || []).includes(u.id) && monthKeyOf(d.drawn_at) >= mk)
         .map(d => (db.surveys.find(x => x.id === d.survey_id) || {}).title || '설문'), ...this._supRow(u) }));
   },
@@ -1302,7 +1385,7 @@ const API = {
   },
   async adminGetAwards(mk) {
     if (!LOCAL) {
-      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk }).then(must), sb.rpc('admin_award_pub_state', { mk }).then(must)]);
+      const [list, st] = await Promise.all([sb.rpc('admin_get_awards', { mk, org_: this.room }).then(must), sb.rpc('admin_award_pub_state', { mk, org_: this.room }).then(must)]);
       return { list: list || [], published: !!(st && st.published), published_at: st && st.published_at };
     }
     const A = this._aw(mk), db = Local.db;
@@ -1310,22 +1393,23 @@ const API = {
       return { category: a.category, token: this._tok(mk, a.user_id), nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note, ...this._supRow(u) }; }) };
   },
   async adminPublishAwards(mk, on) {
-    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on })); return; }
+    if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on, org_: this.room })); return; }
     const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
   },
   async voiceAwardsPublic(mk) {
-    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk })) || [];
+    if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk, org_: this.room })) || [];
     const A = this._aw(mk), db = Local.db; if (!A.published) return [];
     return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note }; });
   },
   async voiceAwardMonths() {
-    if (!LOCAL) return (must(await sb.rpc('voice_award_months')) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
-    return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published).map(([k]) => k).sort().reverse();
+    if (!LOCAL) return (must(await sb.rpc('voice_award_months', { org_: this.room })) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
+    const pre = this.room + ':'; return Object.entries(Local.db.vawards || {}).filter(([k, v]) => v.published && k.startsWith(pre)).map(([k]) => k.slice(pre.length)).sort().reverse();
   },
   async ranking(mk) {
-    if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '' }));
+    if (!LOCAL) return must(await sb.rpc('get_ranking', { mk: mk || '', org_: this.room }));
     const w = Local.db.settings.score || { like: 1, comment: 2 }, g = {};
-    Local.db.posts.filter(p => p.author_role !== 'admin' && p.user_id && (!mk || p.month_key === mk)).forEach(p => {
+    const users = {}; Local.db.users.forEach(u => users[u.id] = u);
+    Local.db.posts.filter(p => orgOf(p) === this.room && awardEligible(users[p.user_id]) && (!mk || p.month_key === mk)).forEach(p => {
       const o = g[p.user_id] = g[p.user_id] || { uid: p.user_id, posts: 0, likes: 0, comments: 0, last: 0, nickname: '' };
       o.posts++; o.likes += p.like_count; o.comments += p.comment_count; if (p.id > o.last) { o.last = p.id; o.nickname = p.author_nickname; } });
     return Object.values(g).map(o => ({ nickname: o.nickname, posts: o.posts, likes: o.likes, comments: o.comments, score: o.likes * w.like + o.comments * w.comment, is_me: o.uid === this.uid }))
@@ -1449,7 +1533,7 @@ const API = {
   },
   async adminSavePopup(p) {
     const row = { title: p.title || '', media_url: p.media_url, media_type: p.media_type, media_path: p.media_path || null, media_name: p.media_name || null, media_size: p.media_size || null,
-      link_url: p.link_url || null, start_at: p.start_at || null, end_at: p.end_at || null, active: !!p.active, sort: +p.sort || 0 };
+      link_url: p.link_url || null, start_at: p.start_at || null, end_at: p.end_at || null, active: !!p.active, sort: +p.sort || 0, orgs: orgsOf(p) };
     if (LOCAL) {
       const db = Local.db; db.popups = db.popups || [];
       if (p.id) Object.assign(db.popups.find(x => x.id === p.id), row);
@@ -1465,7 +1549,7 @@ const API = {
   },
   async removeMedia(path) { if (!LOCAL && path) await sb.storage.from('voy-files').remove([path]); },
   async adminSetPinned(id, pinned, keepOthers) {
-    if (LOCAL) { const db = Local.db; if (pinned && !keepOthers) db.posts.forEach(p => p.is_pinned = false); db.posts.find(p => p.id === +id).is_pinned = pinned; Local.save(); return; }
+    if (LOCAL) { const db = Local.db, t = db.posts.find(p => p.id === +id); if (pinned && !keepOthers) db.posts.forEach(p => { if (orgOf(p) === orgOf(t)) p.is_pinned = false; }); t.is_pinned = pinned; Local.save(); return; }
     if (pinned && !keepOthers) must(await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', +id));
     must(await sb.from('posts').update({ is_pinned: pinned }).eq('id', +id));
   }
@@ -1484,7 +1568,8 @@ const QL_DEFAULTS = [
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
-  { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, updated_at: null },   // YH MKT PM 품목 검색
+  { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, orgs: ['etc'], updated_at: null },   // ETC 품목 PM 검색
+  { id: 'opm',      name: '품목PM검색',              url: 'yhopm/',    icon: 'pm_otc',   auto: true, on: true, orgs: ['otc'], updated_at: null },   // OTC 품목 PM 검색
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -1510,6 +1595,7 @@ const QL_ICONS = {
     '<path d="M20.5 49c0-8.6 6-14.6 13.5-14.6S47.5 40.4 47.5 49c0 1.4-1.1 2.5-2.5 2.5H23c-1.4 0-2.5-1.1-2.5-2.5Z" fill="#fff"/>' +
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
+  pm_otc: { name: '품목PM검색 · OTC (청록)', c: ['#4FD8C4', '#0E8F86'], g: '' },
   rest: { name: 'FunVOY!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
     '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
@@ -1518,6 +1604,7 @@ const QL_ICONS = {
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
+QL_ICONS.pm_otc.g = QL_ICONS.pm.g.replace(/#7B3FE4/g, '#0E8F86');   // OTC 품목PM검색: 같은 모양, 청록색
 function qlIconSVG(key, size) {
   const ic = QL_ICONS[key] || QL_ICONS.link, id = 'qg' + key + Math.random().toString(36).slice(2, 6);
   return `<svg width="${size || 56}" height="${size || 56}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${ic.c[0]}"/><stop offset="1" stop-color="${ic.c[1]}"/></linearGradient></defs>
@@ -1531,7 +1618,8 @@ function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
   if (!(Array.isArray(raw) && raw.length)) return QL_DEFAULTS.map(l => ({ ...l }));
   const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
-  out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name; });
+  out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name;
+    if (d && d.orgs && !Array.isArray(l.orgs)) l.orgs = d.orgs.slice(); });   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
   QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
   return out;
 }
@@ -1542,7 +1630,7 @@ const QL = {
   resolve(u) { u = String(u || '').trim(); if (!u) return '';
     if (!/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(u)) { const [path, rest = ''] = u.split(/(?=[?#])/); if (path.endsWith('/')) u = path + 'index.html' + rest; else if (!/\.[a-z0-9]{2,5}$/i.test(path.split('/').pop())) u = path + '/index.html' + rest; }
     try { return new URL(u, this.base).href; } catch (e) { return u; } },
-  init(raw) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed); },
+  init(raw, room) { this.list = qlMerge(raw).filter(l => l.on !== false && !l.removed && (!room || !Array.isArray(l.orgs) || !l.orgs.length || l.orgs.includes(room))); },   // room: 회원 화면은 지금 방(ETC/OTC)에 체크된 메뉴만
   /* 빨간 점 기준 (이 기기·이 브라우저 기준으로 기억)
      ① 관리자가 [업데이트 알림]을 누른 뒤 아직 안 열어봤으면 표시
      ② 페이지 '내용'이 마지막으로 열어본 때와 달라졌으면 표시 — 파일 크기·ETag로 비교
@@ -1718,7 +1806,7 @@ const root = document.getElementById('root');
 const A = { likeCounts: [], dtList: {}, dtView: {}, popups: [], me: null, page: 'posts', boards: [], settings: {}, posts: [], comments: [], profiles: [], events: [], sel: new Set(), pageNo: 1,
   f: { posts: { month: curMonth(), board: '', sort: 'new', q: '' }, comments: { month: curMonth(), q: '' }, members: { role: '', likeMonth: curMonth() }, rank: { month: curMonth(), inclAdmin: false }, events: { month: curMonth() } } };
 const PER = 30;
-const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '관리자 계정'], ['rank', 'trophy', '순위·점수 관리'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
+const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '권한·운영진'], ['rank', 'trophy', '순위·점수 관리'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
 const pmap = () => { const m = {}; A.profiles.forEach(p => m[p.id] = p); return m; };
 const boardOf = id => A.boards.find(b => b.id === id) || { name: '-', color: '#888' };
 const W = () => A.settings.score || { like: 1, comment: 2 };
@@ -1748,9 +1836,9 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261111.0945</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261111.1622</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
-    ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 최고관리자 <b>admin / admin1234</b> · 일반관리자 <b>manager / manager1234</b></p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
+    ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
   const lr = document.getElementById('lreset'); if (lr) lr.onclick = async ev => { ev.preventDefault(); if (await confirmBox('데모 데이터를 처음 상태로 되돌릴까요?\n(admin / admin1234 로 다시 로그인할 수 있어요)', '초기화', true)) { Local.reset(); location.reload(); } };
   document.getElementById('lf').onsubmit = async e => {
@@ -1783,7 +1871,7 @@ function layout() {
         <button data-act="reload">${I('refresh', 17)}<span>새로고침</span></button>
         <button data-act="logout">${I('logout', 17)}<span>로그아웃</span></button></div>
       <button class="collapse" data-act="mini">${I('left', 14)}</button></aside>
-    <div class="main"><header class="topbar"><h1>${title}</h1><div class="who">${esc(A.me.real_name || '')} · 아이디 ${esc(A.me.login_id)} <span class="adm-badge" ${A.me.role === 'super' ? 'style="color:var(--gold);border-color:var(--gold);background:var(--gold-soft)"' : ''}>${A.me.role === 'super' ? 'SUPER' : 'ADMIN'}</span>${LOCAL ? ' <span class="adm-badge" style="color:var(--gold);border-color:var(--gold)">DEMO</span>' : ''}</div></header>
+    <div class="main"><header class="topbar"><h1>${title}</h1>${['members', 'admins'].includes(A.page) ? '<span class="org-all">ETC + OTC 공통</span>' : `<div class="org-sw" title="지금 관리 중인 커뮤니티">${['etc', 'otc'].map(o => `<button class="${API.room === o ? 'on' : ''}" data-act="org" data-org="${o}">${ORG_NAME[o]}</button>`).join('')}</div>`}<div class="who">${esc(A.me.real_name || '')} · 아이디 ${esc(A.me.login_id)} <span class="adm-badge" ${A.me.role === 'super' ? 'style="color:var(--gold);border-color:var(--gold);background:var(--gold-soft)"' : ''}>${A.me.role === 'super' ? 'SUPER' : 'ADMIN'}</span>${LOCAL ? ' <span class="adm-badge" style="color:var(--gold);border-color:var(--gold)">DEMO</span>' : ''}</div></header>
       <div class="content" id="content"></div></div></div>`;
 }
 function renderPage() {
@@ -1858,7 +1946,7 @@ function postCols() {
   const P = pmap(), w = W();
   return [
     { k: 'id', l: '누적', v: p => p.id, cls: 'num dim' },
-    { k: 'no', l: '글번호', v: p => postNo(p), r: p => postNo(p) ? `<span class="no-chip">${postNo(p)}</span>` : `<span class="dim" title="관리자 글은 글번호 없음">관리자</span>` },
+    { k: 'no', l: '글번호', v: p => postNo(p), r: p => postNo(p) ? `<span class="no-chip">${postNo(p)}</span>` : `<span class="dim" title="admin·운영진·통합 회원 글은 글번호·시상에서 제외">${p.author_role === 'admin' ? '관리자' : (k => k ? KIND_LABEL[k].replace(/ \(.*\)/, '') : '제외')(memberKind((A.profiles || []).find(u => u.id === p.user_id)))}</span>` },
     { k: 'board', l: '게시판', v: p => boardOf(p.board_id).name, cls: 'nowrap' },
     { k: 'nick', l: '닉네임', v: p => p.author_nickname, cls: 'b nowrap' },
     { k: 'name', l: '성명 🔒', sup: true, v: p => (P[p.user_id] || {}).real_name || (p.user_id ? '' : '탈퇴'), cls: 'nowrap' },
@@ -1938,10 +2026,14 @@ function countsByUser() { const pc = {}, cc = {}; A.posts.forEach(p => pc[p.user
 function detailCols() { return MEMBER_FIELDS.map(([k, l]) => ({ k, l, v: p => p[k], cls: k === 'emp_no' ? 'mono' : (k === 'real_name' ? 'b nowrap' : 'nowrap'), r: k === 'org_branch' ? p => pill(p[k]) : undefined })); }
 function pageMembers(c) {
   const f = A.f.members, mk = curMonth(), { pc, cc } = countsByUser();
-  const users = A.profiles.filter(p => p.role === 'user');
+  const users = A.profiles.filter(p => !isAdminRole(p.role)).filter(p => !f.org || roomsOf(p).includes(f.org));
   const rows = users.filter(p => !f.role || (f.role === 'blocked' ? p.status === 'blocked' : f.role === 'pw' ? p.must_change_pw : f.role === 'never' ? !p.last_seen || p.must_change_pw : p.status === 'active'));
   const t = dtHTML('members', rows, supOnly([
     { k: 'nickname', l: '닉네임', v: p => p.nickname, cls: 'b nowrap' },
+    { k: 'org', l: '조직', v: p => roomsOf(p).map(o => ORG_NAME[o]).join('+'), r: p => p.role === 'user' && !p.cross_org
+        ? `<select class="mem-sel" data-mem-org="${p.id}">${['etc', 'otc'].map(o => `<option value="${o}" ${orgOf(p) === o ? 'selected' : ''}>${ORG_NAME[o]}</option>`).join('')}</select>` : `<b>${roomsOf(p).map(o => ORG_NAME[o]).join(' + ')}</b>` },
+    { k: 'kind', l: '권한', v: p => KIND_LABEL[memberKind(p)], r: p => p.role === 'user'
+        ? `<select class="mem-sel" data-mem-kind="${p.id}"><option value="member" ${!p.cross_org ? 'selected' : ''}>회원</option><option value="cross" ${p.cross_org ? 'selected' : ''}>통합 회원</option></select>` : `<span class="kind-b ${memberKind(p)}">${KIND_LABEL[memberKind(p)]}</span>` },
     ...detailCols().slice(0, 2),
     { k: 'email', l: `이메일<br><small class="th-sub">(@${COMPANY_DOMAIN})</small>`, v: p => p.email, cls: 'mono dim', r: p => esc(String(p.email || '').endsWith('@' + COMPANY_DOMAIN) ? p.email.slice(0, -(COMPANY_DOMAIN.length + 1)) : p.email || '') },
     ...detailCols().slice(2).filter(c => c.k !== 'sales_office'),   // 영업소 열은 목록에서 숨김 (회원 정보·엑셀에는 그대로 저장)
@@ -1955,9 +2047,9 @@ function pageMembers(c) {
   ]), { empty: '회원이 없습니다. [엑셀 일괄 등록]으로 회원 명단을 올려주세요.' });
   const nPw = users.filter(p => p.must_change_pw).length, nNew = users.filter(p => monthKeyOf(p.created_at) === mk).length;
   c.innerHTML = `<div class="mem-stats"><div class="ms">${I('users', 17)}<span>전체 회원</span><b>${users.length}</b><small>명</small></div><div class="ms ${nPw ? 'warn' : ''}">${I('lock', 17)}<span>비밀번호 미변경</span><b>${nPw}</b><small>명</small></div><div class="ms">${I('userplus', 17)}<span>이번 달 신규</span><b>${nNew}</b><small>명</small></div></div>
-  <div class="panel mem-compact"><div class="mem-head"><div><h2>회원 목록</h2><small>로그인: 회사 이메일 + 비밀번호(초기값 사번) · 관리자 계정은 [관리자 계정] 메뉴</small></div>
+  <div class="panel mem-compact"><div class="mem-head"><div><h2>회원 목록</h2><small>로그인: 회사 이메일 + 비밀번호(초기값 사번) · 조직(ETC/OTC)·권한(회원/통합 회원)은 목록에서 바로 바꿀 수 있어요 · e_admin·o_admin 계정은 [권한·운영진]</small></div>
       <div class="mem-btns"><button class="btn sm" data-act="xls-template">${I('download', 15)} 엑셀 양식</button><button class="btn sm primary" data-act="xls-upload">${I('plus', 15)} 엑셀 일괄 등록</button><button class="btn sm" data-act="mem-new">${I('userplus', 15)} 회원 추가</button><button class="btn sm" data-act="csv" data-t="members">${I('download', 15)} CSV</button></div></div>
-    <div class="mem-filters"><div class="pills">${[['', '전체'], ['active', '정상'], ['pw', '비밀번호 미변경'], ['blocked', '이용 제한']].map(([k, t]) => `<button class="${f.role === k ? 'on' : ''}" data-act="mrole" data-v="${k}">${t}</button>`).join('')}</div>
+    <div class="mem-filters"><div class="pills">${[['', 'ETC+OTC'], ['etc', 'ETC'], ['otc', 'OTC']].map(([k, t]) => `<button class="${(f.org || '') === k ? 'on' : ''}" data-act="morg" data-v="${k}">${t}</button>`).join('')}</div><div class="pills">${[['', '전체'], ['active', '정상'], ['pw', '비밀번호 미변경'], ['blocked', '이용 제한']].map(([k, t]) => `<button class="${f.role === k ? 'on' : ''}" data-act="mrole" data-v="${k}">${t}</button>`).join('')}</div>
       <label class="mem-like">${I('heart', 15)} 누른 좋아요 기준월 <select data-f="likeMonth">${monthOpts(f.likeMonth).replace('전체 기간', '누적 전체')}</select></label></div>
     ${t.html}</div><input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" hidden>`;
   document.getElementById('xlsFile').onchange = e => { const f0 = e.target.files[0]; e.target.value = ''; if (f0) xlsImport(f0); };
@@ -2035,7 +2127,7 @@ function memberNewModal() {
 }
 
 /* ---------------- 엑셀 일괄 등록 ---------------- */
-const XLS_HEAD = ['이메일', '성명', '사번', '닉네임', '구분', '조직지점', '근무지점', '영업소', '직위', '직책', '초기비밀번호'];
+const XLS_HEAD = ['이메일', '성명', '사번', '닉네임', '조직(ETC/OTC)', '구분', '조직지점', '근무지점', '영업소', '직위', '직책', '초기비밀번호'];
 function loadXLSX() {
   if (window.XLSX) return Promise.resolve(window.XLSX);
   return new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
@@ -2047,6 +2139,7 @@ function headKey(h) {
   if (t.includes('이메일') || t === 'email' || t.includes('메일')) return 'email';
   if (t.includes('비밀번호') || t.includes('password')) return 'password';
   if (t.includes('닉네임') || t === 'nickname') return 'nickname';
+  if (t === '조직' || t === 'org' || t === 'etc/otc' || t === '커뮤니티') return 'org';
   return { 성명: 'real_name', 이름: 'real_name', 사번: 'emp_no', 구분: 'category', 조직지점: 'org_branch', 근무지점: 'work_branch', 영업소: 'sales_office', 직위: 'position', 직책: 'duty' }[t] || null;
 }
 async function xlsTemplate() {
@@ -2054,7 +2147,7 @@ async function xlsTemplate() {
     const X = await loadXLSX(), wb = X.utils.book_new();
     const ws = X.utils.aoa_to_sheet([XLS_HEAD]); ws['!cols'] = XLS_HEAD.map((h, i) => ({ wch: i === 0 ? 28 : 13 }));
     X.utils.book_append_sheet(wb, ws, '회원명단');
-    const g = X.utils.aoa_to_sheet([['작성 방법'], ['1. [회원명단] 시트 2행부터 한 줄에 한 명씩 입력합니다.'], ['2. 이메일(@yuhan.co.kr)과 성명은 필수, 사번은 초기 비밀번호로 쓰이므로 꼭 입력하세요.'], ['3. 초기비밀번호를 비워두면 사번이 초기 비밀번호가 됩니다. (첫 로그인 시 본인이 변경)'], ['3-1. 닉네임(선택): 다른 곳에서 쓰던 닉네임을 넣으면 그대로 이어서 씁니다. 2~12자, 다른 회원과 겹치면 자동 생성됩니다. 비우면 자동 생성.'], ['4. 이미 등록된 이메일은 세부정보만 수정됩니다.'], ['5. 구분·조직지점·근무지점·영업소·직위·직책은 설문 대상 지정과 운영 통계에 쓰이며, 게시판에서는 최고관리자(admin)에게만 보입니다.'], [], ['예시'], XLS_HEAD, ['hong.gildong@yuhan.co.kr', '홍길동', '20150101', '든든한수달27', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원', '']]);
+    const g = X.utils.aoa_to_sheet([['작성 방법'], ['1. [회원명단] 시트 2행부터 한 줄에 한 명씩 입력합니다.'], ['2. 이메일(@yuhan.co.kr)과 성명은 필수, 사번은 초기 비밀번호로 쓰이므로 꼭 입력하세요.'], ['3. 초기비밀번호를 비워두면 사번이 초기 비밀번호가 됩니다. (첫 로그인 시 본인이 변경)'], ['3-1. 닉네임(선택): 다른 곳에서 쓰던 닉네임을 넣으면 그대로 이어서 씁니다. 2~12자, 다른 회원과 겹치면 자동 생성됩니다. 비우면 자동 생성.'], ['3-2. 조직: ETC 또는 OTC (비우면 ETC). 그 회원은 자기 조직 커뮤니티만 볼 수 있어요. 통합 회원·e_admin·o_admin은 관리자 콘솔에서 지정합니다.'], ['4. 이미 등록된 이메일은 세부정보만 수정됩니다. (조직 칸을 채우면 조직도 바뀝니다)'], ['5. 구분·조직지점·근무지점·영업소·직위·직책은 설문 대상 지정과 운영 통계에 쓰이며, 게시판에서는 최고관리자(admin)에게만 보입니다.'], [], ['예시'], XLS_HEAD, ['hong.gildong@yuhan.co.kr', '홍길동', '20150101', '든든한수달27', 'ETC', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원', '']]);
     g['!cols'] = [{ wch: 28 }, ...XLS_HEAD.slice(1).map(() => ({ wch: 13 }))];
     X.utils.book_append_sheet(wb, g, '작성방법');
     X.writeFile(wb, 'VOY_회원명단_양식.xlsx');
@@ -2092,8 +2185,8 @@ async function xlsImport(file) {
   const nNew = chk.filter(r => r._kind === '신규').length, nUp = chk.filter(r => r._kind === '수정').length, nErr = chk.filter(r => r._kind === '오류').length;
   openModal(`<div class="modal-head"><h3>엑셀 일괄 등록 미리보기</h3><button class="icon-x" data-close>${I('x')}</button></div>
     <div class="modal-body"><p class="hint" style="margin:0 0 10px"><b>${esc(file.name)}</b> · 총 ${chk.length}명 — <b class="c-acc">신규 ${nNew}</b> · 수정 ${nUp} · <b style="color:var(--danger)">오류 ${nErr}</b> (오류 행은 건너뜁니다)</p>
-      <div class="tbl-wrap xprev" style="margin:0;max-height:46vh;overflow:auto;border:1px solid var(--border);border-radius:10px"><table><thead><tr><th>구분</th><th>이메일</th><th>성명</th><th>사번</th><th>닉네임</th><th>조직지점</th><th>근무지점</th><th>직위</th><th>확인</th></tr></thead><tbody>
-      ${chk.slice(0, 300).map(r => `<tr><td><span class="pst ${r._kind === '신규' ? 'on' : r._kind === '오류' ? 'off' : 'wait'}" ${r._kind === '오류' ? 'style="color:var(--danger)"' : ''}>${r._kind}</span></td><td class="mono">${esc(r.email)}</td><td>${esc(r.real_name || '')}</td><td class="mono">${esc(r.emp_no || '')}</td><td class="b" ${r._nickBad ? 'style="color:var(--danger);text-decoration:line-through"' : ''}>${esc(r.nickname || '')}</td><td>${esc(r.org_branch || '')}</td><td>${esc(r.work_branch || '')}</td><td>${esc(r.position || '')}</td><td class="dim" style="font-size:12px">${esc(r._msg)}</td></tr>`).join('')}
+      <div class="tbl-wrap xprev" style="margin:0;max-height:46vh;overflow:auto;border:1px solid var(--border);border-radius:10px"><table><thead><tr><th>구분</th><th>이메일</th><th>성명</th><th>사번</th><th>닉네임</th><th>조직</th><th>조직지점</th><th>근무지점</th><th>직위</th><th>확인</th></tr></thead><tbody>
+      ${chk.slice(0, 300).map(r => `<tr><td><span class="pst ${r._kind === '신규' ? 'on' : r._kind === '오류' ? 'off' : 'wait'}" ${r._kind === '오류' ? 'style="color:var(--danger)"' : ''}>${r._kind}</span></td><td class="mono">${esc(r.email)}</td><td>${esc(r.real_name || '')}</td><td class="mono">${esc(r.emp_no || '')}</td><td class="b" ${r._nickBad ? 'style="color:var(--danger);text-decoration:line-through"' : ''}>${esc(r.nickname || '')}</td><td class="b">${esc(String(r.org || '').trim() ? (String(r.org).trim().toLowerCase() === 'otc' ? 'OTC' : 'ETC') : (r._kind === '신규' ? 'ETC' : '유지'))}</td><td>${esc(r.org_branch || '')}</td><td>${esc(r.work_branch || '')}</td><td>${esc(r.position || '')}</td><td class="dim" style="font-size:12px">${esc(r._msg)}</td></tr>`).join('')}
       </tbody></table></div>${chk.length > 300 ? `<p class="hint">미리보기는 300명까지만 표시합니다.</p>` : ''}
       <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" class="ck" id="xreset"> 기존 회원(수정 대상)의 비밀번호도 사번/초기비밀번호로 초기화</label>
       <div id="xprog" class="hint"></div></div>
@@ -2101,7 +2194,7 @@ async function xlsImport(file) {
     wide: true, sticky: true, onMount(m, close) {
       m.querySelector('#xok').onclick = async e => {
         const reset = m.querySelector('#xreset').checked;
-        const todo = chk.filter(r => r._kind !== '오류').map(r => { const o = {}; ['email', 'password', 'nickname', ...MEMBER_FIELDS.map(f => f[0])].forEach(k => { if (r[k]) o[k] = r[k]; }); if (r._nickBad) delete o.nickname; if (reset) o.reset_pw = true; return o; });
+        const todo = chk.filter(r => r._kind !== '오류').map(r => { const o = {}; ['email', 'password', 'nickname', 'org', ...MEMBER_FIELDS.map(f => f[0])].forEach(k => { if (r[k]) o[k] = r[k]; }); if (r._nickBad) delete o.nickname; if (reset) o.reset_pw = true; return o; });
         busy(e.target, true, ' 등록 중'); const out = [];
         try {
           for (let i = 0; i < todo.length; i += 100) { m.querySelector('#xprog').textContent = `처리 중… ${Math.min(i + 100, todo.length)} / ${todo.length}`; out.push(...await API.adminUpsertMembers(todo.slice(i, i + 100))); }
@@ -2122,21 +2215,56 @@ async function xlsImport(file) {
 /* ---------------- 관리자 계정 (최고관리자 전용) ---------------- */
 function permChips(p) { return p.role === 'super' ? '<span class="perm all">전체 권한</span>' : (p.perms || []).map(k => `<span class="perm">${esc((PERMS.find(x => x[0] === k) || [k, k])[1])}</span>`).join('') || '<span class="dim">없음</span>'; }
 function pageAdmins(c) {
-  const { pc } = countsByUser(), admins = A.profiles.filter(p => isAdminRole(p.role));
-  const t = dtHTML('admins', admins, [
-    { k: 'login_id', l: '아이디', v: p => p.login_id, cls: 'mono b' },
-    ...detailCols(),
-    { k: 'role', l: '역할', cls: 'nowrap', v: p => p.role === 'super' ? '최고관리자' : '관리자', r: p => `<span class="role ${p.role === 'super' ? 'admin' : ''}">${p.role === 'super' ? '👑 최고관리자' : '관리자'}</span>${p.status === 'blocked' ? ' <span class="status-blocked">정지</span>' : ''}` },
-    { k: 'perms', l: '메뉴 권한', v: p => p.role === 'super' ? '전체' : (p.perms || []).map(k => (PERMS.find(x => x[0] === k) || [k, k])[1]).join(','), r: p => `<div class="chips" style="min-width:190px">${permChips(p)}</div>`, nosort: true },
-    { k: 'nickname', l: '공지 닉네임', v: p => p.nickname, cls: 'nowrap' },
-    { k: 'created', l: '가입일', v: p => p.created_at, s: p => fmtDT(p.created_at), r: p => dtCell(p.created_at) },
+  const { pc } = countsByUser();
+  const staff = A.profiles.filter(p => p.role === 'super' || p.role === 'e_admin' || p.role === 'o_admin' || p.cross_org);
+  const ord = { admin: 0, cross: 1, e_admin: 2, o_admin: 3 };
+  const t = dtHTML('admins', staff.slice().sort((a, b) => ord[memberKind(a)] - ord[memberKind(b)]), [
+    { k: 'kind', l: '권한', v: p => KIND_LABEL[memberKind(p)], r: p => `<span class="kind-b ${memberKind(p)}">${memberKind(p) === 'admin' ? '👑 ' : ''}${KIND_LABEL[memberKind(p)]}</span>${p.status === 'blocked' ? ' <span class="status-blocked">정지</span>' : ''}` },
+    { k: 'rooms', l: '볼 수 있는 방', v: p => roomsOf(p).map(o => ORG_NAME[o]).join(' + '), cls: 'b nowrap' },
+    { k: 'login_id', l: '아이디', v: p => p.login_id || p.email, cls: 'mono' },
+    { k: 'nickname', l: '닉네임', v: p => p.nickname, cls: 'b nowrap' },
+    { k: 'real_name', l: '성명', v: p => p.real_name || '', cls: 'nowrap' },
+    { k: 'award', l: '시상', v: p => '제외', r: () => '<span class="dim">제외</span>', nosort: true },
     { k: 'seen', l: '최근접속', v: p => p.last_seen, s: p => fmtDT(p.last_seen), r: p => dtCell(p.last_seen) },
     { k: 'posts', l: '게시글', v: p => pc[p.id] || 0, cls: 'num', ns: true },
-    { k: 'act', l: '관리', nosort: true, ns: true, v: () => '', r: p => `<div class="acts"><button class="ib" data-act="adm-edit" data-id="${p.id}" title="수정">${I('edit', 16)}</button></div>` }
+    { k: 'act', l: '관리', nosort: true, ns: true, v: () => '', r: p => {
+      const k = memberKind(p);
+      if (k === 'admin') return `<div class="acts"><button class="ib" data-act="adm-edit" data-id="${p.id}" title="수정">${I('edit', 16)}</button></div>`;
+      if (k === 'cross') return `<div class="acts"><button class="btn sm" data-act="cross-off" data-id="${p.id}">권한 해제</button></div>`;
+      return `<div class="acts"><button class="ib" data-act="staff-pw" data-id="${p.id}" title="비밀번호 변경">${I('lock', 16)}</button><button class="ib del" data-act="staff-del" data-id="${p.id}" title="계정 삭제">${I('trash', 16)}</button></div>`; } }
   ]);
-  c.innerHTML = `<div class="cards3">${stat('관리자 계정', admins.length, '명', 'shield')}${stat('최고관리자', admins.filter(p => p.role === 'super').length, '명', 'trophy')}${stat('최근 7일 접속', admins.filter(p => p.last_seen && Date.now() - new Date(p.last_seen) < 7 * 86400e3).length, '명', 'eye')}</div>
-  <div class="panel"><div class="panel-head"><div><h2>관리자 계정</h2><p>최고관리자(admin) 1명만 모든 권한을 갖고, 관리자 계정을 추가·수정할 수 있습니다. 추가한 관리자는 체크한 메뉴만 보입니다.</p></div>
-    <div style="display:flex;gap:8px"><button class="btn sm" data-act="csv" data-t="admins">${I('download', 15)} 엑셀(CSV)</button><button class="btn primary" data-act="adm-new">${I('plus', 16)} 관리자 추가</button></div></div>${t.html}</div>`;
+  const n = k => staff.filter(p => memberKind(p) === k).length;
+  c.innerHTML = `<div class="panel"><div class="panel-head"><div><h2>${I('shield', 19)} 권한 구조</h2><p><b>운영(설정·회원·시상·공지·팝업)과 실명 확인은 admin 한 사람만</b> 할 수 있습니다. 나머지 권한은 보기·참여 범위만 정합니다.</p></div></div>
+    <div class="rule-grid">
+      <div><span class="kind-b admin">👑 admin</span><b>ETC + OTC · 운영 전체</b><small>관리자 콘솔 · 실명 확인 · 공지/팝업 동시 게시 · 시상 선정</small></div>
+      <div><span class="kind-b cross">통합 회원</span><b>ETC + OTC · 보기·참여</b><small>헤더에서 방을 바꿔가며 글·댓글 · 본인 닉네임(한 달 1회 변경) · 시상 제외 · 회원 목록에서 지정</small></div>
+      <div><span class="kind-b e_admin">e_admin</span><b>ETC만 · 보기·참여</b><small>부서 대표 닉네임 계정 · 처음 닉네임 = 아이디(한 달 1회 변경) · 시상 제외</small></div>
+      <div><span class="kind-b o_admin">o_admin</span><b>OTC만 · 보기·참여</b><small>부서 대표 닉네임 계정 · 처음 닉네임 = 아이디(한 달 1회 변경) · 시상 제외</small></div>
+      <div><span class="kind-b">회원</span><b>자기 조직(ETC 또는 OTC)만</b><small>회원명부의 조직으로 결정 · 이달의 Voice 등 시상 대상</small></div>
+    </div></div>
+  <div class="cards3">${stat('통합 회원', n('cross'), '명', 'users')}${stat('e_admin (ETC)', n('e_admin'), '개', 'shield')}${stat('o_admin (OTC)', n('o_admin'), '개', 'shield')}</div>
+  <div class="panel"><div class="panel-head"><div><h2>운영진·통합 회원 목록</h2><p>통합 회원은 [회원 관리] 목록의 '권한' 칸에서 지정합니다. e_admin·o_admin은 여기서 계정을 만듭니다.</p></div>
+    <div style="display:flex;gap:8px"><button class="btn sm" data-act="csv" data-t="admins">${I('download', 15)} 엑셀(CSV)</button><button class="btn primary" data-act="staff-new">${I('plus', 16)} e_admin · o_admin 계정 만들기</button></div></div>${t.html}</div>`;
+}
+/* 아이디 제안: 처음은 e_admin / o_admin, 이미 있으면 그때만 e_admin2… (번호 계정은 꼭 필요할 때만) */
+const staffId = k => { const ids = new Set(A.profiles.map(p => p.login_id)); if (!ids.has(k)) return k; let i = 2; while (ids.has(k + i)) i++; return k + i; };
+function staffModal() {
+  openModal(`<div class="modal-head"><h3>e_admin · o_admin 계정 만들기</h3><button class="icon-x" data-close>${I('x')}</button></div>
+    <div class="modal-body"><div class="form-grid">
+      <div class="full"><label class="lbl">구분</label><div class="seg-radio" id="sk"><label><input type="radio" name="sk" value="e_admin" checked> e_admin · ETC 방</label><label><input type="radio" name="sk" value="o_admin"> o_admin · OTC 방</label></div></div>
+      <div><label class="lbl">아이디 (= 처음 닉네임)</label><input id="s_id" value="${staffId('e_admin')}" autocapitalize="off"></div>
+      <div><label class="lbl">비밀번호 (6자 이상)</label><input id="s_pw" type="text" placeholder="초기 비밀번호"></div>
+      <div class="full"><p class="hint" style="margin:0">보통 조직마다 <b>e_admin · o_admin 한 계정</b>을 함께 쓰면 충분합니다. 로그인은 아이디만 입력하면 됩니다 (예: e_admin). 운영 권한·실명 확인은 없고, 지정한 방에서 부서 대표 닉네임으로 글·댓글만 씁니다. 닉네임은 한 달에 한 번 바꿀 수 있어요.</p></div>
+    </div></div>
+    <div class="modal-foot"><button class="btn ghost" data-close>취소</button><button class="btn primary" id="s_ok">만들기</button></div>`, {
+    onMount(m, close) {
+      m.querySelectorAll('input[name=sk]').forEach(r => r.onchange = () => { const k = m.querySelector('input[name=sk]:checked').value; m.querySelector('#s_id').value = staffId(k); });
+      m.querySelector('#s_ok').onclick = async e => {
+        busy(e.target, true);
+        try { await API.adminCreateStaff(m.querySelector('#s_id').value, m.querySelector('#s_pw').value, m.querySelector('input[name=sk]:checked').value); close(); toast('계정을 만들었습니다'); await loadAll(); renderPage(); }
+        catch (er) { toast(friendly(er), 'err'); busy(e.target, false); }
+      };
+    } });
 }
 function adminModal(p) {
   const isNew = !p, sup = p && p.role === 'super', self = p && p.id === A.me.id;
@@ -2391,7 +2519,7 @@ function pagePopups(c) {
     <div class="tbl-wrap"><table><thead><tr><th>미리보기</th><th>제목</th><th>유형</th><th>노출 기간</th><th>링크</th><th class="num">순서</th><th>상태</th><th class="num">노출</th><th>등록일</th><th class="num">관리</th></tr></thead><tbody>
     ${list.map(p => { const [tk, tl] = popupTypeLabel(p), [sk, sl] = popupStatus(p); return `<tr>
       <td><div class="pthumb" data-act="pop-preview" data-id="${p.id}">${popupMediaHTML(p, true)}${p.media_type === 'video' ? '<span class="vb">▶ MP4</span>' : ''}</div></td>
-      <td class="b">${esc(p.title || '(제목 없음)')}<div class="dim" style="font-size:12px;font-weight:500;margin-top:2px">${esc(p.media_name || '')} ${fmtSize(p.media_size)}</div></td>
+      <td class="b">${orgsOf(p).map(o => `<span class="pop-org">${ORG_NAME[o]}</span>`).join('')} ${esc(p.title || '(제목 없음)')}<div class="dim" style="font-size:12px;font-weight:500;margin-top:2px">${esc(p.media_name || '')} ${fmtSize(p.media_size)}</div></td>
       <td><span class="type-b ${tk}">${tl}</span></td>
       <td class="dim">${p.start_at || p.end_at ? `${p.start_at || '즉시'} ~ ${p.end_at || '종료일 없음'}` : '상시'}</td>
       <td style="max-width:200px">${p.link_url ? `<a href="${esc(safeUrl(p.link_url))}" target="_blank" class="c-acc" style="text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.link_url)}</a>` : '<span class="dim">-</span>'}</td>
@@ -2414,6 +2542,8 @@ function popupModal(p) {
         <div class="full"><label class="lbl">팝업을 누르면</label>
           <div class="seg-radio" id="plt">${[['none', '아무것도 안 함'], ['url', '새 창으로 링크 열기'], ['post', 'VOY 게시글로 바로가기']].map(([v, l]) => `<label><input type="radio" name="plt" value="${v}" ${(popupPostId(p) ? 'post' : p.link_url ? 'url' : 'none') === v ? 'checked' : ''}> ${l}</label>`).join('')}</div>
           <div id="plbox" style="margin-top:8px"></div></div>
+        <div class="full"><label class="lbl">올릴 커뮤니티</label>
+          <div class="seg-radio" id="porg">${[['both', 'ETC + OTC 동시'], ['etc', 'ETC만'], ['otc', 'OTC만']].map(([v, l]) => `<label><input type="radio" name="porg" value="${v}" ${(orgsOf(p).length > 1 ? 'both' : orgsOf(p)[0]) === v ? 'checked' : ''}> ${l}</label>`).join('')}</div></div>
         <div><label class="lbl">시작일</label><input type="date" id="ps" value="${esc(p.start_at || '')}"></div>
         <div><label class="lbl">종료일 (비우면 계속)</label><input type="date" id="pe" value="${esc(p.end_at || '')}"></div>
         <div><label class="lbl">순서 (작을수록 먼저)</label><input type="number" id="po" value="${p.sort}"></div>
@@ -2456,7 +2586,8 @@ function popupModal(p) {
       drop.ondragleave = () => drop.classList.remove('over');
       drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); pick(e.dataTransfer.files[0]); };
       const collect = () => ({ ...p, title: m.querySelector('#pt').value.trim(), link_url: ltype() === 'url' ? lurl.trim() : ltype() === 'post' && lpost ? '#/post/' + lpost : '', start_at: m.querySelector('#ps').value || null,
-        end_at: m.querySelector('#pe').value || null, sort: +m.querySelector('#po').value || 0, active: m.querySelector('#pa').checked });
+        end_at: m.querySelector('#pe').value || null, sort: +m.querySelector('#po').value || 0, active: m.querySelector('#pa').checked,
+        orgs: (v => v === 'both' ? ['etc', 'otc'] : [v])(m.querySelector('input[name=porg]:checked').value) });
       m.querySelector('#ppv').onclick = () => {
         const url = objUrl || p.media_url; if (!url) return toast('파일을 먼저 선택하세요', 'err');
         const d = collect(); d.media_url = url; if (file) d.media_type = /^video/.test(file.type) || /\.(mp4|webm)$/i.test(file.name) ? 'video' : 'image';
@@ -2778,6 +2909,7 @@ function qlRows() { return A.qlEdit.map((l, i) => l.removed ? '' : `<div class="
     <select class="qi">${Object.entries(QL_ICONS).map(([k, v]) => `<option value="${k}" ${l.icon === k ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
     <input class="qn" value="${esc(l.name)}" placeholder="메뉴 이름 (| 를 넣으면 줄바꿈)" title="| 를 넣으면 그 자리에서 줄이 바뀝니다. 예) 건강의 벗|USE">
     <div><input class="qu" value="${esc(l.url)}" placeholder="폴더명/ (예: yhdbt/) · #/research = 커뮤니티 설문 · 비우면 '준비중'"><small>최근 업데이트: ${l.updated_at ? fmtDate(l.updated_at, true) : '수동 알림 없음'}${QL.auto[l.id] && QL.auto[l.id].lm ? ` · 사이트 자동감지 ${fmtDate(new Date(QL.auto[l.id].lm).toISOString(), true)}` : ''}</small></div>
+    <div class="ql-orgs" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700">${['etc', 'otc'].map(o => `<label style="display:flex;align-items:center;gap:5px"><input type="checkbox" class="ck qorg" value="${o}" ${orgsOf(l).includes(o) ? 'checked' : ''}> ${ORG_NAME[o]}</label>`).join('')}</div>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qo" ${l.on !== false ? 'checked' : ''}><span></span></label>표시</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qa" ${l.auto ? 'checked' : ''}><span></span></label>자동감지</label>
     <button class="btn sm" data-act="ql-bump" data-i="${i}" title="지금 업데이트했다고 표시 → 모든 회원에게 빨간 점">${I('bell', 14)} 업데이트 알림</button>
@@ -2786,7 +2918,8 @@ function qlCollect() {
   document.querySelectorAll('.ql-row[data-i]').forEach(r => { const l = A.qlEdit[+r.dataset.i]; if (!l) return;
     l.icon = r.querySelector('.qi').value; l.name = r.querySelector('.qn').value.trim(); l.url = r.querySelector('.qu').value.trim();
     if (l.url && !/^https?:\/\//i.test(l.url) && /\.[a-z]{2,}(\/|$)/i.test(l.url.split('/')[0])) l.url = 'https://' + l.url;   // 도메인 형태만 https 붙임, 폴더명은 그대로
-    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked; });
+    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked;
+    l.orgs = [...r.querySelectorAll('.qorg:checked')].map(x => x.value); });
 }
 function pageSettings(c) {
   const s = A.settings;
@@ -2794,7 +2927,7 @@ function pageSettings(c) {
   c.innerHTML = `<div class="panel"><div class="panel-head"><div><h2>${I('link', 19)} 바로가기 메뉴 (커뮤니티 오른쪽 고정)</h2><p>사이트가 업데이트되면 아이콘 오른쪽 위에 빨간 점이 뜹니다. ① 자동감지: GitHub Pages 사이트의 마지막 배포 시각을 읽음 ② [업데이트 알림]: 관리자가 직접 표시. 회원이 아이콘을 누르면 그 회원에게선 점이 사라집니다.</p></div>
       <div style="display:flex;gap:8px"><button class="btn sm" data-act="ql-add">${I('plus', 15)} 메뉴 추가</button><button class="btn primary sm" data-act="ql-save">저장</button></div></div>
     <div class="ql-gallery" id="qlGallery">${A.qlEdit.filter(l => l.on !== false).map(l => QL.tile(l)).join('')}</div>
-    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>표시</span><span>자동</span><span></span><span></span></div>
+    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>자동</span><span></span><span></span></div>
     <div id="qlRows">${qlRows()}</div></div>
   <div class="panel"><div class="panel-head"><div><h2>${I('lock', 19)} 앱 전용 모드</h2><p>켜면 브라우저에서는 로그인 화면만 보이고, 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>(설치한 앱)에서만 열립니다. 브라우저로 로그인하면 앱 설치·열기 안내 화면이 나옵니다. (휴대폰 삼성·아이폰, PC 공통)</p></div>
     <label class="switch"><input type="checkbox" id="appOnly" ${A.settings.app_only === false ? '' : 'checked'}><span></span></label></div></div>
@@ -2851,6 +2984,12 @@ document.addEventListener('click', async e => {
       break;
     }
     case 'mrole': A.f.members.role = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
+    case 'morg': A.f.members.org = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
+    case 'org': if (API.room !== t.dataset.org) { API.setRoom(t.dataset.org); A.awMonth = A.awMonth; root.querySelector('#content').innerHTML = '<div class="loading">불러오는 중…</div>'; await loadAll(); route(); toast(`${ORG_NAME[t.dataset.org]} 커뮤니티 관리로 전환했어요`); } break;
+    case 'staff-new': staffModal(); break;
+    case 'staff-pw': { const u = A.profiles.find(x => x.id === t.dataset.id); const v = prompt(`${u.login_id} 새 비밀번호 (6자 이상)`); if (!v) break; if (v.length < 6) { toast('6자 이상 입력하세요', 'err'); break; } try { await API.adminResetPassword(u.id, v); toast('비밀번호를 바꿨습니다'); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'staff-del': { const u = A.profiles.find(x => x.id === t.dataset.id); if (!(await confirmBox(`${u.login_id} 계정을 삭제할까요?\n쓴 글은 남고 작성자 연결만 끊어집니다.`, '삭제', true))) break; try { await API.adminDeleteUser(u.id); toast('삭제했습니다'); await loadAll(); renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'cross-off': { const u = A.profiles.find(x => x.id === t.dataset.id); if (!(await confirmBox(`'${u.nickname}'의 통합 회원 권한을 해제할까요?\n${ORG_NAME[orgOf(u)]} 방만 보게 됩니다.`, '해제'))) break; try { await API.adminUpdateProfile(u.id, { cross_org: false }); toast('해제했습니다'); await loadAll(); renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'mem-new': memberNewModal(); break;
     case 'xls-upload': document.getElementById('xlsFile').click(); break;
     case 'xls-template': xlsTemplate(); break;
@@ -2957,6 +3096,11 @@ document.addEventListener('click', async e => {
   }
 });
 document.addEventListener('change', async e => {
+  if (e.target.matches('[data-mem-org],[data-mem-kind]')) { const el = e.target, id = el.dataset.memOrg || el.dataset.memKind, u = A.profiles.find(x => x.id === id);
+    const patch = el.dataset.memOrg ? { org: el.value } : { cross_org: el.value === 'cross' };
+    const msg = el.dataset.memOrg ? `'${u.nickname}'의 조직을 ${ORG_NAME[el.value]}(으)로 바꿀까요?` : el.value === 'cross' ? `'${u.nickname}'을(를) 통합 회원으로 지정할까요?\nETC·OTC 두 방을 모두 보고 글을 쓸 수 있게 되고, 시상에서는 제외됩니다.` : `'${u.nickname}'의 통합 회원 권한을 해제할까요?`;
+    if (!(await confirmBox(msg, '변경'))) { renderPage(); return; }
+    try { await API.adminUpdateProfile(id, patch); Object.assign(u, patch); toast('변경했습니다'); renderPage(); } catch (er) { toast(friendly(er), 'err'); renderPage(); } return; }
   if (e.target.matches('[data-award],[data-awp]')) { const el = e.target, d = el.dataset, on = el.checked, cat = d.award || d.awp; el.disabled = true;
     try { if (d.awp) await API.adminSetAwardPost(d.mk, cat, d.pid, on); else await API.adminSetAward(d.mk, cat, d.tok, on, d.note || null);
       toast(`${voiceCat(cat).t} ${on ? '선정' : '선정 취소'}`); awLoad(d.mk, true); }
