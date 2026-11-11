@@ -487,7 +487,12 @@ body:has(.policy) .theme-fab{display:none}
 .auth .err-msg{margin-top:4px;min-height:14px}
 .auth #asub{margin-top:2px}
 .auth .ver-tag{line-height:1.4}
-.push-tools button[hidden]{display:none!important}
+.push-need{margin-top:10px;border:1.5px solid var(--point,#e8590c);background:color-mix(in srgb,var(--point,#e8590c) 9%,var(--surface));border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;gap:6px;animation:pnBlink 1.6s ease-in-out 3}
+.push-need.bad{border-color:#d33;background:color-mix(in srgb,#d33 8%,var(--surface))}
+.push-need>b{font-size:15px;color:var(--text)}.push-need>span{font-size:13px;line-height:1.5;color:var(--text2)}
+.push-need .btn{margin-top:4px;height:46px;font-size:15px;font-weight:800}
+.push-need .linkbtn{background:none;border:0;color:var(--accent);font-size:12.5px;font-weight:700;text-decoration:underline;padding:2px;cursor:pointer}
+@keyframes pnBlink{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--point,#e8590c) 22%,transparent)}}
 .push-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .push-tools button{border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));background:color-mix(in srgb,var(--accent) 8%,var(--surface));color:var(--accent);font-weight:800;font-size:12.5px;border-radius:999px;padding:7px 12px;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
 .ph-tabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 8px}
@@ -2759,20 +2764,30 @@ function pushBoxHTML() {
   const help = !(LOCAL || !VAPID_PUBLIC_KEY);
   return `<div class="set-row"><span>${I('bell', 19)} <span><b style="color:var(--text);display:block;font-size:15px">새 글 알림</b><small class="muted" style="font-size:12.5px;line-height:1.45;display:block">${hint}</small></span></span>
     <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>
-    ${help ? `<div class="push-tools"><button type="button" data-act="push-help">${I('bell', 14)} 알림 허용 방법 보기</button><button type="button" data-act="push-test" id="pushTestBtn" ${pushSupported() && Notification.permission === 'granted' ? '' : 'hidden'}>🔔 테스트 알림 보내기</button></div>` : ''}
+    ${help ? `<div class="push-tools"><button type="button" data-act="push-help">${I('bell', 14)} 알림 허용 방법 보기</button><button type="button" data-act="push-test" id="pushTestBtn">🔔 테스트 알림 보내기</button></div>` : ''}
+    <div id="pushNeed"></div>
     <p class="hint" id="pushDiag" style="margin:6px 0 0;font-size:11.5px;opacity:.75"></p>`;
+}
+/* 알림 권한이 아직 없으면 '알림 허용' 안내를 크게 표시 */
+function pushNeed() {
+  const el = document.getElementById('pushNeed'); if (!el) return;
+  if (!pushSupported()) { el.innerHTML = ''; return; }
+  const p = Notification.permission;
+  el.innerHTML = p === 'granted' ? '' : p === 'denied'
+    ? `<div class="push-need bad"><b>⛔ 이 기기에서 알림이 차단되어 있어요</b><span>알림 허용을 해야 새 글 알림을 받을 수 있어요. 아래 버튼을 눌러 순서대로 허용해 주세요.</span><button type="button" class="btn primary block" data-act="push-help">알림 허용 방법 보기</button></div>`
+    : `<div class="push-need"><b>🔔 알림 허용이 필요해요</b><span>아직 이 기기에서 알림을 허용하지 않았어요. 아래 버튼을 누르고, 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</span><button type="button" class="btn primary block" data-act="push-on">알림 허용하기</button><button type="button" class="linkbtn" data-act="push-help">창이 안 뜨나요? 허용 방법 보기</button></div>`;
 }
 async function bindPushBox() {
   const sw = document.getElementById('pushSw'); if (!sw) return;
   try { sw.checked = localStorage.getItem(PUSH_FLAG) === '1' && Notification.permission === 'granted'; } catch (e) {}   // 바로 표시 → 아래에서 실제 상태 확인
   sw.checked = await pushIsOn();
-  pushDiag();
+  pushNeed(); pushDiag();
   sw.onchange = async () => {
     sw.disabled = true;
     try { sw.checked ? await enablePush() : await disablePush(); }
     catch (e) { const m = pushErrText(e); toast(m, 'err'); pushDiag('켜기 실패: ' + m); sw.checked = await pushIsOn(); }
     sw.disabled = false; pushDiag();
-    const tb = document.getElementById('pushTestBtn'); if (tb) tb.hidden = !(pushSupported() && Notification.permission === 'granted');
+    pushNeed();
   };
 }
 /* 실패 원인을 사람이 알아들을 수 있는 말로 */
@@ -2857,7 +2872,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.0317`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.0337`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -2884,7 +2899,8 @@ async function enablePush() {
 }
 /* 이 기기에서 알림이 실제로 화면에 뜨는지 확인 (서버를 거치지 않는 기기 자체 테스트) */
 async function pushTest() {
-  if (!pushSupported() || Notification.permission !== 'granted') return pushHelp(Notification.permission);
+  if (!pushSupported()) return toast('이 환경에서는 알림을 받을 수 없어요', 'err');
+  if (Notification.permission !== 'granted') { toast('먼저 알림 허용이 필요해요 — [알림 허용하기]를 눌러 주세요', 'err'); document.getElementById('pushNeed')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (Notification.permission === 'denied') pushHelp('denied'); return; }
   const reg = await swReg(); if (!reg) return toast('앱을 완전히 닫았다가 다시 열어 주세요', 'err');
   await reg.showNotification('🔔 VOY™ 테스트 알림', { body: '이 알림이 보이면 이 기기의 알림 설정은 정상이에요.', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test' });
   toast('테스트 알림을 보냈어요 — 알림창(맨 위/오른쪽 아래)을 확인해 주세요. 안 보이면 [알림 허용 방법]의 휴대폰·PC 설정을 확인해 주세요.');
@@ -2896,11 +2912,13 @@ async function disablePush() {
   toast('새 글 알림을 껐어요');
 }
 function pushPromptHTML() {
-  if (!pushSupported() || !isStandalone() || Notification.permission !== 'default') return '';
-  try { if (localStorage.getItem('voy_push_prompt_off')) return ''; } catch (e) {}
-  return `<div class="event-banner" id="pushPrompt" style="border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:var(--accent-soft)"><div class="gi" style="background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)">${I('bell', 20)}</div>
-    <div style="flex:1"><b style="color:var(--accent)">새 글 알림 받기</b><span style="color:var(--text2)">새 글이 올라오면 아이콘에 🔔 표시로 알려드려요</span></div>
-    <button class="btn primary sm" data-act="push-on">켜기</button><button class="icon-x" data-act="push-later" aria-label="닫기">${I('x', 16)}</button></div>`;
+  if (!pushSupported() || !isStandalone()) return '';
+  const p = Notification.permission; if (p === 'granted') return '';
+  try { const off = +localStorage.getItem('voy_push_prompt_off') || 0; if (Date.now() - off < 3 * 864e5) return ''; } catch (e) {}   // 닫으면 3일 뒤 다시 안내
+  const deny = p === 'denied';
+  return `<div class="event-banner" id="pushPrompt" style="border-color:color-mix(in srgb,var(--point,#e8590c) 55%,transparent);background:color-mix(in srgb,var(--point,#e8590c) 8%,var(--surface))"><div class="gi" style="background:color-mix(in srgb,var(--point,#e8590c) 18%,transparent);color:var(--point,#e8590c)">${I('bell', 20)}</div>
+    <div style="flex:1"><b style="color:var(--point,#e8590c)">${deny ? '알림이 차단되어 있어요' : '알림 허용이 필요해요'}</b><span style="color:var(--text2)">${deny ? '허용해야 새 글 알림을 받을 수 있어요' : '허용하면 새 글이 올라올 때 🔔 알려드려요'}</span></div>
+    <button class="btn primary sm" data-act="${deny ? 'push-help' : 'push-on'}">${deny ? '허용 방법' : '허용하기'}</button><button class="icon-x" data-act="push-later" aria-label="닫기">${I('x', 16)}</button></div>`;
 }
 /* 앱 아이콘 배지: 보고 있으면 지우고, 백그라운드(창 최소화 등)에서는 새 글 수를 표시 */
 const Badge = {
@@ -2943,7 +2961,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261112.0317" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261112.0337" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -2968,7 +2986,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261112.0317" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261112.0337" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3054,8 +3072,9 @@ document.addEventListener('click', async e => {
     case 'reinstall': try { localStorage.removeItem('voy_app_ok'); } catch (er) {} refreshInstallCard(); Inst.run(); break;
     case 'app-done': markAppInstalled(); document.querySelectorAll('.install,.inst-sheet,.inst-arrow').forEach(el => el.remove()); route(); maybeShowPopups(); break;
     case 'gate-bypass': S.gateBypass = true; try { sessionStorage.setItem('voy_gate_bypass', '1'); } catch (er) {} route(); maybeShowPopups(); break;
-    case 'push-on': try { await enablePush(); document.getElementById('pushPrompt')?.remove(); } catch (er) { toast(pushErrText(er), 'err'); } break;
-    case 'push-later': try { localStorage.setItem('voy_push_prompt_off', '1'); } catch (er) {} document.getElementById('pushPrompt')?.remove(); break;
+    case 'push-on': try { await enablePush(); document.getElementById('pushPrompt')?.remove(); } catch (er) { toast(pushErrText(er), 'err'); }
+      { const sw = document.getElementById('pushSw'); if (sw) { sw.checked = await pushIsOn(); pushNeed(); pushDiag(); } } break;
+    case 'push-later': try { localStorage.setItem('voy_push_prompt_off', String(Date.now())); } catch (er) {} document.getElementById('pushPrompt')?.remove(); break;
     case 'install': doInstall(); break;
   }
 });
