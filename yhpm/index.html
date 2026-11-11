@@ -209,9 +209,12 @@
 
     /* 검색 전 안내 */
     .prompt-state {
+      grid-column: 1 / -1;            /* 결과 칸(그리드) 전체 폭을 써서 화면 가운데에 */
       text-align: center;
-      padding: 45px 16px 32px;
+      padding: 32px 16px;
       color: var(--gray);
+      min-height: max(260px, calc(100vh - 420px));   /* 남은 화면 높이의 가운데 */
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .prompt-icon { font-size: 40px; margin-bottom: 13px; opacity: 0.25; }
     .prompt-state h2 {
