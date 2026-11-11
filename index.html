@@ -366,14 +366,15 @@ a.att{text-decoration:none}
 .cmt-text{font-size:14px;margin-top:3px;word-break:break-all;color:var(--text2)}
 .cmt-act{display:flex;gap:10px;margin-top:4px}
 .cmt-act button{font-size:12px;color:var(--muted)}
-.cbox{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:stretch;background:var(--bg);padding:10px 0}
+.cbox{position:static;display:flex;gap:8px;align-items:stretch;background:var(--bg);padding:10px 0}
 .cbox textarea{flex:1;min-width:0;height:auto;min-height:0;resize:none;border-radius:14px;background:var(--surface);line-height:1.5;padding:10px 14px;font-size:14.5px}
 .cbox-side{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .cbox .cimg-btn,.cbox .csend{width:48px;flex:1;min-height:40px;height:auto;padding:0;display:grid;place-items:center;border-radius:12px}
-body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
+body:has(.policy) .theme-fab{display:none}
 .own-act{display:flex;gap:6px}
-.cbox-wrap{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));background:var(--bg);padding-top:6px}
+.cbox-wrap{position:static;background:transparent;padding-top:6px;margin-bottom:6px}
 .cbox-wrap .cbox{position:static;padding-top:4px}
+.w-submit{width:100%;height:52px;font-size:16px;font-weight:800;border-radius:14px;margin:18px 0 8px}
 .cprev{display:flex;gap:6px;flex-wrap:wrap}
 .thumb.sm{width:64px;height:64px;border-radius:10px}
 .thumb.sm button{width:20px;height:20px;top:3px;right:3px}
@@ -639,8 +640,8 @@ function mountThemeToggle() {
 function toast(msg, type) {
   let el = document.getElementById('toast');
   if (!el) { el = document.createElement('div'); el.id = 'toast'; document.body.appendChild(el); }
-  const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; el.appendChild(t);
-  setTimeout(() => t.classList.add('out'), 2600); setTimeout(() => t.remove(), 3000);
+  const t = document.createElement('div'); t.className = 'toast ' + (type || ''); t.textContent = msg; const ml = String(msg).includes('\n'); if (ml) { t.style.whiteSpace = 'pre-line'; t.style.textAlign = 'center'; } el.appendChild(t);
+  setTimeout(() => t.classList.add('out'), ml ? 4200 : 2600); setTimeout(() => t.remove(), ml ? 4600 : 3000);
 }
 function openModal(html, opts = {}) {
   const wrap = document.createElement('div'); wrap.className = 'modal-back';
@@ -1916,7 +1917,7 @@ function refreshQL() { const r = document.getElementById('qlRail'), s = document
    · Chrome / Edge / 삼성인터넷 (안드로이드·PC): [설치] 한 번 → 브라우저 확인창 → 끝 (메뉴 안 열어도 됨)
    · 카카오톡·네이버 등 앱 안의 브라우저: 자동으로 Chrome/Safari로 다시 열기
    · 아이폰(Safari·Chrome·Edge): 애플이 자동 설치를 막아 두어, 눌러야 할 버튼 위치를 화살표로 직접 가리켜 안내 */
-window.addEventListener('appinstalled', () => { markAppInstalled(); window.__bip = null; document.querySelectorAll('.inst-sheet,.inst-arrow').forEach(el => el.remove()); refreshInstallCard(); toast('VOY™ 아이콘이 설치되었어요! 홈 화면(바탕화면)의 VOY™로 열어주세요'); });
+window.addEventListener('appinstalled', () => { markAppInstalled(); window.__bip = null; document.querySelectorAll('.inst-sheet,.inst-arrow').forEach(el => el.remove()); refreshInstallCard(); toast('VOY™ 아이콘이\n설치 되었어요!\n홈화면의 VOY™으로\n열어 주세요'); });
 /* 앱(아이콘)으로 열었는지 — 브라우저·기기마다 신호가 달라 여러 가지를 함께 확인 */
 function isStandalone() {
   const mm = q => { try { return matchMedia(q).matches; } catch (e) { return false; } };
@@ -2139,7 +2140,7 @@ function shell(inner, tab, fab = true) {
     <header class="top"><div class="top-row">
       <div class="brand" data-act="home"><img class="logo-img" src="icons/voy-mark.png?v=2" alt="VOY"><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
       ${roomSwitchHTML()}
-      <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth(), true)}의</span><b>${esc(me.nickname)}</b></div>
+      <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth(), true)}</span><b>${esc(me.nickname)}</b></div>
       <button class="avatar sm" style="background:${avColor(me.nickname)}" data-act="go" data-to="#/me" aria-label="내 정보">${esc(me.nickname[0])}</button></div>
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
     </header>
@@ -2278,11 +2279,11 @@ async function viewPost(id) {
       <div class="tags"><span class="tag" style="--c:${b.color}">${esc(b.name)}</span></div>
       <div class="react" id="react">${reactHTML(p)}</div>
     </article>
-    <section class="cmts"><h4>댓글 <span id="ccount">${cmts.length}</span></h4><div id="clist">${commentsHTML(cmts)}</div></section>
     <div class="cbox-wrap"><div id="cprev" class="cprev"></div>
     <form class="cbox" id="cform"><textarea id="ctext" rows="3" placeholder="${S.me.status === 'blocked' ? '댓글 작성이 제한된 계정입니다' : '따뜻한 댓글을 남겨주세요'}" maxlength="1000" ${S.me.status === 'blocked' ? 'disabled' : ''}></textarea>
       <div class="cbox-side"><button type="button" class="cimg-btn" id="cimgbtn" title="사진 첨부 (최대 2장)" aria-label="사진 첨부" ${S.me.status === 'blocked' ? 'disabled' : ''}>${I('image', 20)}</button><button class="btn primary csend" aria-label="댓글 등록" ${S.me.status === 'blocked' ? 'disabled' : ''}>${I('send', 17)}</button></div></form>
     <input type="file" id="cfile" accept="image/*" multiple hidden></div>
+    <section class="cmts"><h4>댓글 <span id="ccount">${cmts.length}</span></h4><div id="clist">${commentsHTML(cmts)}</div></section>
   </div>`;
   let cimgs = [];
   const drawPrev = () => { document.getElementById('cprev').innerHTML = cimgs.map((im, i) => `<div class="thumb sm"><img src="${esc(im.url)}" alt=""><button type="button" data-ci="${i}" aria-label="삭제">${I('x', 12)}</button></div>`).join(''); };
@@ -2404,7 +2405,7 @@ async function viewWrite(editId) {
   }
   S.write = W;
   shell(`<div class="page write">
-    <div class="subbar"><button class="back" data-act="back" aria-label="뒤로">${I('left')}</button><b>${W.id ? '글 수정' : '글쓰기'}</b><span class="spacer"></span><button class="btn primary sm" data-act="submit-post" id="wsubmit">${W.id ? '수정 완료' : '등록'}</button></div>
+    <div class="subbar"><button class="back" data-act="back" aria-label="뒤로">${I('left')}</button><b>${W.id ? '글 수정' : '글쓰기'}</b><span class="spacer"></span></div>
     <label class="lbl" style="margin-top:0">게시판 선택</label>
     <div class="chips wrap" id="wboards"></div>
     <div id="wnotice"></div>
@@ -2418,6 +2419,7 @@ async function viewWrite(editId) {
     <div class="attach-extra thumbs" id="wthumbs"></div>
     <button class="attach" data-act="w-pdf"><div class="ai">${I('file', 20)}</div><div><b>PDF 첨부 (최대 20MB)</b><small>PDF 자료를 첨부할 수 있어요</small></div></button>
     <div class="attach-extra" id="wpdf"></div>
+    <button class="btn primary w-submit" data-act="submit-post" id="wsubmit">${W.id ? '수정 완료' : '등록'}</button>
     <input type="file" id="fimg" accept="image/*" multiple hidden><input type="file" id="fpdf" accept="application/pdf,.pdf" hidden>
   </div>`, 'feed', false);
   renderWriteParts();
@@ -2781,7 +2783,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = extra || `점검: 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261111.1955`;
+  el.textContent = extra || `점검: 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261111.2210`;
 }
 async function enablePush() {
   if (!pushSupported()) throw new Error('이 환경에서는 알림을 켤 수 없어요');
@@ -2844,8 +2846,8 @@ function landingHTML() {
     <div class="box land-how"><div class="land-tabs" role="tablist">${tabs.map(([id, t]) => `<button type="button" role="tab" class="${id === def ? 'on' : ''}" data-ltab="${id}">${t}</button>`).join('')}</div>
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
-    <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261111.1955" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
+    <p class="ver-tag" title="v261111.2210" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -2869,8 +2871,8 @@ async function renderAuth() {
       <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>(사번은 사번 숫자 전체 <b>8자리</b>입니다.)</p>
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
-      <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1955" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
+      <p class="ver-tag" title="v261111.2210" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
