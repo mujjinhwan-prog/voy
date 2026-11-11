@@ -2735,13 +2735,22 @@ function pushBoxHTML() {
   else if (!('PushManager' in window)) { hint = '이 브라우저는 알림을 지원하지 않아요. Chrome·Edge·Safari(홈 화면 앱)에서 이용해주세요.'; disabled = true; }
   else if (Notification.permission === 'denied') { hint = '알림이 차단되어 있어요. 브라우저 주소창 왼쪽 🔒 → 알림 → 허용으로 바꿔주세요.'; disabled = true; }
   return `<div class="set-row"><span>${I('bell', 19)} <span><b style="color:var(--text);display:block;font-size:15px">새 글 알림</b><small class="muted" style="font-size:12.5px;line-height:1.45;display:block">${hint}</small></span></span>
-    <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>`;
+    <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>
+    <p class="hint" id="pushDiag" style="margin:6px 0 0;font-size:11.5px;opacity:.75"></p>`;
 }
 async function bindPushBox() {
   const sw = document.getElementById('pushSw'); if (!sw) return;
   try { sw.checked = localStorage.getItem(PUSH_FLAG) === '1' && Notification.permission === 'granted'; } catch (e) {}   // 바로 표시 → 아래에서 실제 상태 확인
   sw.checked = await pushIsOn();
-  sw.onchange = async () => { sw.disabled = true; try { sw.checked ? await enablePush() : await disablePush(); } catch (e) { toast(friendly(e), 'err'); sw.checked = await pushIsOn(); } sw.disabled = false; };
+  pushDiag();
+  sw.onchange = async () => { sw.disabled = true; try { sw.checked ? await enablePush() : await disablePush(); } catch (e) { toast(friendly(e), 'err'); pushDiag('켜기 실패: ' + friendly(e)); sw.checked = await pushIsOn(); } sw.disabled = false; pushDiag(); };
+}
+/* 알림 상태 점검 문구 — 문제가 생기면 이 한 줄을 캡처해서 보내면 원인을 바로 알 수 있음 */
+async function pushDiag(extra) {
+  const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
+  let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
+  let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
+  el.textContent = extra || `점검: 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261111.1718`;
 }
 async function enablePush() {
   if (!pushSupported()) throw new Error('이 환경에서는 알림을 켤 수 없어요');
@@ -2801,7 +2810,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1709" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261111.1718" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
