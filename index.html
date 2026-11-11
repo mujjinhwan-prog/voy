@@ -452,7 +452,7 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth-hero{text-align:center;margin-bottom:22px}
 /* 시작 화면: VOY 로고가 작게 시작해 다가오듯 커짐 */
 .boot-splash{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-.boot-splash img{width:min(600px,92vw,70vh);height:min(600px,92vw,70vh);border-radius:22%;box-shadow:0 14px 40px rgba(0,0,0,.14);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
+.boot-splash img{width:min(600px,92vw,70vh);height:min(600px,92vw,70vh);border-radius:50%;background:#fff;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
 .boot-splash p{color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
 @keyframes bootZoom{0%{transform:scale(.14);opacity:0;filter:blur(4px)}35%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes bootBreath{50%{transform:scale(1.04)}}
@@ -1931,7 +1931,7 @@ function installGuide(title, steps, note) {
     <div class="modal-foot"><button class="btn primary block" data-close>확인</button></div>`);
 }
 
-const SPLASH = '<div class="boot-splash"><img src="icons/voy-512.png?v=4" alt="VOY™"><p>불러오는 중…</p></div>';
+const SPLASH = '<div class="boot-splash"><img src="icons/voy-mark.png?v=2" alt="VOY™"><p>불러오는 중…</p></div>';
 async function boot() {
   mountThemeToggle();
   root.innerHTML = SPLASH;
@@ -2008,7 +2008,7 @@ function shell(inner, tab, fab = true) {
   const me = S.me; document.body.classList.add('has-bnav');
   root.innerHTML = `<div class="app">
     <header class="top"><div class="top-row">
-      <div class="brand" data-act="home"><img class="logo-img" src="icons/voy-mark.png?v=1" alt="VOY"><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
+      <div class="brand" data-act="home"><img class="logo-img" src="icons/voy-mark.png?v=2" alt="VOY"><div class="brand-txt"><small>Voice of</small><b>YUHAN</b></div></div>
       <div class="top-pill" title="${monthLabel(curMonth())} 이달의 닉네임"><span class="tp-m">${monthLabel(curMonth(), true)}의</span><b>${esc(me.nickname)}</b></div>
       <button class="avatar sm" style="background:${avColor(me.nickname)}" data-act="go" data-to="#/me" aria-label="내 정보">${esc(me.nickname[0])}</button></div>
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
@@ -2656,7 +2656,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261111.1111</p>
+      <p class="ver-tag">v261111.1128</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
