@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YH MKT PM 품목 검색</title>
+  <title>마케팅부문 PM 품목 검색</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Oswald:wght@600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,30 +28,31 @@
       color: var(--black);
       font-family: 'Noto Sans KR', sans-serif;
       min-height: 100vh;
-      padding-bottom: 60px;
+      padding-bottom: 48px;
     }
 
     /* ── HEADER ── */
     header {
       background: var(--green-dark);
-      padding: 32px 40px 28px;
+      padding: 26px 32px 22px;
     }
 
-    /* 상단 한 줄: 로고/타이틀 + 날짜 배지 */
     .hd-top {
       display: flex;
       align-items: flex-start;
-      justify-content: space-between;
-      gap: 20px;
+      justify-content: center;
+      gap: 16px;
       flex-wrap: nowrap;
+      max-width: 900px;
+      margin: 0 auto;
     }
-    .hd-left {}
+    .hd-left { flex: 1; }
     .hd-eyebrow {
       font-size: 11px;
       letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--green-mid);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       font-weight: 500;
     }
     h1 {
@@ -64,7 +65,7 @@
     }
     h1 em { font-style: normal; color: #6dffb0; }
     .hd-sub {
-      margin-top: 6px;
+      margin-top: 5px;
       font-size: 12px;
       color: var(--green-mid);
       line-height: 1.5;
@@ -74,23 +75,23 @@
     .hd-badge {
       background: rgba(255,255,255,0.12);
       border: 2px solid rgba(255,255,255,0.35);
-      border-radius: 14px;
-      padding: 14px 22px;
+      border-radius: 8px;
+      padding: 8px 13px;
       color: var(--white);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex-shrink: 0;
       text-align: center;
     }
     .badge-dot-row {
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
     }
     .dot {
-      width: 10px; height: 10px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       background: #6dffb0;
       animation: blink 2s infinite;
@@ -103,51 +104,35 @@
       text-transform: uppercase;
       font-weight: 500;
     }
-    /* 금일 접속수 fixed 위젯 */
-    #visit-widget {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      background: rgba(0,0,0,0.1);
-      color: var(--gray);
-      border-radius: 8px;
-      padding: 5px 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      z-index: 999;
-      font-size: 11px;
-      border: 1px solid var(--border);
-    }
-    #visit-widget .vw-label { color: var(--gray); }
-    #visit-widget .vw-count { font-weight: 700; color: var(--green-dark); }
-    #visit-widget .vw-sub { display: none; }
     .badge-date {
       font-family: 'Oswald', sans-serif;
-      font-size: clamp(18px, 3.5vw, 30px);
+      font-size: clamp(13px, 2.5vw, 21px);
       font-weight: 600;
       letter-spacing: 0.5px;
       white-space: nowrap;
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    /* 검색 영역 (헤더 안) */
+    /* 검색 영역 */
     .hd-search {
-      margin-top: 22px;
+      margin-top: 18px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .search-box { position: relative; }
     .search-ico {
       position: absolute;
-      left: 16px; top: 50%;
+      left: 13px; top: 50%;
       transform: translateY(-50%);
-      font-size: 17px;
+      font-size: 15px;
       pointer-events: none;
     }
     #searchInput {
       width: 100%;
       border: 2px solid rgba(255,255,255,0.4);
-      border-radius: 10px;
-      padding: 14px 18px 14px 46px;
+      border-radius: 8px;
+      padding: 11px 14px 11px 38px;
       font-size: 15px;
       font-family: 'Noto Sans KR', sans-serif;
       color: var(--black);
@@ -164,13 +149,13 @@
     /* 팀 필터 */
     .filter-row {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       flex-wrap: wrap;
-      margin-top: 12px;
+      margin-top: 10px;
     }
     .filter-btn {
-      padding: 5px 14px;
-      border-radius: 20px;
+      padding: 4px 11px;
+      border-radius: 16px;
       border: 1.5px solid rgba(255,255,255,0.3);
       background: transparent;
       color: rgba(255,255,255,0.75);
@@ -181,10 +166,7 @@
       transition: all 0.15s;
       white-space: nowrap;
     }
-    .filter-btn:hover {
-      border-color: #6dffb0;
-      color: #6dffb0;
-    }
+    .filter-btn:hover { border-color: #6dffb0; color: #6dffb0; }
     .filter-btn.active {
       background: var(--white);
       border-color: var(--white);
@@ -195,12 +177,18 @@
     /* ── STATS ── */
     .stats-row {
       display: flex;
-      border-bottom: 2.5px solid var(--green);
+      border-bottom: 2px solid var(--green);
       background: var(--white);
+      justify-content: center;
+    }
+    .stats-inner {
+      display: flex;
+      max-width: 900px;
+      width: 100%;
     }
     .stat-item {
       flex: 1;
-      padding: 16px 24px;
+      padding: 13px 19px;
       border-right: 1px solid var(--border);
     }
     .stat-item:last-child { border-right: none; }
@@ -214,47 +202,47 @@
 
     /* ── RESULTS AREA ── */
     .results-wrap {
-      max-width: 1120px;
-      margin: 28px auto 0;
-      padding: 0 24px;
+      max-width: 900px;
+      margin: 22px auto 0;
+      padding: 0 19px;
     }
 
     /* 검색 전 안내 */
     .prompt-state {
       text-align: center;
-      padding: 56px 20px 40px;
+      padding: 45px 16px 32px;
       color: var(--gray);
     }
-    .prompt-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.25; }
+    .prompt-icon { font-size: 40px; margin-bottom: 13px; opacity: 0.25; }
     .prompt-state h2 {
       font-size: 18px;
       font-weight: 700;
       color: var(--black);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .prompt-state p { font-size: 14px; color: var(--gray); line-height: 1.7; }
 
     .results-meta {
       font-size: 13px;
       color: var(--gray);
-      margin-bottom: 16px;
-      padding-bottom: 12px;
+      margin-bottom: 13px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--border);
     }
     .results-meta strong { color: var(--green-dark); font-weight: 700; }
 
     #results {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+      gap: 11px;
     }
 
     /* ── CARDS ── */
     .card {
       background: var(--white);
       border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 20px 16px;
+      border-radius: 10px;
+      padding: 14px 16px 13px;
       position: relative;
       overflow: hidden;
       transition: border-color 0.18s, box-shadow 0.18s;
@@ -263,21 +251,21 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .card:hover {
       border-color: var(--green);
-      box-shadow: 0 4px 18px rgba(26,122,74,0.1);
+      box-shadow: 0 4px 14px rgba(26,122,74,0.1);
     }
     .card-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 4px;
+      height: 3px;
       background: var(--green);
     }
     .card-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
-      padding-top: 4px;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding-top: 3px;
     }
     .badge-team {
       font-size: 11px;
@@ -285,8 +273,8 @@
       background: var(--green-light);
       color: var(--green-dark);
       border: 1px solid var(--green-mid);
-      border-radius: 6px;
-      padding: 3px 9px;
+      border-radius: 5px;
+      padding: 2px 7px;
       white-space: nowrap;
     }
     .badge-group {
@@ -294,19 +282,19 @@
       color: var(--gray);
       background: var(--gray-light);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 9px;
+      border-radius: 5px;
+      padding: 2px 7px;
       text-align: right;
       line-height: 1.4;
     }
     .pm-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 10px;
     }
     .pm-avatar {
-      width: 36px; height: 36px;
+      width: 29px; height: 29px;
       border-radius: 50%;
       background: var(--green-dark);
       color: var(--white);
@@ -324,15 +312,15 @@
     .leader-row {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-      padding: 7px 10px;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding: 6px 8px;
       background: var(--green-light);
       border: 1px solid var(--green-mid);
-      border-radius: 8px;
+      border-radius: 6px;
     }
     .leader-avatar {
-      width: 26px; height: 26px;
+      width: 21px; height: 21px;
       border-radius: 50%;
       background: var(--green);
       color: var(--white);
@@ -348,17 +336,17 @@
       font-weight: 700;
       color: var(--white);
       background: var(--green-dark);
-      border-radius: 4px;
-      padding: 1px 6px;
+      border-radius: 3px;
+      padding: 1px 5px;
       white-space: nowrap;
     }
     .leader-name { font-size: 14px; font-weight: 700; color: var(--green-dark); }
 
-    .tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag {
       font-size: 12px;
-      padding: 4px 9px;
-      border-radius: 6px;
+      padding: 3px 7px;
+      border-radius: 5px;
       border: 1px solid var(--border);
       background: var(--gray-light);
       color: var(--gray);
@@ -380,32 +368,52 @@
     .empty {
       grid-column: 1/-1;
       text-align: center;
-      padding: 56px 20px;
+      padding: 45px 16px;
       color: var(--gray);
     }
-    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+    .empty-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.3; }
     .empty p { font-size: 14px; line-height: 1.9; }
     .empty strong { color: var(--red); }
 
+    /* 금일 접속수 위젯 */
+    #visit-widget {
+      position: fixed;
+      bottom: 13px;
+      right: 13px;
+      background: rgba(0,0,0,0.1);
+      color: var(--gray);
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 999;
+      font-size: 11px;
+      border: 1px solid var(--border);
+    }
+    #visit-widget .vw-label { color: var(--gray); }
+    #visit-widget .vw-count { font-weight: 700; color: var(--green-dark); }
+    #visit-widget .vw-sub { display: none; }
+
     /* ── MOBILE ── */
     @media (max-width: 600px) {
-      header { padding: 20px 16px 16px; }
-      .hd-top { flex-wrap: nowrap; align-items: flex-start; gap: 12px; }
+      header { padding: 16px 13px 13px; }
+      .hd-top { flex-wrap: nowrap; align-items: flex-start; gap: 10px; }
       h1 { font-size: 22px; }
       .hd-sub { font-size: 11px; }
-      .hd-badge { padding: 10px 14px; border-radius: 10px; gap: 4px; }
+      .hd-badge { padding: 8px 11px; border-radius: 8px; gap: 3px; }
       .badge-date { font-size: 16px; }
       .badge-label { font-size: 9px; }
-      .dot { width: 8px; height: 8px; }
-      .hd-search { margin-top: 16px; }
-      #searchInput { font-size: 14px; padding: 12px 14px 12px 42px; }
-      .filter-row { gap: 6px; }
-      .filter-btn { font-size: 11px; padding: 4px 11px; }
+      .dot { width: 7px; height: 7px; }
+      .hd-search { margin-top: 13px; }
+      #searchInput { font-size: 15px; padding: 10px 11px 10px 36px; }
+      .filter-row { gap: 5px; }
+      .filter-btn { font-size: 12px; padding: 3px 9px; }
       .stats-row { display: none; }
-      .results-wrap { padding: 0 14px; }
+      .results-wrap { padding: 0 11px; }
       #results { grid-template-columns: 1fr; }
-      .prompt-state { padding: 40px 16px 28px; }
-      .prompt-icon { font-size: 36px; }
+      .prompt-state { padding: 32px 13px 22px; }
+      .prompt-icon { font-size: 32px; }
     }
   </style>
 </head>
@@ -414,14 +422,14 @@
 <header>
   <div class="hd-top">
     <div class="hd-left">
-      <div class="hd-eyebrow">유한양행 · 마케팅</div>
+      <div class="hd-eyebrow">유한양행 · 마케팅부문</div>
       <h1>PM 품목 <em>검색</em></h1>
-      <p class="hd-sub">품목 또는 PM명을 입력하면<br>정보를 드립니다.</p>
+      <p class="hd-sub">품목명 또는 PM 이름을 입력하면<br>담당자 정보를 즉시 찾아드립니다</p>
     </div>
     <div class="hd-badge">
       <div class="badge-dot-row">
         <span class="dot"></span>
-        <span class="badge-label">기준일</span>
+        <span class="badge-label">Update</span>
       </div>
       <div class="badge-date">2026년 4월 27일</div>
     </div>
@@ -445,17 +453,19 @@
 </header>
 
 <div class="stats-row">
-  <div class="stat-item">
-    <div class="stat-num">29</div>
-    <div class="stat-label">PM 인원</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num">6</div>
-    <div class="stat-label">팀 수</div>
-  </div>
-  <div class="stat-item">
-    <div class="stat-num" id="statProduct">—</div>
-    <div class="stat-label">총 품목 수</div>
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">29</div>
+      <div class="stat-label">PM 인원</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">팀 수</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="statProduct">—</div>
+      <div class="stat-label">총 품목 수</div>
+    </div>
   </div>
 </div>
 
@@ -532,7 +542,6 @@ function render() {
   const meta = document.getElementById('resultsMeta');
   const ct = document.getElementById('countDisplay');
 
-  // 검색어도 없고 전체 탭이면 안내 화면
   if (!q && currentTeam === '전체') {
     meta.style.display = 'none';
     el.innerHTML = '<div class="prompt-state">'
@@ -620,34 +629,27 @@ render();
 
     const url = DB_URL + '/visits/' + today + '.json';
 
-    // Firebase REST transaction: 조건부 쓰기로 정확한 카운팅
     let count = 1;
     let success = false;
     let attempts = 0;
 
     while (!success && attempts < 10) {
       attempts++;
-      // 1) 현재 값 + ETag 읽기
       const getRes = await fetch(url, { headers: { 'X-Firebase-ETag': 'true' } });
       const etag = getRes.headers.get('ETag');
       const raw = await getRes.json();
       const current = (typeof raw === 'number') ? raw : 0;
       count = current + 1;
 
-      // 2) ETag 조건부 쓰기 (동시 접속 충돌 방지)
       const putRes = await fetch(url, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'if-match': etag
-        },
+        headers: { 'Content-Type': 'application/json', 'if-match': etag },
         body: JSON.stringify(count)
       });
 
       if (putRes.status === 200) {
         success = true;
       } else if (putRes.status === 412) {
-        // 다른 사람이 먼저 썼으면 재시도
         await new Promise(r => setTimeout(r, Math.random() * 200));
       } else {
         break;
