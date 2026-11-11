@@ -452,7 +452,7 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth-hero{text-align:center;margin-bottom:22px}
 /* 시작 화면: VOY 로고가 작게 시작해 다가오듯 커짐 */
 .boot-splash{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-.boot-splash img{width:min(300px,74vw);height:min(300px,74vw);border-radius:22%;box-shadow:0 14px 40px rgba(0,0,0,.14);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
+.boot-splash img{width:min(600px,92vw,70vh);height:min(600px,92vw,70vh);border-radius:22%;box-shadow:0 14px 40px rgba(0,0,0,.14);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
 .boot-splash p{color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
 @keyframes bootZoom{0%{transform:scale(.14);opacity:0;filter:blur(4px)}35%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes bootBreath{50%{transform:scale(1.04)}}
@@ -1931,9 +1931,10 @@ function installGuide(title, steps, note) {
     <div class="modal-foot"><button class="btn primary block" data-close>확인</button></div>`);
 }
 
+const SPLASH = '<div class="boot-splash"><img src="icons/voy-512.png?v=4" alt="VOY™"><p>불러오는 중…</p></div>';
 async function boot() {
   mountThemeToggle();
-  root.innerHTML = '<div class="boot-splash"><img src="icons/voy-512.png?v=4" alt="VOY™"><p>불러오는 중…</p></div>';
+  root.innerHTML = SPLASH;
   try {
     if (!LOCAL && !window.supabase) throw new Error('Supabase 라이브러리를 불러오지 못했습니다.');
     let first = false; try { first = !sessionStorage.getItem('voy_splash'); sessionStorage.setItem('voy_splash', '1'); } catch (e) {}
@@ -2655,7 +2656,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261111.1100</p>
+      <p class="ver-tag">v261111.1111</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
@@ -2668,7 +2669,9 @@ async function renderAuth() {
     try {
       busy(btn, true);
       S.me = await API.signIn(document.getElementById('aid').value, pw);
-      API.touch(); await loadHidden(); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
+      root.innerHTML = SPLASH;   // 로그인 성공 → VOY 로고가 크게 다가오는 화면을 끝까지 보여준 뒤 피드로
+      try { sessionStorage.setItem('voy_splash', '1'); } catch (x) {}
+      API.touch(); await Promise.all([loadHidden(), new Promise(r => setTimeout(r, 2100))]); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
       if (S.me.must_change_pw) pwModal(true, pw); else maybeShowPopups();
     } catch (er) { err.textContent = friendly(er); busy(btn, false); }
   };
