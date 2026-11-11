@@ -2078,6 +2078,7 @@ function viewFeed() {
 }
 async function loadFeed(reset) {
   const f = S.feed;
+  const seq = f.seq = (f.seq || 0) + 1;   // 동시에 두 번 불리면(화면 전환·새로고침이 겹칠 때) 늦게 도착한 이전 요청은 버림 → 같은 글이 두 번 보이던 문제 방지
   if (reset) { f.offset = 0; f.items = []; f.done = false; }
   try {
     const showPins = f.showPinned && !f.q && (!f.board || boardOf(f.board).admin_only);
@@ -2085,9 +2086,12 @@ async function loadFeed(reset) {
       reset && showPins ? API.listPosts({ pinned: true, board: f.board, limit: 5 }) : Promise.resolve(reset ? [] : f.pinned),
       API.listPosts({ pinned: false, month: f.month, board: f.board, q: f.q, limit: PAGE, offset: f.offset })
     ]);
-    f.pinned = pins; f.items = f.items.concat(rows); f.offset += rows.length; f.done = rows.length < PAGE;
+    if (seq !== f.seq) return;
+    const seen = new Set(f.items.map(x => x.id));
+    f.pinned = pins; f.items = f.items.concat(rows.filter(x => !seen.has(x.id))); f.offset += rows.length; f.done = rows.length < PAGE;
     Object.assign(S.react, await API.myReactions([...pins, ...rows].map(p => p.id)));
   } catch (e) { toast(friendly(e), 'err'); }
+  if (seq !== f.seq) return;
   const pe = document.getElementById('pinned'), le = document.getElementById('list'), me = document.getElementById('more');
   if (!le) return;
   pe.innerHTML = f.pinned.map(cardHTML).join('');
@@ -2651,7 +2655,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261111.0945</p>
+      <p class="ver-tag">v261111.1100</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
