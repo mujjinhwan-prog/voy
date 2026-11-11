@@ -451,9 +451,11 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .auth-card{width:100%;max-width:420px}
 .auth-hero{text-align:center;margin-bottom:22px}
 /* 시작 화면: VOY 로고가 작게 시작해 다가오듯 커짐 */
-.boot-splash{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
-.boot-splash img{width:min(600px,92vw,70vh);height:min(600px,92vw,70vh);border-radius:50%;background:#fff;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
-.boot-splash p{color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
+.boot-splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .35s ease}
+.boot-splash.out{opacity:0}
+.boot-splash.out img{transform:scale(1.06)!important;transition:transform .35s ease}
+.boot-splash img{width:min(80vw,80vh);height:min(80vw,80vh);width:min(80vw,80dvh);height:min(80vw,80dvh);border-radius:50%;background:#fff;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
+.boot-splash p{position:absolute;left:0;right:0;bottom:max(3.5vh,14px);margin:0;text-align:center;color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
 @keyframes bootZoom{0%{transform:scale(.14);opacity:0;filter:blur(4px)}35%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes bootBreath{50%{transform:scale(1.04)}}
 @keyframes bootFade{from{opacity:0;transform:translateY(6px)}}
@@ -1931,6 +1933,8 @@ function installGuide(title, steps, note) {
     <div class="modal-foot"><button class="btn primary block" data-close>확인</button></div>`);
 }
 
+/* 로고가 다 커진 뒤 살짝 사라지며 메인으로 */
+function splashOut() { const sp = document.querySelector('.boot-splash'); if (!sp) return Promise.resolve(); sp.classList.add('out'); return new Promise(r => setTimeout(r, 330)); }
 const SPLASH = '<div class="boot-splash"><img src="icons/voy-mark.png?v=2" alt="VOY™"><p>불러오는 중…</p></div>';
 async function boot() {
   mountThemeToggle();
@@ -1942,8 +1946,8 @@ async function boot() {
     S.me = me; S.boards = boards; S.settings = settings;
     QL.init(settings.quicklinks); QL.bind(); QL.checkAuto(refreshQL);
   } catch (e) { root.innerHTML = `<div class="empty">${esc(friendly(e))}</div>`; return; }
-  if (!S.me) return renderAuth();
-  API.touch(); await loadHidden(); route(); Badge.start(); Badge.seen(); refreshResearch();
+  if (!S.me) { await splashOut(); return renderAuth(); }
+  API.touch(); await loadHidden(); await splashOut(); route(); Badge.start(); Badge.seen(); refreshResearch();
   if (S.me.must_change_pw) pwModal(true); else maybeShowPopups();
 }
 async function loadHidden() {
@@ -2656,7 +2660,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag">v261111.1128</p>
+      <p class="ver-tag">v261111.1135</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
@@ -2671,7 +2675,7 @@ async function renderAuth() {
       S.me = await API.signIn(document.getElementById('aid').value, pw);
       root.innerHTML = SPLASH;   // 로그인 성공 → VOY 로고가 크게 다가오는 화면을 끝까지 보여준 뒤 피드로
       try { sessionStorage.setItem('voy_splash', '1'); } catch (x) {}
-      API.touch(); await Promise.all([loadHidden(), new Promise(r => setTimeout(r, 2100))]); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
+      API.touch(); await Promise.all([loadHidden(), new Promise(r => setTimeout(r, 2100))]); await splashOut(); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
       if (S.me.must_change_pw) pwModal(true, pw); else maybeShowPopups();
     } catch (er) { err.textContent = friendly(er); busy(btn, false); }
   };
