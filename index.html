@@ -454,7 +454,7 @@ body:has(.cbox-wrap) .theme-fab,body:has(.policy) .theme-fab{display:none}
 .boot-splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .35s ease}
 .boot-splash.out{opacity:0}
 .boot-splash.out img{transform:scale(1.06)!important;transition:transform .35s ease}
-.boot-splash img{width:min(80vw,80vh);height:min(80vw,80vh);width:min(80vw,80dvh);height:min(80vw,80dvh);border-radius:50%;background:#fff;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
+.boot-splash img{width:min(60vw,60vh);height:min(60vw,60vh);width:min(60vw,60dvh);height:min(60vw,60dvh);border-radius:50%;background:#fff;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
 .boot-splash p{position:absolute;left:0;right:0;bottom:max(3.5vh,14px);margin:0;text-align:center;color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
 @keyframes bootZoom{0%{transform:scale(.14);opacity:0;filter:blur(4px)}35%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes bootBreath{50%{transform:scale(1.04)}}
@@ -2660,7 +2660,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:12px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에 초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261111.1149" style="margin-top:18px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261111.1153" style="margin-top:18px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>회원: <b>demo / demo1234</b> · 최고관리자: <b>admin / admin1234</b></p>` : ''}
   </div></div>`;
