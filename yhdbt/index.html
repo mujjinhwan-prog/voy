@@ -408,7 +408,13 @@
     .masthead .brand-sub{ font-size:15px; display:block; margin-top:3px; }
     .datebar{ padding:10px 14px 12px; margin-bottom:12px; }
     .datebar .date-main{ font-size:21px; }
-    .datebar .date-anniv{ font-size:13px; padding-left:10px; }
+    .datebar .date-row{ flex-direction:column; gap:4px; }
+    .datebar .date-anniv{ font-size:13px; padding:4px 0 0; border-left:0; border-top:1px dashed #E5E2D8; white-space:normal; text-align:center; line-height:1.5; word-break:keep-all; width:100%; }
+    .datebar .date-anniv span{ white-space:nowrap; }
+    .datebar .onthisday .eline{ align-items:flex-start; }
+    .datebar .onthisday .ebadge{ width:19px; height:19px; font-size:10.5px; margin-top:1px; }
+    .datebar .onthisday .eyear{ flex:0 0 3.6em; }
+    .datebar .onthisday .edesc{ flex:1; min-width:0; word-break:keep-all; line-height:1.45; }
     .datebar .onthisday-heading{ margin-top:8px; padding-top:8px; font-size:13px; }
     .datebar .onthisday{ grid-template-columns:1fr; margin-top:6px; row-gap:5px; }
     .datebar .onthisday .eline{ font-size:12.5px; white-space:normal; }
@@ -452,7 +458,7 @@
   <div class="datebar">
     <div class="date-row">
       <div class="date-main">2026.11.11 (Wed)</div>
-      <div class="date-anniv">농업인의 날 · 보행자의 날 · 유엔참전용사 국제추모의 날</div>
+      <div class="date-anniv"><span>농업인의 날</span> · <span>보행자의 날</span> · <span>유엔참전용사 국제추모의 날</span></div>
     </div>
     <div class="onthisday-heading">그날, 오늘: 역사속의 오늘</div>
     <div class="onthisday"><div class="eline"><span class="ebadge ebadge-k">K</span><span class="eyear">1964년</span><span class="edesc">제1회 농민의 날 행사 개최</span></div><div class="eline"><span class="ebadge ebadge-k">K</span><span class="eyear">2010년</span><span class="edesc">서울 G20 정상회의 개막</span></div><div class="eline"><span class="ebadge ebadge-w">W</span><span class="eyear">1889년</span><span class="edesc">워싱턴주, 미국 42번째 주로 편입</span></div></div>
