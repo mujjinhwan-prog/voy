@@ -487,6 +487,29 @@ body:has(.policy) .theme-fab{display:none}
 .auth .err-msg{margin-top:4px;min-height:14px}
 .auth #asub{margin-top:2px}
 .auth .ver-tag{line-height:1.4}
+.rv-banner{cursor:pointer;border-color:color-mix(in srgb,#7c3aed 45%,transparent)!important;background:color-mix(in srgb,#7c3aed 8%,var(--surface))!important}
+.rv-banner .gi{background:color-mix(in srgb,#7c3aed 16%,transparent)!important;font-size:18px}
+.rv-banner b{color:#7c3aed}
+.rv-dot{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#e11d48;color:#fff;font-size:11.5px;margin-left:4px;vertical-align:2px}
+.rv-info{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:13.5px;line-height:1.5}.rv-info span{color:var(--muted)}
+.rv-done{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:13px}
+.rv-item{scroll-margin-top:80px;border:2px solid transparent;transition:border-color .15s}
+.rv-item.on{border-color:#7c3aed;box-shadow:0 0 0 3px color-mix(in srgb,#7c3aed 14%,transparent)}
+.rv-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}.rv-top h3{margin:0;font-size:17px;line-height:1.4}
+.rv-no{flex-shrink:0;background:#7c3aed;color:#fff;font-weight:900;font-size:12.5px;border-radius:8px;padding:3px 8px;margin-top:2px}
+.rv-stats{display:flex;gap:14px;color:var(--muted);font-size:13px;margin-top:12px}.rv-stats span{display:inline-flex;gap:4px;align-items:center}
+.rv-cmts{margin-top:8px;border-top:1px dashed var(--border);padding-top:8px}.rv-cmts summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--accent)}
+.rv-cmt{padding:8px 10px;margin-top:6px;border-radius:10px;background:var(--surface2);font-size:13.5px}.rv-cmt p{margin:0 0 3px;white-space:pre-wrap;word-break:break-word}.rv-cmt small{color:var(--muted);font-size:11.5px}
+.rv-score{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:6px;margin-top:14px}
+.rv-score button{height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);font-weight:900;font-size:15px;color:var(--text);cursor:pointer}
+.rv-score button.on{background:#7c3aed;border-color:#7c3aed;color:#fff}
+.rv-score .rv-x{font-size:12px;font-weight:700;color:var(--muted);padding:0 10px}
+.rv-score button:disabled{opacity:.5;cursor:default}
+.rv-submit{position:sticky;bottom:calc(70px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 -4px 18px rgba(0,0,0,.08)}
+.rv-cnt{font-size:15px}.rv-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.rv-chips a{font-size:12.5px;text-decoration:none;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px 10px}
+.rv-chips a span{color:#7c3aed;font-weight:900}.rv-chips a b{color:#7c3aed}
+.rv-row small .ok{color:var(--accent);font-weight:800}.rv-row small .warn{color:#e11d48;font-weight:800}
 .push-need{margin-top:10px;border:1.5px solid var(--point,#e8590c);background:color-mix(in srgb,var(--point,#e8590c) 9%,var(--surface));border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;gap:6px;animation:pnBlink 1.6s ease-in-out 3}
 .push-need.bad{border-color:#d33;background:color-mix(in srgb,#d33 8%,var(--surface))}
 .push-need>b{font-size:15px;color:var(--text)}.push-need>span{font-size:13px;line-height:1.5;color:var(--text2)}
@@ -1512,6 +1535,81 @@ const API = {
     if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on, org_: this.room })); return; }
     const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
   },
+  /* ---------- Voice 심사 (회차 · 심사자 · 채점) ---------- */
+  _rv() { const db = Local.db; db.reviews = db.reviews || { seq: 0, rounds: [] }; return db.reviews; },
+  _rvOpen(r) { const t = Date.now(); return r.status === 'open' && t >= Date.parse(r.starts_at) && t <= Date.parse(r.ends_at); },
+  async reviewStart({ mk, title, memo, ends_at, post_ids, judge_ids }) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_start', { org_: this.room, mk, title_: title, memo_: memo || '', ends_: ends_at, post_ids, judge_ids }));
+    if (this.profile?.role !== 'super') throw new Error('심사는 최고관리자만 시작할 수 있습니다');
+    if (!post_ids.length) throw new Error('심사할 Voice를 1개 이상 선택하세요'); if (!judge_ids.length) throw new Error('심사자를 1명 이상 지정하세요');
+    if (Date.parse(ends_at) <= Date.now()) throw new Error('마감 일시는 지금 이후여야 합니다');
+    const R = this._rv(), db = Local.db, now = new Date().toISOString();
+    const posts = db.posts.filter(p => post_ids.includes(p.id)).sort((a, b) => (a.month_key || '').localeCompare(b.month_key || '') || (a.month_seq || 0) - (b.month_seq || 0) || a.id - b.id);
+    const r = { id: ++R.seq, org: this.room, month_key: mk, title, memo: memo || null, starts_at: now, ends_at, status: 'open', created_at: now, closed_at: null,
+      items: posts.map((p, i) => ({ post_id: p.id, seq: i + 1 })), judges: [...new Set(judge_ids)].map(u => ({ user_id: u, notified_at: now, submitted_at: null })), scores: [] };
+    R.rounds.push(r); Local.save(); return r.id;
+  },
+  async reviewList() {
+    if (!LOCAL) return must(await sb.rpc('review_admin_list', { org_: this.room })) || [];
+    return this._rv().rounds.filter(r => r.org === this.room).sort((a, b) => b.id - a.id).map(r => ({ id: r.id, month_key: r.month_key, title: r.title, starts_at: r.starts_at, ends_at: r.ends_at, status: r.status,
+      is_open: this._rvOpen(r), items: r.items.length, judges: r.judges.length, submitted: r.judges.filter(j => j.submitted_at).length, created_at: r.created_at }));
+  },
+  async reviewDetail(rid) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_detail', { rid: +rid }));
+    const r = this._rv().rounds.find(x => x.id === +rid); if (!r) throw new Error('심사 회차가 없습니다'); const db = Local.db;
+    return { round: { ...r, items: undefined, judges: undefined, scores: undefined, is_open: this._rvOpen(r) },
+      items: r.items.map(i => { const p = db.posts.find(x => x.id === i.post_id) || {}, u = db.users.find(x => x.id === p.user_id) || {};
+        return { seq: i.seq, post_id: i.post_id, title: p.title, month_key: p.month_key, month_seq: p.month_seq, nickname: p.author_nickname, real_name: u.real_name, like_count: p.like_count || 0, comment_count: db.comments.filter(c => c.post_id === p.id).length }; }),
+      judges: r.judges.map(j => { const u = db.users.find(x => x.id === j.user_id) || {}; return { user_id: j.user_id, real_name: u.real_name, emp_no: u.emp_no, dept: u.org_branch || u.dept, login_id: u.login_id, nickname: u.nickname, notified_at: j.notified_at, submitted_at: j.submitted_at }; }),
+      scores: r.scores.map(x => ({ ...x })) };
+  },
+  async reviewUpdate(rid, status, ends_at) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_update', { rid: +rid, status_: status || null, ends_: ends_at || null })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid); if (status) r.status = status; if (ends_at) r.ends_at = ends_at; r.closed_at = r.status === 'closed' ? (r.closed_at || new Date().toISOString()) : null; Local.save();
+  },
+  async reviewJudge(rid, uid, on) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_judge', { rid: +rid, uid, on_: !!on })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid);
+    if (on) { if (!r.judges.some(j => j.user_id === uid)) r.judges.push({ user_id: uid, notified_at: new Date().toISOString(), submitted_at: null }); }
+    else { r.judges = r.judges.filter(j => j.user_id !== uid); r.scores = r.scores.filter(x => x.judge_id !== uid); }
+    Local.save();
+  },
+  async reviewRemind(rid, onlyMissing = true) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_remind', { rid: +rid, only_missing: !!onlyMissing }));
+    const r = this._rv().rounds.find(x => x.id === +rid), l = r.judges.filter(j => !onlyMissing || !j.submitted_at); l.forEach(j => j.notified_at = new Date().toISOString()); Local.save(); return l.length;
+  },
+  async reviewDelete(rid) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_delete', { rid: +rid })); return; }
+    const R = this._rv(); R.rounds = R.rounds.filter(x => x.id !== +rid); Local.save();
+  },
+  /* 심사자 */
+  async reviewMy() {
+    if (!this.uid) return [];
+    if (!LOCAL) return must(await sb.rpc('review_my')) || [];
+    const lim = Date.now() - 30 * 864e5;
+    return this._rv().rounds.filter(r => r.judges.some(j => j.user_id === this.uid) && (this._rvOpen(r) || Date.parse(r.ends_at) > lim))
+      .map(r => { const j = r.judges.find(x => x.user_id === this.uid); return { id: r.id, title: r.title, memo: r.memo, month_key: r.month_key, starts_at: r.starts_at, ends_at: r.ends_at, is_open: this._rvOpen(r), items: r.items.length, submitted_at: j.submitted_at, my_count: r.scores.filter(x => x.judge_id === this.uid).length }; })
+      .sort((a, b) => (b.is_open - a.is_open) || b.ends_at.localeCompare(a.ends_at));
+  },
+  async reviewItems(rid) {
+    if (!LOCAL) return must(await sb.rpc('review_items_for_judge', { rid: +rid }));
+    const r = this._rv().rounds.find(x => x.id === +rid), db = Local.db; if (!r || !r.judges.some(j => j.user_id === this.uid)) throw new Error('이 심사의 심사자가 아닙니다');
+    const j = r.judges.find(x => x.user_id === this.uid);
+    return { round: { id: r.id, title: r.title, memo: r.memo, month_key: r.month_key, ends_at: r.ends_at, is_open: this._rvOpen(r), submitted_at: j.submitted_at },
+      items: r.items.map(i => { const p = db.posts.find(x => x.id === i.post_id) || {}; const my = r.scores.find(x => x.judge_id === this.uid && x.post_id === p.id);
+        return { seq: i.seq, post_id: p.id, title: p.title, body: p.body, link_url: p.link_url, link_title: p.link_title, link_image: p.link_image, images: p.images || [], pdf: p.pdf, created_at: p.created_at,
+          like_count: p.like_count || 0,
+          comment_count: db.comments.filter(c => c.post_id === p.id).length,
+          comments: db.comments.filter(c => c.post_id === p.id).sort((a, b) => a.id - b.id).map(c => ({ body: c.body, images: c.images || [], created_at: c.created_at })),
+          my_points: my ? my.points : null }; }) };
+  },
+  async reviewSubmit(rid, scores) {
+    if (!LOCAL) { must(await sb.rpc('review_submit', { rid: +rid, scores })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid); if (!this._rvOpen(r)) throw new Error('심사 기간이 아닙니다 (마감되었어요)');
+    if (scores.length < 1 || scores.length > 3) throw new Error('점수는 1개~3개 글에 줄 수 있어요');
+    r.scores = r.scores.filter(x => x.judge_id !== this.uid).concat(scores.map(x => ({ judge_id: this.uid, post_id: +x.post_id, points: +x.points })));
+    r.judges.find(j => j.user_id === this.uid).submitted_at = new Date().toISOString(); Local.save();
+  },
   async voiceAwardsPublic(mk) {
     if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk, org_: this.room })) || [];
     const A = this._aw(mk), db = Local.db; if (!A.published) return [];
@@ -2130,6 +2228,7 @@ function route() {
   if (view === 'guide') return viewGuide();
   if (view === 'privacy') return viewPrivacy();
   if (view === 'myposts') return viewMyPosts();
+  if (view === 'review') return arg ? viewReview(arg) : viewReviewList();
   if (view === 'research' && arg) return viewSurvey(arg);
   if (view === 'research') return viewResearch();
   return viewFeed();
@@ -2206,6 +2305,70 @@ function cardHTML(p) {
     </div></article>`;
 }
 
+
+/* ---------------- Voice 심사 (지정된 심사자만) ---------------- */
+const rvDue = iso => { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}(${'일월화수목금토'[d.getDay()]}) ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const rvLeft = iso => { const ms = Date.parse(iso) - Date.now(); if (ms <= 0) return '마감'; const h = Math.floor(ms / 36e5); return h >= 24 ? `${Math.floor(h / 24)}일 ${h % 24}시간 남음` : h >= 1 ? `${h}시간 남음` : `${Math.max(1, Math.floor(ms / 6e4))}분 남음`; };
+async function loadReviewBanner() {
+  const el = document.getElementById('rvBanner'); if (!el) return;
+  let l = []; try { l = (await API.reviewMy()).filter(r => r.is_open); } catch (e) { return; }
+  if (!l.length || !document.body.contains(el)) return;
+  el.innerHTML = l.map(r => `<div class="event-banner rv-banner" data-act="go" data-to="#/review/${r.id}"><div class="gi">📝</div>
+    <div style="flex:1;min-width:0"><b>${r.submitted_at ? 'Voice 심사 · 제출 완료' : 'Voice 심사 요청이 도착했어요'} <small class="eb-now">${rvLeft(r.ends_at)}</small></b><span class="one">${esc(r.title)} · ${rvDue(r.ends_at)}까지${r.submitted_at ? ' · 마감 전까지 수정 가능' : ''}</span></div>
+    <button class="btn primary sm">${r.submitted_at ? '수정' : '심사하기'}</button></div>`).join('');
+  const todo = l.find(r => !r.submitted_at);
+  if (todo && !S.rvPopped) { S.rvPopped = true;
+    openModal(`<div class="modal-head"><h3>📝 Voice 심사 요청</h3><button class="icon-x" data-close>${I('x')}</button></div>
+      <div class="modal-body"><p style="margin:0 0 8px;font-size:15px;line-height:1.6"><b>${esc(todo.title)}</b> 심사자로 지정되었어요.</p>
+      <div class="rv-info"><span>🗓 마감</span><b>${rvDue(todo.ends_at)} · ${rvLeft(todo.ends_at)}</b><span>📄 대상</span><b>Voice ${todo.items}개</b><span>✍️ 방법</span><b>마음에 드는 글 1~3개에 3·2·1점</b></div>
+      ${todo.memo ? `<p class="hint" style="white-space:pre-line">${esc(todo.memo)}</p>` : ''}</div>
+      <div class="modal-foot"><button class="btn ghost" data-close>나중에</button><button class="btn primary" data-close data-act="go" data-to="#/review/${todo.id}">지금 심사하기</button></div>`);
+  }
+}
+async function viewReviewList() {
+  shell(`<div class="page"><div class="subbar"><button class="back" data-act="go" data-to="#/me">${I('left')}</button><b>📝 Voice 심사</b></div><div id="rvList"><div class="loading">불러오는 중…</div></div></div>`, 'me');
+  let l = []; try { l = await API.reviewMy(); } catch (e) { toast(friendly(e), 'err'); }
+  document.getElementById('rvList').innerHTML = l.length ? l.map(r => `<button class="box menu-row rv-row" data-act="go" data-to="#/review/${r.id}"><div class="mi">📝</div><div style="flex:1"><b>${esc(r.title)}</b>
+    <small>${r.is_open ? `${rvDue(r.ends_at)}까지 · ${rvLeft(r.ends_at)}` : '마감됨'} · ${r.submitted_at ? `<span class="ok">제출 완료 (${r.my_count}개 채점)</span>` : r.is_open ? '<span class="warn">미제출</span>' : '미제출'}</small></div>${I('right')}</button>`).join('')
+    : '<div class="empty">맡은 심사가 없어요</div>';
+}
+async function viewReview(rid) {
+  shell(`<div class="page"><div class="loading">불러오는 중…</div></div>`, 'feed', false);
+  let D; try { D = await API.reviewItems(rid); } catch (e) { toast(friendly(e), 'err'); return go('#/feed'); }
+  const R = D.round, open = R.is_open;
+  const pick = S.rvPick = {}; D.items.forEach(it => { if (it.my_points) pick[it.post_id] = it.my_points; });
+  const media = p => { const imgs = p.images || [];
+    return `${p.link_url ? `<a class="link-wrap" href="${esc(safeUrl(p.link_url))}" target="_blank" rel="noopener">${p.link_image ? `<img class="lw-img" src="${esc(p.link_image)}" alt="" referrerpolicy="no-referrer" onerror="this.hidden=true">` : ''}<span class="link-card"><span class="lc-ic">${I('link', 18)}</span><span class="lc-txt"><b>${esc(p.link_title || (() => { try { return new URL(safeUrl(p.link_url)).host; } catch (e) { return '첨부 링크'; } })())}</b><small>${esc(p.link_url)}</small></span></span></a>` : ''}
+    ${imgs.length ? `<div class="imgs ${imgs.length === 1 ? 'one' : ''}">${imgs.map((i, k) => `<button class="img-btn" data-act="lightbox" data-src="${esc(i.url)}" data-orig="${esc(i.orig || i.url)}" data-name="${esc(i.name || `voy_image_${k + 1}.jpg`)}"><img src="${esc(i.url)}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}
+    ${p.pdf ? `<a class="att pdf" href="${esc(p.pdf.url)}" target="_blank" rel="noopener" download="${esc(p.pdf.name)}">${I('file', 16)} ${esc(p.pdf.name)}</a>` : ''}`; };
+  shell(`<div class="page rv-page">
+    <div class="subbar"><button class="back" data-act="go" data-to="#/review">${I('left')}</button><b>📝 ${esc(R.title)}</b></div>
+    <div class="box rv-head"><div class="rv-info"><span>🗓 마감</span><b>${rvDue(R.ends_at)} · ${open ? rvLeft(R.ends_at) : '마감됨'}</b><span>📄 대상</span><b>Voice ${D.items.length}개</b>
+      <span>✍️ 방법</span><b>마음에 드는 글 <u>1~3개</u>에 <u>3·2·1점</u> 중 하나씩 (같은 점수 여러 번 가능)</b></div>
+      ${R.memo ? `<p class="hint" style="white-space:pre-line;margin:8px 0 0">${esc(R.memo)}</p>` : ''}
+      <p class="hint" style="margin:8px 0 0">🔒 공정한 심사를 위해 작성자(닉네임)는 표시하지 않아요. 내 점수는 admin만 확인할 수 있어요.</p>
+      ${R.submitted_at ? `<p class="rv-done">✅ ${fmtDT(R.submitted_at)} 제출 완료${open ? ' · 마감 전까지 다시 제출할 수 있어요' : ''}</p>` : ''}</div>
+    ${D.items.map(p => `<article class="box rv-item" id="rv${p.post_id}" data-pid="${p.post_id}">
+      <div class="rv-top"><span class="rv-no">V${p.seq}</span><h3>${esc(p.title)}</h3></div>
+      <div class="body-full">${linkify(p.body || '')}</div>${media(p)}
+      <div class="rv-stats"><span>${I('heart', 15)} 좋아요 ${p.like_count}</span><span>${I('msg', 15)} 댓글 ${p.comment_count}</span></div>
+      ${p.comments.length ? `<details class="rv-cmts"><summary>댓글 ${p.comments.length}개 보기</summary>${p.comments.map(c => `<div class="rv-cmt"><p>${linkify(c.body || '')}</p>${(c.images || []).length ? `<div class="cmt-imgs">${c.images.map(i => `<img src="${esc(i.url)}" alt="" data-act="lightbox" data-src="${esc(i.url)}" data-orig="${esc(i.orig || i.url)}" data-name="${esc(i.name || 'voy_comment.jpg')}" loading="lazy">`).join('')}</div>` : ''}<small>${timeAgo(c.created_at)}</small></div>`).join('')}</details>` : ''}
+      <div class="rv-score" role="group" aria-label="점수">${[3, 2, 1].map(n => `<button type="button" data-act="rv-pt" data-pid="${p.post_id}" data-pt="${n}" ${open ? '' : 'disabled'}>${n}점</button>`).join('')}<button type="button" class="rv-x" data-act="rv-pt" data-pid="${p.post_id}" data-pt="0" ${open ? '' : 'disabled'}>선택 안 함</button></div>
+    </article>`).join('')}
+    <div class="box rv-submit"><div id="rvSum"></div>
+      ${open ? `<button class="btn primary block w-submit" data-act="rv-submit" data-rid="${R.id}">${R.submitted_at ? '다시 제출하기' : '심사 제출하기'}</button>` : '<p class="hint" style="text-align:center">심사가 마감되었어요</p>'}</div>
+  </div>`, 'feed', false);
+  rvPaint(D.items);
+  S.rvItems = D.items;
+}
+function rvPaint(items) {
+  items = items || S.rvItems || []; const pick = S.rvPick || {};
+  document.querySelectorAll('.rv-item').forEach(a => { const v = pick[a.dataset.pid] || 0; a.classList.toggle('on', !!v);
+    a.querySelectorAll('[data-act="rv-pt"]').forEach(b => b.classList.toggle('on', +b.dataset.pt === v && v > 0)); });
+  const sel = items.filter(i => pick[i.post_id]);
+  const el = document.getElementById('rvSum'); if (!el) return;
+  el.innerHTML = `<b class="rv-cnt">선택 ${sel.length} / 3</b>${sel.length ? `<div class="rv-chips">${sel.map(i => `<a href="#rv${i.post_id}" data-act="rv-jump" data-pid="${i.post_id}"><span>V${i.seq}</span> ${esc(i.title.slice(0, 16))} <b>${pick[i.post_id]}점</b></a>`).join('')}</div>` : '<p class="hint" style="margin:4px 0 0">글 아래의 3점·2점·1점 버튼으로 점수를 주세요</p>'}`;
+}
 /* ---------------- 피드 ---------------- */
 function viewFeed() {
   const f = S.feed, me = S.me, cur = S.hidden.current;
@@ -2213,6 +2376,7 @@ function viewFeed() {
   shell(`<div class="page">
     ${cur && cur.active ? `<div class="event-banner"><div class="gi">${I('gift', 17)}</div><div>
       <b>N번째 주인공을 찾아라!${cur.found ? ` <small class="eb-now">현재 ${cur.found}명 탄생</small>` : ''}</b><span class="one">이번 달 <em>N번째</em> 글을 쓴 <em>${cur.total}명</em>에게 특별한 선물이!!</span></div></div>` : ''}
+    <div id="rvBanner"></div>
     ${pushPromptHTML()}
     ${researchBannerHTML()}
     <div class="toolbar">
@@ -2227,7 +2391,7 @@ function viewFeed() {
   const q = document.getElementById('fq'); let t;
   q.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { f.q = q.value.trim(); loadFeed(true); }, 350); });
   document.getElementById('fmonth').onchange = e => { f.month = e.target.value; loadFeed(true); };
-  loadFeed(true);
+  loadFeed(true); loadReviewBanner();
 }
 async function loadFeed(reset) {
   const f = S.feed;
@@ -2657,6 +2821,7 @@ async function viewMe() {
       <div class="nrow"><b>${esc(me.nickname)}</b><button class="nbtn" data-act="nick" ${changed && !isAdminRole(me.role) ? 'disabled' : ''}>${I('pen', 13)} ${changed && !isAdminRole(me.role) ? '이번 달 변경 완료' : '닉네임 변경'}</button></div>
       <p>이달 닉네임을 1회 변경할 수 있습니다. (매월 1일 자동 초기화)</p></div>
     <div class="box statgrid" id="mystats"><div><b>-</b><small>이달 작성</small></div><div><b>-</b><small>이달 점수</small></div><div><b>-</b><small>누적 작성</small></div></div>
+    <div class="box" id="meReview" hidden></div>
     <div class="box"><button class="menu-row" data-act="go" data-to="#/myposts"><div class="mi">${I('doc', 20)}</div><div><b>내가 쓴 글</b><small>월별로 내 게시글과 반응을 확인하세요</small></div>${I('right')}</button></div>
     <div class="box"><h4>닉네임 이력</h4><div id="nhist" class="muted" style="font-size:13px">불러오는 중…</div></div>
     <div class="box"><div class="set-row"><span>${I('palette', 19)} 화면 모드 (눈 보호)</span><div class="theme-seg">
@@ -2673,6 +2838,8 @@ async function viewMe() {
     ${LOCAL ? `<p class="demo-flag" style="margin-top:12px">데모 모드로 실행 중입니다. 데이터는 이 브라우저에만 저장돼요.</p>` : ''}
   </div>`, 'me');
   bindPushBox();
+  API.reviewMy().then(l => { const el = document.getElementById('meReview'); if (!el || !l.length) return; const open = l.filter(r => r.is_open && !r.submitted_at).length;
+    el.hidden = false; el.innerHTML = `<button class="menu-row" data-act="go" data-to="#/review"><div class="mi">📝</div><div><b>Voice 심사${open ? ` <span class="rv-dot">${open}</span>` : ''}</b><small>${open ? '심사할 회차가 있어요' : '내가 맡은 심사 회차를 확인하세요'}</small></div>${I('right')}</button>`; }).catch(() => {});
   try {
     const [mine, hist] = await Promise.all([API.listPosts({ mine: true, limit: 2000 }), API.nicknameHistory()]);
     const m = mine.filter(p => p.month_key === curMonth());
@@ -2879,7 +3046,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.0411`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.1005`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -2975,7 +3142,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261112.0411" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261112.1005" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3000,7 +3167,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261112.0411" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261112.1005" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3088,6 +3255,15 @@ document.addEventListener('click', async e => {
     case 'gate-bypass': S.gateBypass = true; try { sessionStorage.setItem('voy_gate_bypass', '1'); } catch (er) {} route(); maybeShowPopups(); break;
     case 'push-on': try { await enablePush(); document.getElementById('pushPrompt')?.remove(); } catch (er) { toast(pushErrText(er), 'err'); }
       { const sw = document.getElementById('pushSw'); if (sw) { sw.checked = await pushIsOn(); pushNeed(); pushDiag(); } } break;
+    case 'rv-pt': { const pid = t.dataset.pid, v = +t.dataset.pt, P = S.rvPick = S.rvPick || {};
+      if (v && !P[pid] && Object.keys(P).length >= 3) { toast('점수는 최대 3개 글에만 줄 수 있어요 — 다른 글의 [선택 안 함]을 먼저 눌러 주세요', 'err'); break; }
+      if (!v || P[pid] === v) delete P[pid]; else P[pid] = v; rvPaint(); break; }
+    case 'rv-jump': document.getElementById('rv' + t.dataset.pid)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); e.preventDefault(); break;
+    case 'rv-submit': { const P = S.rvPick || {}, sc = Object.entries(P).map(([post_id, points]) => ({ post_id: +post_id, points }));
+      if (!sc.length) { toast('1개 이상 글에 점수를 주세요', 'err'); break; }
+      const items = S.rvItems || [], lines = sc.map(x => { const it = items.find(i => i.post_id === x.post_id) || {}; return `V${it.seq} ${esc((it.title || '').slice(0, 22))} — <b>${x.points}점</b>`; });
+      if (!(await confirmBox('<b>심사를 제출할까요?</b><br><br>' + lines.join('<br>') + '<br><br><small>마감 전까지는 다시 제출해서 바꿀 수 있어요.</small>', '제출하기'))) break;
+      t.disabled = true; try { await API.reviewSubmit(t.dataset.rid, sc); toast('✅ 심사를 제출했어요. 감사합니다!'); go('#/review'); } catch (er) { toast(friendly(er), 'err'); t.disabled = false; } break; }
     case 'push-later': try { localStorage.setItem('voy_push_prompt_off', String(Date.now())); } catch (er) {} document.getElementById('pushPrompt')?.remove(); break;
     case 'install': doInstall(); break;
   }

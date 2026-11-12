@@ -221,6 +221,18 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .ck:checked{background:var(--accent);box-shadow:inset 0 0 0 3px var(--surface)}
 .bulk{display:flex;gap:10px;align-items:center;background:var(--danger-soft);color:var(--danger);border-radius:12px;padding:8px 14px;margin-bottom:12px;font-weight:700;font-size:14px}
 .bulk .btn{margin-left:auto}
+.rv-form{display:flex;gap:12px;flex-wrap:wrap}.rv-form>div{flex:1;min-width:180px}
+.rv-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15.5px;margin:22px 0 10px}.rv-h small{color:var(--muted);font-weight:500;font-size:12.5px}
+.rv-judges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.rv-jchip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:6px 8px 6px 12px;font-size:13px}
+.rv-jchip small,.aw-addbtn small{display:block;color:var(--muted);font-size:11px;font-weight:500}.rv-jchip button{border:0;background:none;color:var(--muted);cursor:pointer;display:grid}
+.rv-jlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.rv-jrow{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:12px;padding:9px 12px;font-size:13px}.rv-jrow.ok{border-color:color-mix(in srgb,var(--accent) 50%,var(--border))}
+.rv-jrow .rv-jn{flex:1;min-width:0}.rv-jrow small{display:block;color:var(--muted);font-size:11.5px}
+.rv-mx th,.rv-mx td{padding:7px 9px!important;min-width:38px}.rv-mx .stick{position:sticky;left:0;background:var(--surface);z-index:1}
+.rv-c3{background:color-mix(in srgb,#7c3aed 30%,transparent);font-weight:900}.rv-c2{background:color-mix(in srgb,#7c3aed 18%,transparent);font-weight:800}.rv-c1{background:color-mix(in srgb,#7c3aed 9%,transparent)}
+.rv-tot td{border-top:2px solid var(--border)!important;background:var(--surface2)}
+.rv-v{color:#7c3aed}.rv-top1 td{background:var(--gold-soft,#fff7e0)}
 .no-chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:800;border:1px solid var(--border);color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .no-chip.gold{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--gold)}
 .no-chip.dash{border-style:dashed;color:var(--muted)}
@@ -1403,6 +1415,81 @@ const API = {
     if (!LOCAL) { must(await sb.rpc('admin_publish_awards', { mk, on_: !!on, org_: this.room })); return; }
     const A = this._aw(mk); A.published = !!on; A.published_at = on ? new Date().toISOString() : null; Local.save();
   },
+  /* ---------- Voice 심사 (회차 · 심사자 · 채점) ---------- */
+  _rv() { const db = Local.db; db.reviews = db.reviews || { seq: 0, rounds: [] }; return db.reviews; },
+  _rvOpen(r) { const t = Date.now(); return r.status === 'open' && t >= Date.parse(r.starts_at) && t <= Date.parse(r.ends_at); },
+  async reviewStart({ mk, title, memo, ends_at, post_ids, judge_ids }) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_start', { org_: this.room, mk, title_: title, memo_: memo || '', ends_: ends_at, post_ids, judge_ids }));
+    if (this.profile?.role !== 'super') throw new Error('심사는 최고관리자만 시작할 수 있습니다');
+    if (!post_ids.length) throw new Error('심사할 Voice를 1개 이상 선택하세요'); if (!judge_ids.length) throw new Error('심사자를 1명 이상 지정하세요');
+    if (Date.parse(ends_at) <= Date.now()) throw new Error('마감 일시는 지금 이후여야 합니다');
+    const R = this._rv(), db = Local.db, now = new Date().toISOString();
+    const posts = db.posts.filter(p => post_ids.includes(p.id)).sort((a, b) => (a.month_key || '').localeCompare(b.month_key || '') || (a.month_seq || 0) - (b.month_seq || 0) || a.id - b.id);
+    const r = { id: ++R.seq, org: this.room, month_key: mk, title, memo: memo || null, starts_at: now, ends_at, status: 'open', created_at: now, closed_at: null,
+      items: posts.map((p, i) => ({ post_id: p.id, seq: i + 1 })), judges: [...new Set(judge_ids)].map(u => ({ user_id: u, notified_at: now, submitted_at: null })), scores: [] };
+    R.rounds.push(r); Local.save(); return r.id;
+  },
+  async reviewList() {
+    if (!LOCAL) return must(await sb.rpc('review_admin_list', { org_: this.room })) || [];
+    return this._rv().rounds.filter(r => r.org === this.room).sort((a, b) => b.id - a.id).map(r => ({ id: r.id, month_key: r.month_key, title: r.title, starts_at: r.starts_at, ends_at: r.ends_at, status: r.status,
+      is_open: this._rvOpen(r), items: r.items.length, judges: r.judges.length, submitted: r.judges.filter(j => j.submitted_at).length, created_at: r.created_at }));
+  },
+  async reviewDetail(rid) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_detail', { rid: +rid }));
+    const r = this._rv().rounds.find(x => x.id === +rid); if (!r) throw new Error('심사 회차가 없습니다'); const db = Local.db;
+    return { round: { ...r, items: undefined, judges: undefined, scores: undefined, is_open: this._rvOpen(r) },
+      items: r.items.map(i => { const p = db.posts.find(x => x.id === i.post_id) || {}, u = db.users.find(x => x.id === p.user_id) || {};
+        return { seq: i.seq, post_id: i.post_id, title: p.title, month_key: p.month_key, month_seq: p.month_seq, nickname: p.author_nickname, real_name: u.real_name, like_count: p.like_count || 0, comment_count: db.comments.filter(c => c.post_id === p.id).length }; }),
+      judges: r.judges.map(j => { const u = db.users.find(x => x.id === j.user_id) || {}; return { user_id: j.user_id, real_name: u.real_name, emp_no: u.emp_no, dept: u.org_branch || u.dept, login_id: u.login_id, nickname: u.nickname, notified_at: j.notified_at, submitted_at: j.submitted_at }; }),
+      scores: r.scores.map(x => ({ ...x })) };
+  },
+  async reviewUpdate(rid, status, ends_at) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_update', { rid: +rid, status_: status || null, ends_: ends_at || null })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid); if (status) r.status = status; if (ends_at) r.ends_at = ends_at; r.closed_at = r.status === 'closed' ? (r.closed_at || new Date().toISOString()) : null; Local.save();
+  },
+  async reviewJudge(rid, uid, on) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_judge', { rid: +rid, uid, on_: !!on })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid);
+    if (on) { if (!r.judges.some(j => j.user_id === uid)) r.judges.push({ user_id: uid, notified_at: new Date().toISOString(), submitted_at: null }); }
+    else { r.judges = r.judges.filter(j => j.user_id !== uid); r.scores = r.scores.filter(x => x.judge_id !== uid); }
+    Local.save();
+  },
+  async reviewRemind(rid, onlyMissing = true) {
+    if (!LOCAL) return must(await sb.rpc('review_admin_remind', { rid: +rid, only_missing: !!onlyMissing }));
+    const r = this._rv().rounds.find(x => x.id === +rid), l = r.judges.filter(j => !onlyMissing || !j.submitted_at); l.forEach(j => j.notified_at = new Date().toISOString()); Local.save(); return l.length;
+  },
+  async reviewDelete(rid) {
+    if (!LOCAL) { must(await sb.rpc('review_admin_delete', { rid: +rid })); return; }
+    const R = this._rv(); R.rounds = R.rounds.filter(x => x.id !== +rid); Local.save();
+  },
+  /* 심사자 */
+  async reviewMy() {
+    if (!this.uid) return [];
+    if (!LOCAL) return must(await sb.rpc('review_my')) || [];
+    const lim = Date.now() - 30 * 864e5;
+    return this._rv().rounds.filter(r => r.judges.some(j => j.user_id === this.uid) && (this._rvOpen(r) || Date.parse(r.ends_at) > lim))
+      .map(r => { const j = r.judges.find(x => x.user_id === this.uid); return { id: r.id, title: r.title, memo: r.memo, month_key: r.month_key, starts_at: r.starts_at, ends_at: r.ends_at, is_open: this._rvOpen(r), items: r.items.length, submitted_at: j.submitted_at, my_count: r.scores.filter(x => x.judge_id === this.uid).length }; })
+      .sort((a, b) => (b.is_open - a.is_open) || b.ends_at.localeCompare(a.ends_at));
+  },
+  async reviewItems(rid) {
+    if (!LOCAL) return must(await sb.rpc('review_items_for_judge', { rid: +rid }));
+    const r = this._rv().rounds.find(x => x.id === +rid), db = Local.db; if (!r || !r.judges.some(j => j.user_id === this.uid)) throw new Error('이 심사의 심사자가 아닙니다');
+    const j = r.judges.find(x => x.user_id === this.uid);
+    return { round: { id: r.id, title: r.title, memo: r.memo, month_key: r.month_key, ends_at: r.ends_at, is_open: this._rvOpen(r), submitted_at: j.submitted_at },
+      items: r.items.map(i => { const p = db.posts.find(x => x.id === i.post_id) || {}; const my = r.scores.find(x => x.judge_id === this.uid && x.post_id === p.id);
+        return { seq: i.seq, post_id: p.id, title: p.title, body: p.body, link_url: p.link_url, link_title: p.link_title, link_image: p.link_image, images: p.images || [], pdf: p.pdf, created_at: p.created_at,
+          like_count: p.like_count || 0,
+          comment_count: db.comments.filter(c => c.post_id === p.id).length,
+          comments: db.comments.filter(c => c.post_id === p.id).sort((a, b) => a.id - b.id).map(c => ({ body: c.body, images: c.images || [], created_at: c.created_at })),
+          my_points: my ? my.points : null }; }) };
+  },
+  async reviewSubmit(rid, scores) {
+    if (!LOCAL) { must(await sb.rpc('review_submit', { rid: +rid, scores })); return; }
+    const r = this._rv().rounds.find(x => x.id === +rid); if (!this._rvOpen(r)) throw new Error('심사 기간이 아닙니다 (마감되었어요)');
+    if (scores.length < 1 || scores.length > 3) throw new Error('점수는 1개~3개 글에 줄 수 있어요');
+    r.scores = r.scores.filter(x => x.judge_id !== this.uid).concat(scores.map(x => ({ judge_id: this.uid, post_id: +x.post_id, points: +x.points })));
+    r.judges.find(j => j.user_id === this.uid).submitted_at = new Date().toISOString(); Local.save();
+  },
   async voiceAwardsPublic(mk) {
     if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk, org_: this.room })) || [];
     const A = this._aw(mk), db = Local.db; if (!A.published) return [];
@@ -1813,7 +1900,7 @@ const root = document.getElementById('root');
 const A = { likeCounts: [], dtList: {}, dtView: {}, popups: [], me: null, page: 'posts', boards: [], settings: {}, posts: [], comments: [], profiles: [], events: [], sel: new Set(), pageNo: 1,
   f: { posts: { month: curMonth(), board: '', sort: 'new', q: '' }, comments: { month: curMonth(), q: '' }, members: { role: '', likeMonth: curMonth() }, rank: { month: curMonth(), inclAdmin: false }, events: { month: curMonth() } } };
 const PER = 30;
-const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '권한·운영진'], ['rank', 'trophy', '순위·점수 관리'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
+const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '권한·운영진'], ['rank', 'trophy', '순위·점수 관리'], ['review', 'clipboard', 'Voice 심사'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
 const pmap = () => { const m = {}; A.profiles.forEach(p => m[p.id] = p); return m; };
 const boardOf = id => A.boards.find(b => b.id === id) || { name: '-', color: '#888' };
 const W = () => A.settings.score || { like: 1, comment: 2 };
@@ -1843,7 +1930,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261112.0411</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261112.1005</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -1860,7 +1947,7 @@ function renderLogin(msg) {
   };
 }
 window.addEventListener('hashchange', () => { if (A.me) route(); });
-const navAllowed = () => NAV.filter(([k]) => k === 'admins' ? A.me.role === 'super' : hasPerm(A.me, k));
+const navAllowed = () => NAV.filter(([k]) => k === 'admins' || k === 'review' ? A.me.role === 'super' : hasPerm(A.me, k));
 function route() {
   const p = location.hash.replace(/^#\/?/, '') || 'posts', allowed = navAllowed();
   if (!allowed.length) { root.innerHTML = `<div class="login"><div class="box"><h1>권한이 없습니다</h1><p class="hint">최고관리자에게 메뉴 권한을 요청하세요.</p><button class="btn block" data-act="logout" style="margin-top:14px">로그아웃</button></div></div>`; return; }
@@ -1884,7 +1971,7 @@ function layout() {
 function renderPage() {
   const c = document.getElementById('content'); if (!c) return;
   const fa = document.activeElement, keep = fa && fa.dataset && fa.dataset.tf ? { t: fa.dataset.tf, k: fa.dataset.k, pos: fa.selectionStart } : null;
-  ({ posts: pagePosts, comments: pageComments, members: pageMembers, admins: pageAdmins, rank: pageRank, events: pageEvents, popups: pagePopups, research: pageResearch, settings: pageSettings })[A.page](c);
+  ({ posts: pagePosts, comments: pageComments, members: pageMembers, admins: pageAdmins, rank: pageRank, review: pageReview, events: pageEvents, popups: pagePopups, research: pageResearch, settings: pageSettings })[A.page](c);
   if (keep) { const n = document.querySelector(`[data-tf="${keep.t}"][data-k="${keep.k}"]`); if (n) { n.focus(); try { n.setSelectionRange(keep.pos, keep.pos); } catch (e) {} } }
 }
 const stat = (label, val, unit, ic) => `<div class="stat"><div class="sl">${label}</div><div class="sv">${val}<small>${unit}</small></div><div class="si">${I(ic, 20)}</div></div>`;
@@ -2447,6 +2534,115 @@ function awardsHTML(mk) {
     <p class="hint" style="margin:12px 0 0">🔒 회원 화면에는 게시한 달의 <b>닉네임(그 달 기준)</b>만 보입니다. 실명·사번·소속은 최고관리자에게만 보여요.</p></div>`;
 }
 
+
+/* ---------------- Voice 심사 (최고관리자 전용) ----------------
+   회차: 대상 월 Voice 선택 → 심사자 지정 → 기간 → [심사 시작] → 심사자 1~3개 글에 3·2·1점 → 집계 → 최우수·우수·장려 선정 */
+const RV_CATS = ['grand', 'excellent', 'merit'];
+const kstISO = v => v ? new Date(v + ':00+09:00').toISOString() : null;
+function rvState() { return A.rv = A.rv || { view: 'list', list: null, detail: null, draft: null, aw: null }; }
+async function rvLoadList() { const V = rvState(); try { V.list = await API.reviewList(); } catch (e) { V.list = []; toast(friendly(e), 'err'); } if (A.page === 'review') renderPage(); }
+async function rvOpen(id) { const V = rvState(); V.view = id; V.detail = null; V.aw = null; renderPage();
+  try { V.detail = await API.reviewDetail(id); await rvAwards(); } catch (e) { toast(friendly(e), 'err'); V.view = 'list'; } if (A.page === 'review') renderPage(); }
+async function rvAwards(rerender) { const V = rvState(); if (!V.detail) return; try { V.aw = await API.adminGetAwards(V.detail.round.month_key); } catch (e) { V.aw = { list: [] }; } if (rerender && A.page === 'review') renderPage(); }
+function rvNewDraft() {
+  const mk = prevMonth(curMonth()), d = new Date(Date.now() + KST_OFFSET); d.setUTCDate(d.getUTCDate() + 4); d.setUTCHours(18, 0, 0, 0);
+  return { mk, title: `${monthLabel(mk)} Voice 심사`, memo: '', ends: d.toISOString().slice(0, 16), posts: null, judges: [], q: '' };
+}
+function rvMonthPosts(mk) { return A.posts.filter(p => p.month_key === mk && p.month_seq && p.author_role !== 'admin').sort((a, b) => a.month_seq - b.month_seq); }
+function pageReview(c) {
+  const V = rvState();
+  if (V.view === 'list') { if (!V.list) { c.innerHTML = '<div class="loading">불러오는 중…</div>'; rvLoadList(); return; } return c.innerHTML = rvListHTML(V); }
+  if (V.view === 'new') return rvNewRender(c, V);
+  if (!V.detail) { c.innerHTML = '<div class="loading">불러오는 중…</div>'; return; }
+  c.innerHTML = rvDetailHTML(V);
+}
+function rvListHTML(V) {
+  return `<div class="panel"><div class="panel-head"><div><h2>${I('clipboard', 19)} Voice 심사 회차 · ${ORG_NAME[API.room]}</h2>
+    <p>대상 월의 Voice를 고르고 심사자를 지정해 <b>[심사 시작]</b>하면 심사자에게 알림이 갑니다 · 심사자는 작성자(닉네임) 없이 글만 보고 1~3개 글에 3·2·1점을 줍니다 · <b>admin만</b> 이 메뉴를 볼 수 있어요</p></div>
+    <button class="btn primary" data-act="rv-new">${I('plus', 16)} 새 심사 시작</button></div>
+    ${V.list.length ? `<div class="table-wrap"><table class="dt"><thead><tr><th>심사</th><th>대상</th><th>마감</th><th>상태</th><th class="num">대상 글</th><th class="num">제출</th><th></th></tr></thead><tbody>
+    ${V.list.map(r => `<tr><td class="b">${esc(r.title)}</td><td>${monthLabel(r.month_key)}</td><td class="nowrap">${fmtDT(r.ends_at)}</td>
+      <td>${r.is_open ? '<span class="tag-st active">진행 중</span>' : r.status === 'closed' ? '<span class="tag-st">마감</span>' : '<span class="tag-st">기간 종료</span>'}</td>
+      <td class="num">${r.items}</td><td class="num b">${r.submitted} / ${r.judges}</td><td><button class="btn sm" data-act="rv-open" data-id="${r.id}">결과·관리</button></td></tr>`).join('')}</tbody></table></div>`
+    : '<div class="empty">아직 심사 회차가 없습니다. [새 심사 시작]을 눌러 만들어 보세요.</div>'}</div>`;
+}
+function rvJudgeSearch(q, exclude) {
+  q = (q || '').trim().toLowerCase(); if (!q) return [];
+  return A.profiles.filter(p => p.status !== 'blocked' && p.role !== 'super' && !exclude.includes(p.id) &&
+    [p.real_name, p.emp_no, p.nickname, p.login_id, p.email, p.org_branch].join(' ').toLowerCase().includes(q)).slice(0, 12);
+}
+const rvWho = p => `${esc(p.real_name || p.login_id)}<small>${esc([p.emp_no, p.org_branch || p.dept, KIND_LABEL[memberKind(p)]].filter(Boolean).join(' · '))}</small>`;
+function rvNewRender(c, V) {
+  const D = V.draft, posts = rvMonthPosts(D.mk); if (!D.posts) D.posts = new Set(posts.map(p => p.id));
+  const P = pmap(), found = rvJudgeSearch(D.q, D.judges);
+  c.innerHTML = `<div class="panel"><div class="panel-head"><div><h2>${I('plus', 19)} 새 Voice 심사 · ${ORG_NAME[API.room]}</h2><p>① 대상 Voice 고르기 → ② 심사자 지정 → ③ 마감 일시 → [심사 시작]</p></div>
+      <button class="btn sm" data-act="rv-back">${I('left', 15)} 목록</button></div>
+    <div class="rv-form"><div><label class="lbl">대상 월</label><select id="rvMk">${recentMonths(6).map(m => `<option value="${m}" ${m === D.mk ? 'selected' : ''}>${monthLabel(m)}</option>`).join('')}</select></div>
+      <div style="flex:2"><label class="lbl">심사 이름 (심사자에게 보여요)</label><input id="rvTitle" value="${esc(D.title)}"></div>
+      <div><label class="lbl">마감 일시</label><input type="datetime-local" id="rvEnds" value="${esc(D.ends)}"></div></div>
+    <label class="lbl" style="margin-top:10px">심사자 안내 문구 (선택)</label><textarea id="rvMemo" rows="2" placeholder="예) 현장 적용 가능성과 아이디어의 참신함을 중심으로 심사해 주세요.">${esc(D.memo)}</textarea>
+    <h3 class="rv-h">① 심사할 Voice <small>${D.posts.size} / ${posts.length}개 선택 · 글번호가 있는 회원 글만</small>
+      <span style="flex:1"></span><button class="btn sm ghost" data-act="rv-all" data-on="1">전체 선택</button><button class="btn sm ghost" data-act="rv-all" data-on="0">전체 해제</button></h3>
+    <div class="table-wrap" style="max-height:420px"><table class="dt"><thead><tr><th style="width:36px"></th><th>글번호</th><th>제목</th><th>닉네임</th><th>성명 🔒</th><th class="num">♥</th><th class="num">💬</th></tr></thead><tbody>
+      ${posts.map(p => `<tr><td><input type="checkbox" class="ck" data-rvp="${p.id}" ${D.posts.has(p.id) ? 'checked' : ''}></td><td><span class="no-chip">${postNo(p)}</span></td><td class="tt"><span data-act="preview" data-id="${p.id}">${esc(p.title)}</span></td>
+        <td class="nowrap">${esc(p.author_nickname || '')}</td><td class="nowrap dim">${esc((P[p.user_id] || {}).real_name || '')}</td><td class="num">${p.like_count}</td><td class="num">${p.comment_count}</td></tr>`).join('') || `<tr><td colspan="7"><div class="empty">${monthLabel(D.mk)} 회원 글이 없습니다</div></td></tr>`}</tbody></table></div>
+    <h3 class="rv-h">② 심사자 <small>${D.judges.length}명 · 이름·사번·닉네임·아이디로 검색해 추가</small></h3>
+    <div class="dt-search" style="max-width:420px">${I('search', 17)}<input id="rvQ" value="${esc(D.q)}" placeholder="심사자 검색 (예: 홍길동, 2015…)"></div>
+    ${found.length ? `<div class="aw-addlist">${found.map(p => `<button class="aw-addbtn" data-act="rv-addj" data-id="${p.id}">${I('plus', 14)} ${rvWho(p)}</button>`).join('')}</div>` : D.q ? '<p class="hint">찾는 회원이 없습니다</p>' : ''}
+    <div class="rv-judges">${D.judges.map(id => { const p = P[id] || {}; return `<span class="rv-jchip">${rvWho(p)}<button data-act="rv-rmj" data-id="${id}" aria-label="빼기">${I('x', 13)}</button></span>`; }).join('') || '<p class="hint">아직 지정한 심사자가 없습니다</p>'}</div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px"><button class="btn" data-act="rv-back">취소</button><button class="btn primary" data-act="rv-start">${I('send', 16)} 심사 시작 · 심사자에게 알림</button></div></div>`;
+  const q = document.getElementById('rvQ'); let t;
+  q.oninput = () => { clearTimeout(t); t = setTimeout(() => { D.q = q.value; const pos = q.selectionStart; renderPage(); const n = document.getElementById('rvQ'); n.focus(); n.setSelectionRange(pos, pos); }, 250); };
+  document.getElementById('rvMk').onchange = e => { const old = D.title === `${monthLabel(D.mk)} Voice 심사`; D.mk = e.target.value; D.posts = null; if (old) D.title = `${monthLabel(D.mk)} Voice 심사`; renderPage(); };
+  ['rvTitle', 'rvEnds', 'rvMemo'].forEach(k => document.getElementById(k).oninput = e => { D[{ rvTitle: 'title', rvEnds: 'ends', rvMemo: 'memo' }[k]] = e.target.value; });
+}
+/* 집계: 글별 합계·순위(동점 같은 순위) */
+function rvTally(D) {
+  const by = {}; D.items.forEach(i => by[i.post_id] = { ...i, total: 0, n3: 0, n2: 0, n1: 0, voters: 0 });
+  D.scores.forEach(x => { const o = by[x.post_id]; if (!o) return; o.total += x.points; o['n' + x.points]++; o.voters++; });
+  const rows = Object.values(by).sort((a, b) => b.total - a.total || b.n3 - a.n3 || a.seq - b.seq);
+  let rk = 0, prev = null; rows.forEach((r, i) => { if (r.total !== prev) { rk = i + 1; prev = r.total; } r.rank = r.total ? rk : null; });
+  return rows;
+}
+function rvDetailHTML(V) {
+  const D = V.detail, R = D.round, rows = rvTally(D), mk = R.month_key, aw = (V.aw && V.aw.list) || [];
+  const sc = {}; D.scores.forEach(x => sc[x.judge_id + ':' + x.post_id] = x.points);
+  const done = D.judges.filter(j => j.submitted_at).length, P = pmap();
+  const found = rvJudgeSearch(V.jq, D.judges.map(j => j.user_id));
+  const head = `<div class="panel-head"><div><h2>${I('clipboard', 19)} ${esc(R.title)} <span class="tag-st ${R.is_open ? 'active' : ''}">${R.is_open ? '진행 중' : '마감'}</span></h2>
+      <p>${ORG_NAME[R.org]} · 대상 ${monthLabel(mk)} · Voice ${D.items.length}개 · 마감 <b>${fmtDT(R.ends_at)}</b> · 제출 <b>${done} / ${D.judges.length}명</b></p></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn sm" data-act="rv-back">${I('left', 15)} 목록</button>
+      ${R.is_open ? `<button class="btn sm" data-act="rv-remind">${I('bell', 15)} 미제출자 다시 알림</button><button class="btn sm" data-act="rv-extend">마감 연장</button><button class="btn sm" data-act="rv-close">지금 마감</button>` : `<button class="btn sm" data-act="rv-extend">기간 연장·다시 열기</button>`}
+      <button class="btn sm" data-act="rv-csv">${I('download', 15)} 엑셀(CSV)</button><button class="btn sm danger" data-act="rv-del">삭제</button></div></div>`;
+  const judges = `<h3 class="rv-h">심사자 현황 <small>🔒 admin만 볼 수 있어요</small></h3><div class="rv-jlist">${D.judges.map(j => `<div class="rv-jrow ${j.submitted_at ? 'ok' : ''}"><span class="rv-st">${j.submitted_at ? '✅' : '⏳'}</span>
+      <span class="rv-jn"><b>${esc(j.real_name || j.login_id)}</b><small>${esc([j.emp_no, j.dept].filter(Boolean).join(' · '))}</small></span><span class="dim">${j.submitted_at ? fmtDT(j.submitted_at) + ' 제출' : '미제출'}</span>
+      ${R.is_open ? `<button class="icon-x" data-act="rv-jout" data-id="${j.user_id}" title="심사자에서 빼기">${I('x', 14)}</button>` : ''}</div>`).join('')}</div>
+    ${R.is_open ? `<div class="dt-search" style="max-width:380px;margin-top:8px">${I('search', 17)}<input id="rvJQ" value="${esc(V.jq || '')}" placeholder="심사자 추가 (이름·사번·닉네임)"></div>
+      ${found.length ? `<div class="aw-addlist">${found.map(p => `<button class="aw-addbtn" data-act="rv-jin" data-id="${p.id}">${I('plus', 14)} ${rvWho(p)}</button>`).join('')}</div>` : ''}` : ''}`;
+  const matrix = `<h3 class="rv-h">심사 점수표 <small>심사자 × Voice · 빈칸은 점수 없음</small></h3>
+    <div class="table-wrap rv-mx" style="overflow-x:auto;max-width:100%"><table class="dt"><thead><tr><th class="stick">심사자</th>${D.items.map(i => `<th class="num" title="${esc(i.title)}">V${i.seq}</th>`).join('')}<th class="num">합</th></tr></thead><tbody>
+    ${D.judges.map(j => { const mine = D.scores.filter(x => x.judge_id === j.user_id); return `<tr><td class="stick b nowrap">${esc(j.real_name || j.login_id)}</td>${D.items.map(i => { const v = sc[j.user_id + ':' + i.post_id]; return `<td class="num ${v ? 'rv-c' + v : ''}">${v || ''}</td>`; }).join('')}<td class="num b">${mine.reduce((a, x) => a + x.points, 0) || ''}</td></tr>`; }).join('')}
+    <tr class="rv-tot"><td class="stick b">합계</td>${D.items.map(i => `<td class="num b">${rows.find(r => r.post_id === i.post_id).total}</td>`).join('')}<td></td></tr></tbody></table></div>`;
+  const picked = (cat, pid) => aw.some(a => a.category === cat && a.post_id === pid);
+  const rank = `<h3 class="rv-h">순위 · 시상 선정 <small>동점은 같은 순위 · 체크하면 [순위·점수 관리 → 이달의 Voice 시상]에 바로 반영 · 몇 명을 줄지는 자유</small></h3>
+    <div class="aw-sum" style="margin-bottom:10px">${RV_CATS.map(k => { const c = voiceCat(k), l = aw.filter(a => a.category === k); return `<div class="aw-sum-row"><span class="aw-sum-t">${c.e} ${c.t}</span><div class="aw-sum-chips">${l.length ? l.map(a => `<span class="aw-chip2">${esc(a.nickname || '-')}${a.post_title ? `<small>· ${esc(a.post_title.slice(0, 18))}</small>` : ''}</span>`).join('') : '<span class="dim">미선정</span>'}</div></div>`; }).join('')}</div>
+    <div class="table-wrap" style="overflow-x:auto;max-width:100%"><table class="dt" style="min-width:1000px"><thead><tr><th class="num">순위</th><th>V</th><th>글번호</th><th>제목</th><th>닉네임</th><th>성명 🔒</th><th class="num">합계</th><th class="num">3점</th><th class="num">2점</th><th class="num">1점</th><th class="num">준 심사자</th>${RV_CATS.map(k => `<th class="num">${voiceCat(k).e} ${voiceCat(k).t.replace(' Voice', '')}</th>`).join('')}</tr></thead><tbody>
+    ${rows.map(r => `<tr class="${r.rank && r.rank <= 3 ? 'rv-top' + r.rank : ''}"><td class="num b">${r.rank ? (r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] + ' ' : '') + r.rank : '-'}</td><td><b class="rv-v">V${r.seq}</b></td>
+      <td><span class="no-chip">${r.month_key && r.month_seq ? `${r.month_key}_${String(r.month_seq).padStart(3, '0')}` : '-'}</span></td><td class="tt"><span data-act="preview" data-id="${r.post_id}">${esc(r.title || '(삭제된 글)')}</span></td>
+      <td class="nowrap">${esc(r.nickname || '')}</td><td class="nowrap dim">${esc(r.real_name || '')}</td><td class="num b" style="font-size:15px">${r.total}</td><td class="num">${r.n3 || ''}</td><td class="num">${r.n2 || ''}</td><td class="num">${r.n1 || ''}</td><td class="num">${r.voters || ''}</td>
+      ${RV_CATS.map(k => `<td class="num"><input type="checkbox" class="ck" data-awp="${k}" data-pid="${r.post_id}" data-mk="${mk}" ${picked(k, r.post_id) ? 'checked' : ''}></td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    <p class="hint" style="margin-top:8px">선정을 마치면 <b>순위·점수 관리 → 이달의 Voice 시상</b>에서 <b>[회원 화면에 게시]</b>를 눌러 발표하세요. 같은 회원이 같은 상을 두 글로 받을 수는 없어요.</p>`;
+  return `<div class="panel">${head}${judges}${matrix}${rank}</div>`;
+}
+function rvCSV(V) {
+  const D = V.detail, rows = rvTally(D), sc = {}; D.scores.forEach(x => sc[x.judge_id + ':' + x.post_id] = x.points);
+  const out = [['순번', '심사자', '사번', '소속', '제출', ...D.items.map(i => 'V' + i.seq), '합']];
+  D.judges.forEach((j, n) => out.push([n + 1, j.real_name || j.login_id, j.emp_no || '', j.dept || '', j.submitted_at ? fmtDT(j.submitted_at) : '미제출', ...D.items.map(i => sc[j.user_id + ':' + i.post_id] || ''), D.scores.filter(x => x.judge_id === j.user_id).reduce((a, x) => a + x.points, 0)]));
+  out.push(['', '합계', '', '', '', ...D.items.map(i => rows.find(r => r.post_id === i.post_id).total), '']);
+  out.push([]); out.push(['순위', 'V', '글번호', '제목', '닉네임', '성명', '합계', '3점', '2점', '1점', '준 심사자']);
+  rows.forEach(r => out.push([r.rank || '', 'V' + r.seq, r.month_key && r.month_seq ? `${r.month_key}_${String(r.month_seq).padStart(3, '0')}` : '', r.title || '', r.nickname || '', r.real_name || '', r.total, r.n3, r.n2, r.n1, r.voters]));
+  csv(`VOY_심사_${D.round.org}_${D.round.month_key}_${D.round.id}.csv`, out);
+}
 /* ---------------- 이벤트(히든보이스) 관리 ---------------- */
 function slotsFor(ev) {
   return [...ev.numbers].sort((a, b) => a - b).map((n, i) => {
@@ -2992,7 +3188,31 @@ document.addEventListener('click', async e => {
     }
     case 'mrole': A.f.members.role = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
     case 'morg': A.f.members.org = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
-    case 'org': if (API.room !== t.dataset.org) { API.setRoom(t.dataset.org); A.awMonth = A.awMonth; root.querySelector('#content').innerHTML = '<div class="loading">불러오는 중…</div>'; await loadAll(); route(); toast(`${ORG_NAME[t.dataset.org]} 커뮤니티 관리로 전환했어요`); } break;
+    case 'org': if (API.room !== t.dataset.org) { API.setRoom(t.dataset.org); A.awMonth = A.awMonth; A.rv = null; root.querySelector('#content').innerHTML = '<div class="loading">불러오는 중…</div>'; await loadAll(); route(); toast(`${ORG_NAME[t.dataset.org]} 커뮤니티 관리로 전환했어요`); } break;
+    case 'rv-new': { const V = rvState(); V.view = 'new'; V.draft = rvNewDraft(); renderPage(); break; }
+    case 'rv-back': { const V = rvState(); V.view = 'list'; V.list = null; V.detail = null; renderPage(); break; }
+    case 'rv-open': rvOpen(+t.dataset.id); break;
+    case 'rv-all': { const D = rvState().draft; D.posts = new Set(t.dataset.on === '1' ? rvMonthPosts(D.mk).map(p => p.id) : []); renderPage(); break; }
+    case 'rv-addj': { const D = rvState().draft; if (!D.judges.includes(t.dataset.id)) D.judges.push(t.dataset.id); D.q = ''; renderPage(); document.getElementById('rvQ')?.focus(); break; }
+    case 'rv-rmj': { const D = rvState().draft; D.judges = D.judges.filter(x => x !== t.dataset.id); renderPage(); break; }
+    case 'rv-start': { const D = rvState().draft;
+      if (!D.posts.size) { toast('심사할 Voice를 1개 이상 선택하세요', 'err'); break; } if (!D.judges.length) { toast('심사자를 1명 이상 지정하세요', 'err'); break; }
+      if (!D.title.trim()) { toast('심사 이름을 입력하세요', 'err'); break; } if (!D.ends || Date.parse(kstISO(D.ends)) <= Date.now()) { toast('마감 일시를 지금 이후로 정하세요', 'err'); break; }
+      if (!(await confirmBox(`<b>${esc(D.title)}</b>을(를) 시작할까요?<br><br>· 대상 Voice ${D.posts.size}개 · 심사자 ${D.judges.length}명<br>· 마감 ${esc(D.ends.replace('T', ' '))}<br><br>심사자에게 앱 안내와 알림(알림을 켠 사람)이 바로 전달됩니다.`, '심사 시작'))) break;
+      busy(t, true); try { const id = await API.reviewStart({ mk: D.mk, title: D.title.trim(), memo: D.memo.trim(), ends_at: kstISO(D.ends), post_ids: [...D.posts], judge_ids: D.judges }); toast('📝 심사를 시작했습니다'); rvState().draft = null; rvOpen(+id); }
+      catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
+    case 'rv-remind': { const V = rvState(); try { const n = await API.reviewRemind(V.detail.round.id, true); toast(n ? `미제출 ${n}명에게 다시 알렸습니다` : '미제출자가 없습니다'); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'rv-extend': { const V = rvState(), R = V.detail.round; const v = prompt('새 마감 일시 (예: 2026-11-07 18:00)', toLocalInput(Date.parse(R.ends_at) > Date.now() ? R.ends_at : new Date(Date.now() + 2 * 864e5).toISOString()).replace('T', ' '));
+      if (!v) break; const iso = kstISO(v.trim().replace(' ', 'T').slice(0, 16)); if (!iso || isNaN(Date.parse(iso)) || Date.parse(iso) <= Date.now()) { toast('지금 이후 일시를 "2026-11-07 18:00" 형식으로 입력하세요', 'err'); break; }
+      try { await API.reviewUpdate(R.id, 'open', iso); toast('마감 일시를 바꿨습니다'); rvOpen(R.id); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'rv-close': { const V = rvState(); if (!(await confirmBox('지금 심사를 마감할까요?<br>마감 후에는 심사자가 점수를 바꿀 수 없어요. (나중에 다시 열 수 있음)', '마감', true))) break;
+      try { await API.reviewUpdate(V.detail.round.id, 'closed'); toast('마감했습니다'); rvOpen(V.detail.round.id); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'rv-del': { const V = rvState(); if (!(await confirmBox('이 심사 회차와 모든 점수를 삭제할까요?<br>이미 선정한 시상은 그대로 남아요.', '삭제', true))) break;
+      try { await API.reviewDelete(V.detail.round.id); toast('삭제했습니다'); V.view = 'list'; V.list = null; renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'rv-csv': rvCSV(rvState()); break;
+    case 'rv-jin': { const V = rvState(); try { await API.reviewJudge(V.detail.round.id, t.dataset.id, true); V.jq = ''; toast('심사자를 추가하고 알렸습니다'); rvOpen(V.detail.round.id); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'rv-jout': { const V = rvState(), j = V.detail.judges.find(x => x.user_id === t.dataset.id); if (!(await confirmBox(`${esc(j.real_name || j.login_id)}님을 심사자에서 뺄까요?<br>이 분이 준 점수도 함께 지워집니다.`, '빼기', true))) break;
+      try { await API.reviewJudge(V.detail.round.id, t.dataset.id, false); toast('뺐습니다'); rvOpen(V.detail.round.id); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'staff-new': staffModal(); break;
     case 'staff-pw': { const u = A.profiles.find(x => x.id === t.dataset.id); const v = prompt(`${u.login_id} 새 비밀번호 (6자 이상)`); if (!v) break; if (v.length < 6) { toast('6자 이상 입력하세요', 'err'); break; } try { await API.adminResetPassword(u.id, v); toast('비밀번호를 바꿨습니다'); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'staff-del': { const u = A.profiles.find(x => x.id === t.dataset.id); if (!(await confirmBox(`${u.login_id} 계정을 삭제할까요?\n쓴 글은 남고 작성자 연결만 끊어집니다.`, '삭제', true))) break; try { await API.adminDeleteUser(u.id); toast('삭제했습니다'); await loadAll(); renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
@@ -3110,8 +3330,9 @@ document.addEventListener('change', async e => {
     try { await API.adminUpdateProfile(id, patch); Object.assign(u, patch); toast('변경했습니다'); renderPage(); } catch (er) { toast(friendly(er), 'err'); renderPage(); } return; }
   if (e.target.matches('[data-award],[data-awp]')) { const el = e.target, d = el.dataset, on = el.checked, cat = d.award || d.awp; el.disabled = true;
     try { if (d.awp) await API.adminSetAwardPost(d.mk, cat, d.pid, on); else await API.adminSetAward(d.mk, cat, d.tok, on, d.note || null);
-      toast(`${voiceCat(cat).t} ${on ? '선정' : '선정 취소'}`); awLoad(d.mk, true); }
+      toast(`${voiceCat(cat).t} ${on ? '선정' : '선정 취소'}`); awLoad(d.mk, true); if (A.page === 'review') rvAwards(true); }
     catch (er) { el.checked = !on; el.disabled = false; toast(friendly(er), 'err'); } return; }
+  if (e.target.matches('[data-rvp]')) { const D = rvState().draft, id = +e.target.dataset.rvp; e.target.checked ? D.posts.add(id) : D.posts.delete(id); renderPage(); return; }
   if (e.target.id === 'awMonth') { A.awMonth = e.target.value; A.awMore = false; renderPage(); return; }
   if (e.target.id === 'awAddCat') { A.awAddCat = e.target.value; return; }
   if (e.target.matches('[data-og-check],[data-og-rep],[data-cand]')) { rsAnalysisAct(e.target); return; }
