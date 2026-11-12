@@ -1,4 +1,4 @@
-/* VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611121 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
@@ -23,7 +23,12 @@ self.addEventListener('push', e => {
   try { d = e.data ? e.data.json() : {}; } catch (er) { d = { body: e.data && e.data.text() }; }
   e.waitUntil((async () => {
     const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    wins.forEach(w => { try { w.postMessage({ type: 'voy-push', data: d }); } catch (er) {} });   // 앱 화면에 '알림 도착' 알림 (알림 점검 도우미용)
     const visible = wins.some(w => w.visibilityState === 'visible');
+    if (d.test) {   // 알림 점검용 테스트: 앱을 보고 있어도 항상 표시
+      await self.registration.showNotification(d.title || '🔔 VOY™ 테스트', { body: d.body || '', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test', data: { url: d.url || './' } });
+      return;
+    }
     const n = visible ? 0 : (await getCount()) + 1;
     await setCount(n); await applyBadge(n);
     if (visible) return;   // 앱을 보고 있는 중이면 알림 생략

@@ -510,6 +510,17 @@ body:has(.policy) .theme-fab{display:none}
 .rv-chips a{font-size:12.5px;text-decoration:none;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:4px 10px}
 .rv-chips a span{color:#7c3aed;font-weight:900}.rv-chips a b{color:#7c3aed}
 .rv-row small .ok{color:var(--accent);font-weight:800}.rv-row small .warn{color:#e11d48;font-weight:800}
+.pw-open{display:flex;align-items:center;gap:12px;width:100%;margin-top:12px;padding:12px 14px;border-radius:14px;border:1.5px solid color-mix(in srgb,var(--accent) 45%,var(--border));background:color-mix(in srgb,var(--accent) 7%,var(--surface));color:var(--text);text-align:left;cursor:pointer}
+.pw-open .pw-ic{font-size:24px;flex:0 0 auto}.pw-open>span:not(.pw-ic){flex:1;min-width:0}.pw-open b{display:block;font-size:15px;color:var(--accent)}.pw-open small{color:var(--muted);font-size:12.5px}
+.pw-step{display:flex;gap:10px;padding:11px 0;border-top:1px dashed var(--border)}.pw-step:first-of-type{border-top:0}
+.pw-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:13px;background:var(--surface2);color:var(--muted)}
+.pw-step.ok .pw-n{background:var(--accent);color:#fff}.pw-step.bad .pw-n{background:#e8590c;color:#fff;animation:pnBlink 1.6s ease-in-out 3}
+.pw-step.wait{opacity:.5}.pw-tx{flex:1;min-width:0}.pw-tx b{font-size:14.5px}.pw-tx p{margin:3px 0 0;font-size:13px;line-height:1.55;color:var(--text2)}
+.pw-act{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pw-fix{margin:8px 0 0;padding-left:18px;font-size:12.8px;line-height:1.6}.pw-fix li{margin:3px 0}
+.pw-done{margin-top:10px;padding:12px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:14px;line-height:1.5}.pw-done small{font-weight:600;color:var(--text2)}
+.pw-more{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}.pw-more summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--accent)}
+.pw-diag{font-size:11px!important;opacity:.7;margin-top:10px!important;word-break:break-all}
 .push-need{margin-top:10px;border:1.5px solid var(--point,#e8590c);background:color-mix(in srgb,var(--point,#e8590c) 9%,var(--surface));border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;gap:6px;animation:pnBlink 1.6s ease-in-out 3}
 .push-need.bad{border-color:#d33;background:color-mix(in srgb,#d33 8%,var(--surface))}
 .push-need>b{font-size:15px;color:var(--text)}.push-need>span{font-size:13px;line-height:1.5;color:var(--text2)}
@@ -739,7 +750,12 @@ const USER_PAGE_URL     = '../';      // 관리자 페이지 → 커뮤니티로
 const ADMIN_PAGE_URL    = 'admin/';   // 커뮤니티 → 관리자 콘솔 경로
 
 const LOCAL = !SUPABASE_URL || !SUPABASE_ANON_KEY;
-const sb = (!LOCAL && window.supabase) ? window.supabase.createClient(SUPABASE_URL.trim().replace(/\/+$/, ''), SUPABASE_ANON_KEY.trim()) : null;   // 주소 끝 / 는 자동 제거
+const sb = (!LOCAL && window.supabase) ? window.supabase.createClient(SUPABASE_URL.trim().replace(/\/+$/, ''), SUPABASE_ANON_KEY.trim(),
+  { auth: { persistSession: true, autoRefreshToken: true, ...(window.VOY_AUTH_KEY ? { storageKey: window.VOY_AUTH_KEY } : {}) } }) : null;   // 관리자 콘솔은 로그인 저장 칸을 따로 씀 (회원 앱과 서로 로그아웃시키지 않도록)
+/* 로그인이 풀렸는지 감지 → 화면에 알려 다시 로그인하게 함 */
+const AUTH_LOST_RX = /permission denied for (view|table|relation|function)|JWT expired|invalid JWT|Invalid Refresh Token|refresh_token_not_found|not authenticated/i;
+if (sb) sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_OUT') setTimeout(() => window.dispatchEvent(new CustomEvent('voy-auth-check')), 0); });
+function authLostCheck(m) { if (AUTH_LOST_RX.test(m || '')) setTimeout(() => window.dispatchEvent(new CustomEvent('voy-auth-check')), 0); }   // 주소 끝 / 는 자동 제거
 
 /* ---------------- 공통 유틸 ---------------- */
 const KST_OFFSET = 9 * 3600e3;
@@ -850,6 +866,7 @@ function friendly(e) {
   if (/Database error saving new user/i.test(m)) return '가입 처리 중 오류가 발생했습니다. 가입 코드를 확인해주세요.';
   if (/Email not confirmed/i.test(m)) return 'Supabase에서 이메일 확인(Confirm email)을 꺼주세요.';
   if (/Failed to fetch|NetworkError/i.test(m)) return '서버에 연결할 수 없습니다. 네트워크를 확인해주세요.';
+  if (AUTH_LOST_RX.test(m)) { authLostCheck(m); return '로그인이 만료되었어요. 다시 로그인해 주세요.'; }
   return m;
 }
 function must(res) { if (res.error) throw new Error(friendly(res.error)); return res.data; }
@@ -1053,7 +1070,14 @@ const API = {
     this.profile = await this.me();
     return this.profile;
   },
-  async signOut() { if (LOCAL) Local.setSession(null); else await sb.auth.signOut(); this.uid = null; this.profile = null; },
+  async signOut() { if (LOCAL) Local.setSession(null); else await sb.auth.signOut({ scope: 'local' }).catch(() => {}); this.uid = null; this.profile = null; },   // 이 기기만 로그아웃 (다른 기기·관리자 콘솔은 유지)
+  /* 서버 기준으로 아직 로그인 상태인지 확인 (풀렸으면 false) */
+  async sessionAlive() {
+    if (LOCAL) return !!Local.sessionUid();
+    try { const { data } = await sb.auth.getSession(); if (!data.session) return false;
+      if (data.session.expires_at && data.session.expires_at * 1000 < Date.now() + 30e3) { const r = await sb.auth.refreshSession(); if (r.error || !r.data.session) return false; }
+      return true; } catch (e) { return false; }
+  },
   async changePassword(cur, next) {
     if (String(next).length < 6) throw new Error('새 비밀번호는 6자 이상이어야 합니다.');
     if (cur === next) throw new Error('현재와 다른 비밀번호를 입력해주세요.');
@@ -1466,6 +1490,10 @@ const API = {
     if (LOCAL) return;
     const j = sub.toJSON();
     must(await sb.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) }));
+  },
+  async pushTestMe() {
+    if (LOCAL) return { subs: 1, configured: false, demo: true };
+    return must(await sb.rpc('push_test_me'));
   },
   async deletePushSub(endpoint) { if (!LOCAL) await sb.rpc('delete_push_subscription', { p_endpoint: endpoint }); },
   async latestPosts(n) {
@@ -2938,7 +2966,7 @@ function pushBoxHTML() {
   const help = !(LOCAL || !VAPID_PUBLIC_KEY);
   return `<div class="set-row"><span>${I('bell', 19)} <span><b style="color:var(--text);display:block;font-size:15px">새 글 알림</b><small class="muted" style="font-size:12.5px;line-height:1.45;display:block">${hint}</small></span></span>
     <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>
-    ${help ? `<div class="push-tools"><button type="button" data-act="push-help">${I('bell', 14)} 알림 허용 방법 보기</button><button type="button" data-act="push-test" id="pushTestBtn">🔔 테스트 알림 보내기</button></div>` : ''}
+    ${help ? `<button type="button" class="pw-open" data-act="push-wiz"><span class="pw-ic">🩺</span><span><b>알림 점검·설정 도우미</b><small>알림이 안 오면 여기서 순서대로 확인하고 해결해요</small></span>${I('right', 18)}</button>` : ''}
     <div id="pushNeed"></div>
     <p class="hint" id="pushDiag" style="margin:6px 0 0;font-size:11.5px;opacity:.75"></p>`;
 }
@@ -2948,8 +2976,8 @@ function pushNeed() {
   if (!pushSupported()) { el.innerHTML = ''; return; }
   const p = Notification.permission;
   el.innerHTML = p === 'granted' ? '' : p === 'denied'
-    ? `<div class="push-need bad"><b>⛔ 이 기기에서 알림이 차단되어 있어요</b><span>알림 허용을 해야 새 글 알림을 받을 수 있어요. 아래 버튼을 눌러 순서대로 허용해 주세요.</span><button type="button" class="btn primary block" data-act="push-help">알림 허용 방법 보기</button></div>`
-    : `<div class="push-need"><b>🔔 알림 허용이 필요해요</b><span>아직 이 기기에서 알림을 허용하지 않았어요. 아래 버튼을 누르고, 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</span><button type="button" class="btn primary block" data-act="push-on">알림 허용하기</button><button type="button" class="linkbtn" data-act="push-help">창이 안 뜨나요? 허용 방법 보기</button></div>`;
+    ? `<div class="push-need bad"><b>⛔ 이 기기에서 알림이 차단되어 있어요</b><span>알림 허용을 해야 새 글 알림을 받을 수 있어요. 아래 버튼을 눌러 순서대로 허용해 주세요.</span><button type="button" class="btn primary block" data-act="push-wiz">알림 점검·설정 도우미로 해결하기</button></div>`
+    : `<div class="push-need"><b>🔔 알림 허용이 필요해요</b><span>아직 이 기기에서 알림을 허용하지 않았어요. 아래 버튼을 누르고, 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</span><button type="button" class="btn primary block" data-act="push-on">알림 허용하기</button><button type="button" class="linkbtn" data-act="push-wiz">창이 안 뜨나요? 알림 점검·설정 도우미</button></div>`;
 }
 async function bindPushBox() {
   const sw = document.getElementById('pushSw'); if (!sw) return;
@@ -3035,6 +3063,101 @@ function pushHelp(reason) {
     try { await navigator.clipboard.writeText(b.dataset.copy); toast('복사했어요 — 붙여넣기 하세요'); } catch (er) { prompt('아래 주소를 복사하세요', b.dataset.copy); }
   });
 }
+
+/* =====================================================================
+   🩺 알림 점검·설정 도우미 — 단계별 자동 점검 + 막힌 단계의 해결 방법
+   ① 앱 화면 → ② 지원 기기 → ③ 알림 권한 → ④ 이 기기 연결 → ⑤ 기기 표시 테스트 → ⑥ 서버 → 기기 실제 알림
+   ===================================================================== */
+const PW = { local: null, server: null, serverInfo: null, waiting: false };
+if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => {
+  if (e.data && e.data.type === 'voy-push' && e.data.data && e.data.data.test && PW.waiting) { PW.arrived = true; pwRender(); }
+});
+function pwEnvTab() { const e = Inst.env(), ua = navigator.userAgent; return e.ios ? 'ios' : e.samsung ? 'sam' : e.android ? 'and' : /Edg\//.test(ua) ? 'edge' : 'pc'; }
+async function pwCheck() {
+  const st = { app: isStandalone(), sup: pushSupported(), perm: pushSupported() ? Notification.permission : 'x', sub: false, flag: false };
+  try { st.flag = localStorage.getItem(PUSH_FLAG) === '1'; } catch (e) {}
+  if (st.sup) { try { const reg = await swReg(); const sub = reg && await reg.pushManager.getSubscription(); st.reg = !!reg; st.sub = !!(sub && sameKey(sub)); } catch (e) {} }
+  return st;
+}
+function pushWizard() {
+  PW.local = null; PW.server = null; PW.serverInfo = null; PW.waiting = false; PW.arrived = false;
+  openModal(`<div class="modal-head"><h3>🩺 알림 점검·설정 도우미</h3><button class="icon-x" data-close>${I('x')}</button></div>
+    <div class="modal-body" id="pwBody"><div class="loading">점검 중…</div></div>
+    <div class="modal-foot"><button class="btn primary block" data-close>닫기</button></div>`);
+  pwRender();
+}
+async function pwRender() {
+  const box = document.getElementById('pwBody'); if (!box) return;
+  const st = await pwCheck(), tab = pwEnvTab(), osWord = Inst.env().mob ? '휴대폰' : 'PC';
+  const step = (n, ok, title, desc, act = '') => `<div class="pw-step ${ok === true ? 'ok' : ok === false ? 'bad' : 'wait'}"><span class="pw-n">${ok === true ? '✓' : ok === false ? '!' : n}</span>
+    <div class="pw-tx"><b>${title}</b>${desc ? `<p>${desc}</p>` : ''}${act ? `<div class="pw-act">${act}</div>` : ''}</div></div>`;
+  const btn = (act, label, primary) => `<button type="button" class="btn ${primary ? 'primary' : ''} sm" data-act="${act}">${label}</button>`;
+  let h = '', stop = false;
+  // ① 앱 화면
+  h += step(1, st.app, '바로가기 앱(VOY™ 아이콘)으로 열었나요?', st.app ? '앱 화면에서 열려 있어요.' : '브라우저 주소창 화면에서는 알림을 받을 수 없어요. 홈 화면·바탕화면의 <b>VOY™ 아이콘</b>으로 열어 주세요.');
+  if (!st.app) stop = true;
+  // ② 지원
+  if (!stop) { h += step(2, st.sup, '이 기기·브라우저가 알림을 지원하나요?', st.sup ? `${esc(pushEnvName())} — 지원돼요.` :
+      Inst.env().ios ? '아이폰은 <b>iOS 16.4 이상</b> + <b>Safari로 홈 화면에 추가한 VOY™</b>에서만 알림이 와요. 설정 → 일반 → 소프트웨어 업데이트 후, Safari에서 다시 설치해 주세요.'
+      : (LOCAL || !VAPID_PUBLIC_KEY) ? '알림 서버가 아직 연결되지 않았어요 (관리자 설정 필요).' : '이 브라우저는 알림을 지원하지 않아요. <b>Chrome·Edge·삼성 인터넷</b>으로 다시 설치해 주세요.'); if (!st.sup) stop = true; }
+  else h += step(2, null, '이 기기·브라우저 지원 확인', '');
+  // ③ 권한
+  if (!stop) { const ok = st.perm === 'granted';
+    h += step(3, ok, '알림 권한을 허용했나요?', ok ? '허용되어 있어요.' : st.perm === 'denied'
+      ? `이 기기에서 VOY™ 알림이 <b>차단</b>되어 있어요. 버튼을 누르면 <b>${esc(pushEnvName().split(' · ')[1] || '')}</b>에 맞는 허용 방법이 열려요. 허용한 뒤 VOY™를 완전히 닫았다가 다시 열고 이 도우미를 다시 열어 주세요.`
+      : '아직 허용하지 않았어요. [알림 허용하기]를 누르고 뜨는 창에서 <b>[허용]</b>을 눌러 주세요. 창이 안 뜨면(5초 뒤 자동 안내) 허용 방법을 따라 해 주세요.',
+      ok ? '' : st.perm === 'denied' ? btn('push-help', '허용 방법 보기', true) : btn('pw-allow', '알림 허용하기', true) + btn('push-help', '허용 방법 보기'));
+    if (!ok) stop = true; }
+  else h += step(3, null, '알림 권한 허용', '');
+  // ④ 연결
+  if (!stop) { const ok = st.sub && st.flag;
+    h += step(4, ok, '이 기기를 VOY™ 알림에 연결했나요?', ok ? '연결되어 있어요.' : '권한은 허용됐지만 아직 연결이 안 됐어요. [연결하기]를 눌러 주세요. 실패하면 와이파이 ↔ LTE를 바꾸거나 회사 VPN을 끄고 다시 눌러 주세요.',
+      ok ? '' : btn('pw-connect', '연결하기', true));
+    if (!ok) stop = true; }
+  else h += step(4, null, '이 기기 알림 연결', '');
+  // ⑤ 기기 표시 테스트
+  if (!stop) { const ok = PW.local === 'ok' ? true : PW.local === 'fail' ? false : null;
+    h += step(5, ok, `${osWord}에 알림이 실제로 보이나요?`, ok === true ? '기기 알림 표시 정상이에요.' : ok === false
+      ? `${osWord} 설정에서 브라우저/VOY™ 알림이 꺼져 있거나 <b>방해 금지·집중 모드</b>가 켜져 있어요. [기기 설정 방법]대로 켠 뒤 다시 테스트해 주세요.`
+      : `[테스트 알림]을 누르면 <b>${Inst.env().mob ? '화면 맨 위 알림창' : '화면 오른쪽 아래(Windows) / 오른쪽 위(Mac)'}</b>에 알림이 떠요. 보였는지 알려 주세요.`,
+      ok === true ? '' : ok === false ? btn('push-help', '기기 설정 방법', true) + btn('pw-local', '다시 테스트') : (PW.localSent ? btn('pw-local-ok', '👍 보였어요', true) + btn('pw-local-no', '안 보여요') + btn('pw-local', '다시 보내기') : btn('pw-local', '🔔 테스트 알림 보내기', true)));
+    if (ok !== true) stop = true; }
+  else h += step(5, null, '기기 알림 표시 테스트', '');
+  // ⑥ 서버 → 기기
+  if (!stop) { const I2 = PW.serverInfo || {}; let ok = PW.server === 'ok' || PW.arrived ? true : PW.server === 'fail' || PW.server === 'nosub' || PW.server === 'nocfg' ? false : null;
+    const failHow = `<ol class="pw-fix"><li><b>[연결 다시 하기]</b>를 누른 뒤 다시 테스트</li>
+      ${Inst.env().mob ? `<li>${osWord} <b>설정 → 애플리케이션 → ${Inst.env().samsung ? '삼성 인터넷' : Inst.env().ios ? 'VOY™' : 'Chrome'} → 배터리 → '제한 없음'</b> (절전 때문에 알림이 늦거나 안 와요)</li><li><b>데이터 절약 모드</b>를 끄고, 와이파이 ↔ LTE 바꿔서 다시 테스트</li>` : `<li>회사 <b>VPN·보안 프로그램</b>이 알림 서버를 막을 수 있어요 → VPN을 끄거나 다른 네트워크(휴대폰 핫스팟)로 테스트</li><li>VOY™ 앱 창을 닫았다가 다시 열기 (브라우저가 완전히 종료돼 있으면 알림이 오지 않아요 — Chrome/Edge 설정의 <b>'백그라운드 앱 계속 실행'</b> 켜기)</li>`}
+      <li>그래도 안 되면 <b>[점검 결과 복사]</b> → 영업기획팀에 붙여 보내 주세요</li></ol>`;
+    const desc = ok === true ? '🎉 서버에서 보낸 알림이 도착했어요. 이제 새 글 알림을 받을 수 있어요!'
+      : PW.server === 'nocfg' ? '알림 서버가 아직 연결되지 않았어요. 영업기획팀(관리자)에 알려 주세요.'
+      : PW.server === 'nosub' ? 'VOY™ 서버에 이 기기가 등록되지 않았어요. [연결 다시 하기]를 눌러 주세요.' + failHow
+      : PW.server === 'fail' ? '서버 알림이 도착하지 않았어요. 아래 순서대로 해 보세요.' + failHow
+      : PW.server === 'sent' ? `서버에서 알림을 보냈어요 (등록된 기기 ${I2.subs || 0}대). <b>10~20초</b> 안에 "VOY™ 서버 테스트 알림"이 와야 해요.`
+      : '마지막으로 VOY™ 서버에서 이 기기로 진짜 알림을 보내 봐요. (실제 새 글 알림과 같은 경로)';
+    h += step(6, ok, '서버에서 보낸 알림이 오나요?', desc, ok === true ? '' : PW.server === 'sent' ? btn('pw-srv-ok', '👍 왔어요', true) + btn('pw-srv-no', '안 와요') : PW.server === 'nocfg' ? '' : (PW.server ? btn('pw-reconnect', '연결 다시 하기', true) + btn('pw-srv', '다시 테스트') + btn('pw-copy', '점검 결과 복사') : btn('pw-srv', '📡 서버 테스트 알림 받기', true)));
+    if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
+  } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
+  h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261112.1150</p>`;
+  box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
+}
+async function pwAct(act, t) {
+  const sw = document.getElementById('pushSw');
+  const after = async () => { if (sw) { sw.checked = await pushIsOn(); pushNeed(); pushDiag(); } pwRender(); };
+  try {
+    if (act === 'pw-allow' || act === 'pw-connect') { t.disabled = true; await enablePush(); }
+    else if (act === 'pw-reconnect') { t.disabled = true; const reg = await swReg(); const sub = reg && await reg.pushManager.getSubscription(); if (sub) { await API.deletePushSub(sub.endpoint).catch(() => {}); await sub.unsubscribe().catch(() => {}); } await enablePush(); PW.server = null; PW.arrived = false; }
+    else if (act === 'pw-local') { await pushTest(); PW.localSent = true; PW.local = null; }
+    else if (act === 'pw-local-ok') PW.local = 'ok';
+    else if (act === 'pw-local-no') PW.local = 'fail';
+    else if (act === 'pw-srv') { t.disabled = true; PW.arrived = false; const r = await API.pushTestMe(); PW.serverInfo = r;
+      PW.server = r.demo ? 'nocfg' : !r.configured ? 'nocfg' : !r.subs ? 'nosub' : 'sent'; PW.waiting = PW.server === 'sent'; }
+    else if (act === 'pw-srv-ok') { PW.server = 'ok'; PW.waiting = false; }
+    else if (act === 'pw-srv-no') { PW.server = 'fail'; PW.waiting = false; }
+    else if (act === 'pw-copy') { const txt = (document.querySelector('.pw-diag') || {}).textContent || ''; try { await navigator.clipboard.writeText(txt + ' · 서버테스트 ' + (PW.server || '-')); toast('점검 결과를 복사했어요 — 영업기획팀에 붙여 보내 주세요'); } catch (e) { prompt('아래 내용을 복사해 보내 주세요', txt); } return; }
+  } catch (er) { toast(pushErrText(er), 'err'); }
+  await after();
+}
 function pushEnvName() {
   const ua = navigator.userAgent, e = Inst.env();
   const br = e.samsung ? '삼성 인터넷' : /Edg\//.test(ua) ? 'Edge' : e.ios ? 'Safari' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : '기타 브라우저';
@@ -3046,7 +3169,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.1005`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261112.1150`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3084,7 +3207,7 @@ async function pushTest() {
   if (Notification.permission !== 'granted') { toast('먼저 알림 허용이 필요해요 — [알림 허용하기]를 눌러 주세요', 'err'); document.getElementById('pushNeed')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (Notification.permission === 'denied') pushHelp('denied'); return; }
   const reg = await swReg(); if (!reg) return toast('앱을 완전히 닫았다가 다시 열어 주세요', 'err');
   await reg.showNotification('🔔 VOY™ 테스트 알림', { body: '이 알림이 보이면 이 기기의 알림 설정은 정상이에요.', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test' });
-  toast('테스트 알림을 보냈어요 — 알림창(맨 위/오른쪽 아래)을 확인해 주세요. 안 보이면 [알림 허용 방법]의 휴대폰·PC 설정을 확인해 주세요.');
+  toast('테스트 알림을 보냈어요 — 알림창(휴대폰 맨 위 · PC 오른쪽 아래)을 확인해 주세요');
 }
 async function disablePush() {
   try { localStorage.removeItem(PUSH_FLAG); } catch (e) {}
@@ -3142,7 +3265,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261112.1005" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261112.1150" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3167,7 +3290,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261112.1005" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261112.1150" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3248,6 +3371,8 @@ document.addEventListener('click', async e => {
         '생긴 <b>VOY™ 아이콘</b>으로 열면 끝 (주소창이 보이는 브라우저 화면에서는 게시판을 쓸 수 없어요)'], 'VOY 주소는 [VOY 주소 복사] 버튼으로 복사해 메일·메신저로 보내면 편해요.');
       break;
     case 'push-help': pushHelp(pushSupported() ? Notification.permission : ''); break;
+    case 'push-wiz': pushWizard(); break;
+    case 'pw-allow': case 'pw-connect': case 'pw-reconnect': case 'pw-local': case 'pw-local-ok': case 'pw-local-no': case 'pw-srv': case 'pw-srv-ok': case 'pw-srv-no': case 'pw-copy': await pwAct(act, t); break;
     case 'push-test': try { await pushTest(); } catch (er) { toast(pushErrText(er), 'err'); } break;
     case 'browser-login': S.browserLogin = true; renderAuth(); toast('관리자 확인용 로그인입니다. 일반 회원은 로그인 후 앱 설치 안내가 나와요'); break;
     case 'reinstall': try { localStorage.removeItem('voy_app_ok'); } catch (er) {} refreshInstallCard(); Inst.run(); break;
@@ -3269,6 +3394,13 @@ document.addEventListener('click', async e => {
   }
 });
 boot();
+
+/* 로그인이 풀린 경우(다른 곳에서 로그아웃·장시간 미사용 등) → 로그인 화면으로 안내 */
+window.addEventListener('voy-auth-check', async () => { if (!S.me || S.authChecking) return; S.authChecking = true;
+  const ok = await API.sessionAlive(); S.authChecking = false;
+  if (!ok) { await API.signOut(); S.me = null; location.hash = ''; document.body.classList.remove('has-bnav'); renderAuth();
+    setTimeout(() => toast('로그인이 만료되었어요. 다시 로그인해 주세요.', 'err'), 400); } });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S.me) window.dispatchEvent(new CustomEvent('voy-auth-check')); });
 </script>
 </body>
 </html>
