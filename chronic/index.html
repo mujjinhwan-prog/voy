@@ -498,7 +498,7 @@ details summary{cursor:pointer;font-weight:700;font-size:13px}
         <summary>설정</summary>
         <label>브이월드 인증키 (지도)</label><input type="text" id="vkey" placeholder="Vercel에 VWORLD_KEY를 넣었으면 비워두세요">
         <div class="note">브이월드에서 발급받은 키입니다. 비워두면 서버 설정(VWORLD_KEY)을 쓰고, 둘 다 없으면 OpenStreetMap을 씁니다.</div>
-        <label>중계 API 주소</label><input type="text" id="apiBase" placeholder="/api/hira">
+        <label>중계 API 주소</label><input type="text" id="apiBase" placeholder="비워두면 자동 (Vercel 중계 API)">
         <div class="note">이 페이지와 같은 Vercel 프로젝트면 비워두세요.</div>
         <button class="btn full" id="btnCache">상세정보 캐시 비우기</button>
         <button class="btn full" id="btnSample">샘플 데이터로 미리보기</button>
@@ -659,7 +659,9 @@ try{ ["chronic_t5","chronic_det"].forEach(k => localStorage.removeItem(k)); }cat
 let DET = store.get("chronic_det2", {});  // ykiho → {h:{night,sat,sun}|null, im:내과·가정 전문의 수|null}
 
 /* ───────── API ───────── */
-const apiBase = () => ($("apiBase").value.trim() || "/api/hira");
+// VOY 바로가기(/chronic) 등 Vercel 밖에서 열면 Vercel의 중계 API를 그대로 사용
+const API_DEFAULT = /vercel\.app$/.test(location.hostname) ? "/api/hira" : "https://chronic-flame.vercel.app/api/hira";
+const apiBase = () => ($("apiBase").value.trim() || API_DEFAULT);
 async function api(params){
   const r = await fetch(apiBase() + "?" + new URLSearchParams(params));
   let j; try{ j = await r.json(); }catch(e){ throw new Error(`중계 API 응답 오류 (HTTP ${r.status})`); }

@@ -1682,6 +1682,7 @@ const QL_DEFAULTS = [
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
   { id: 'pm',       name: '품목PM검색',              url: 'yhpm/',     icon: 'pm',       auto: true, on: true, orgs: ['etc'], updated_at: null },   // ETC 품목 PM 검색
   { id: 'opm',      name: '품목PM검색',              url: 'yhopm/',    icon: 'pm_otc',   auto: true, on: true, orgs: ['otc'], updated_at: null },   // OTC 품목 PM 검색
+  { id: 'chronic',  name: '비대면진료|타깃병의원',   url: 'chronic/',  icon: 'chronic',  auto: true, on: true, updated_at: null },   // 비대면 진료 타깃 병의원 (심평원 API · Vercel 중계)
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -1708,6 +1709,12 @@ const QL_ICONS = {
     '<circle cx="47" cy="45" r="10.5" fill="#7B3FE4" stroke="#fff" stroke-width="2.6"/>' +
     '<g transform="rotate(-45 47 45)"><rect x="40.6" y="41.8" width="12.8" height="6.4" rx="3.2" fill="#fff"/><path d="M47 41.8h3.2a3.2 3.2 0 0 1 0 6.4H47Z" fill="#FFC94D"/></g>' },
   pm_otc: { name: '품목PM검색 · OTC (청록)', c: ['#4FD8C4', '#0E8F86'], g: '' },
+  chronic: { name: '비대면 진료 (모니터·알약·마우스)', c: ['#5B6B8C', '#1F2A44'], g:
+    '<rect x="8" y="12" width="40" height="29" rx="4.5" fill="#fff"/>' +
+    '<rect x="11.5" y="15.5" width="33" height="22" rx="2" fill="#2E3D5E"/>' +
+    '<g transform="rotate(-35 28 26.5)"><rect x="18.5" y="22.3" width="19" height="8.4" rx="4.2" fill="#fff"/><path d="M28 22.3h5.3a4.2 4.2 0 0 1 0 8.4H28Z" fill="#FF8A3D"/></g>' +
+    '<path d="M24 41h8l1.5 6h-11Z" fill="#fff"/><rect x="18" y="47" width="20" height="3.6" rx="1.8" fill="#fff"/>' +
+    '<path d="M48 41c0-3 2-5 4.5-5S57 38 57 41v6.5c0 3-2 5.2-4.5 5.2S48 50.5 48 47.5Z" fill="#fff"/><path d="M52.5 36v5" stroke="#2E3D5E" stroke-width="1.6" stroke-linecap="round"/><path d="M52.5 36c0-3-2-4-4.5-4" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>' },
   rest: { name: 'FunVOY!! (사다리·로또공)', c: ['#FFD86B', '#F59E0B'], g:
     '<path d="M15 13v38M31 13v38" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>' +
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
@@ -1948,7 +1955,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261112.1150</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261113.0931</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
