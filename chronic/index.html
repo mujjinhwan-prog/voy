@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>비대면 진료 타깃 병의원</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("chronic_theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* 낮: 화이트 바탕 · 짙은 녹색/짙은 그레이 메인 · 주황 포인트 */
+:root,:root[data-theme="light"]{
+  --bg:#ffffff;--card:#ffffff;--soft:#f1f6f3;--soft2:#e3ede7;
+  --ink:#262d29;--sub:#5d6862;--line:#d3ddd7;--line2:#a9bdb1;
+  --pri:#1e5a3d;--pri2:#2f7a54;--prit:#ffffff;--btn:#1e5a3d;--btnh:#2f7a54;
+  --head:#1e5a3d;--headt:#ffffff;
+  --acc:#e8701a;--acc-soft:#fdeedf;
+  --a:#e8701a;--b:#4f8a69;--c:#a2ada7;--nbar:#e3ede7;--err:#c0392b;
+  --shadow:0 1px 2px rgba(30,90,61,.06)}
+/* 밤: 같은 계열을 어둡게 */
+:root[data-theme="dark"]{
+  --bg:#111513;--card:#181e1b;--soft:#1e2622;--soft2:#26302b;
+  --ink:#e4ebe7;--sub:#9aa9a1;--line:#2b3631;--line2:#3d4b44;
+  --pri:#5cbf8c;--pri2:#74cf9f;--prit:#ffffff;--btn:#2b7350;--btnh:#348a60;
+  --head:#1f3b2d;--headt:#e4ebe7;
+  --acc:#ff8a3d;--acc-soft:#3a2617;
+  --a:#ff8a3d;--b:#56a77d;--c:#5f6b65;--nbar:#26302b;--err:#ff7b6b;
+  --shadow:none}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+header{padding:18px 16px 8px;max-width:1280px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--sub);font-size:13px}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px 32px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
+h1{color:var(--pri)}
+h1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{display:inline-block;width:30px;height:30px;flex:none;background:var(--pri);-webkit-mask:url(data:image/png;base64,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) center/contain no-repeat;mask:url(data:image/png;base64,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) center/contain no-repeat}
+@media (max-width:640px){.logo{width:24px;height:24px}}
+.kpi{border-top:3px solid var(--pri)}
+.kpi:nth-child(2){border-top-color:var(--acc)}
+.kpi:nth-child(2) .v{color:var(--acc)}
+.kpi .v{color:var(--pri)}
+.sec-title{color:var(--pri)}
+.step{color:var(--pri)}
+.btn.pri:hover:not(:disabled){background:var(--btnh);border-color:var(--btnh)}
+.btn:hover:not(:disabled){border-color:var(--line2)}
+select:focus,input[type=text]:focus,input[type=number]:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:var(--acc)}
+input[type=range],input[type=checkbox]{accent-color:var(--acc)}
+tbody tr:nth-child(even){background:var(--soft)}
+tbody tr:hover{background:var(--acc-soft)}
+.multi{border:1px solid var(--line2);border-radius:8px;background:var(--card)}
+.multi .mh{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid var(--line);font-size:12px}
+.multi .mh b{color:var(--acc);font-weight:700}
+.multi .mh button{background:none;border:0;color:var(--pri);font:inherit;font-size:12px;cursor:pointer;padding:0 2px}
+.multi .mh button:hover{color:var(--acc)}
+.multi .ml .grp{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:var(--pri);border-bottom:1px solid var(--line);margin-top:6px;padding:2px 0}
+.multi .ml .grp button{background:none;border:0;color:var(--acc);font:inherit;font-size:11.5px;cursor:pointer}
+.multi .ml{max-height:190px;overflow:auto;padding:4px 6px;display:grid;grid-template-columns:1fr 1fr;gap:0 6px}
+.multi .ml label{display:flex;gap:5px;align-items:center;margin:0;padding:3px 2px;font-size:12.5px;color:var(--ink);cursor:pointer}
+.multi .ml label span{color:var(--sub);font-size:11px;margin-left:auto}
+.multi .ml label.nl span{color:var(--acc)}
+#btnBasis.need{box-shadow:0 0 0 3px var(--acc-soft);background:var(--acc);border-color:var(--acc)}
+.multi .empty{grid-column:1/-1;color:var(--sub);font-size:12px;padding:6px 2px}
+.tele .grp{font-size:12px;font-weight:700;color:var(--pri);margin:10px 0 2px}
+.tele .grp.x{color:var(--sub)}
+.side .tele label{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;align-items:start;margin:4px 0;color:var(--ink);font-size:12.5px;cursor:pointer}
+.side .tele label small{grid-column:2;color:var(--sub);font-size:11px;line-height:1.35}
+.side .opt{display:flex;gap:6px;align-items:center;font-size:12.5px;margin:6px 0;color:var(--ink);cursor:pointer}
+.chip.off{opacity:.45}
+table.no-t5 .c-t5,table.no-ev .c-ev{display:none}
+.hb{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px;margin-right:2px;background:var(--soft2);color:var(--pri)}
+.hb.on{background:var(--acc-soft);color:var(--acc)}
+.pct{color:var(--sub);font-size:11.5px}
+.em{display:inline-flex;align-items:center;gap:2px;margin-left:6px;font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap;vertical-align:middle;line-height:1}
+td.c-ev .em:first-child{margin-left:0}
+.em .md{width:13px;height:16px;flex:none;margin-top:-2px}
+.em.hd{--m1:#f2c230;--m2:#b8860b;--m3:#fff6c9;--rb1:#d64545;--rb2:#2f6fd1}
+.em.copd{--m1:#4a8ff0;--m2:#1f4fa3;--m3:#e3eeff;--rb1:#1f4fa3;--rb2:#8db8f7}
+.em.ast{--m1:#f08a2a;--m2:#b4560c;--m3:#fff0e0;--rb1:#b4560c;--rb2:#f7c08a}
+.elegend{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:0 0 8px;padding:8px 10px;background:var(--soft);border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--sub)}
+.elegend b{color:var(--ink);font-weight:700}
+.elegend .em{margin-left:0}
+.vleg{flex-basis:100%}.vleg .vt{margin:0 2px 0 4px}
+.esrc{flex-basis:100%;font-size:11.5px;line-height:1.6}
+.esrcbox{margin:10px 0 0}
+.esrc a{color:var(--pri2)}
+.srcs{font-size:11.5px;color:var(--sub);line-height:1.7;margin:4px 0 0;padding-left:16px}
+.eb{display:inline-block;margin-left:5px;font-size:11px;font-weight:700;color:var(--acc);background:var(--acc-soft);border:1px solid var(--acc);border-radius:10px;padding:0 6px;white-space:nowrap}
+.ccard .t3 .eb:first-child{margin-left:0}
+.chip.cond{border-color:var(--acc);color:var(--acc);background:var(--acc-soft)}
+.chip.unk{border-style:dashed;color:var(--sub)}
+.tele .grp.c{color:var(--acc)}
+.dzsel{width:auto!important;padding:3px 6px!important;font-size:12px!important}
+.dzsel.t-core{color:var(--pri2)} .dzsel.t-cond{color:var(--acc)} .dzsel.t-unk{border-color:var(--acc)!important;border-style:dashed!important}
+.dz{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;font-size:12px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.dz .st{font-size:11px;font-weight:700}
+.dz .st.y{color:var(--pri2)} .dz .st.n{color:var(--sub)} .dz .st.u{color:var(--acc)}
+.est{color:var(--sub);font-size:10.5px;margin-left:3px}
+.vt{display:inline-block;min-width:18px;text-align:center;font-size:10.5px;font-weight:700;border-radius:5px;padding:0 4px;margin-left:4px;border:1px solid}
+.vt.L{color:#fff;background:var(--pri2);border-color:var(--pri2)}.vt.M{color:var(--pri2);border-color:var(--pri2);background:var(--soft)}.vt.S{color:var(--sub);border-color:var(--line2)}
+.evalstat{font-size:12px;margin-top:6px;padding:6px 8px;border-radius:8px;background:var(--soft)}
+.evalstat b{color:var(--pri)}
+.theme{position:fixed;right:16px;bottom:16px;z-index:1500;display:flex;background:var(--card);border:1px solid var(--line2);border-radius:999px;padding:3px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.theme button{border:0;background:none;color:var(--sub);width:38px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;cursor:pointer}
+.theme button.on{background:var(--btn);color:var(--prit);font-weight:700}
+.theme button:not(.on):hover{color:var(--acc)}
+.row{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(4,1fr);margin:12px 0}
+.kpi .v{font-size:24px;font-weight:700}
+.kpi .l{color:var(--sub);font-size:12px}
+.main{grid-template-columns:310px minmax(0,1fr)}
+.row>*{min-width:0}
+.side label{display:block;font-size:12px;color:var(--sub);margin:10px 0 4px}
+select,input[type=text],input[type=number]{width:100%;padding:7px 8px;border:1px solid var(--line2);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.chk{display:flex;gap:10px;flex-wrap:wrap;font-size:13px}
+.chk.pri{gap:6px;background:var(--acc-soft);border:1px solid var(--acc);border-radius:8px;padding:7px 8px}
+.chk.pri::before{content:"비대면·만성질환 주력";flex-basis:100%;font-size:11px;font-weight:700;color:var(--acc)}
+.chk.pri label{font-weight:700;color:var(--acc)}
+.chk.etc{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin-top:4px}
+.chk.etc label{font-size:12.5px}
+.subetc{margin-top:6px}.subetc summary{font-size:12.5px;font-weight:600}
+.mh2{font-size:12px;margin-top:4px}.mh2 button{background:none;border:0;color:var(--pri);cursor:pointer;font:inherit;padding:0 2px}
+td .subp{color:var(--acc);font-weight:700}
+.loc-btn{width:34px;height:34px;border:2px solid rgba(0,0,0,.2);border-radius:4px;background:#fff;cursor:pointer;font-size:16px;line-height:1;padding:0}
+.chk label{display:flex;gap:4px;align-items:center;margin:0;color:var(--ink)}
+.w{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:6px}
+.w span{text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%}
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font:inherit}
+.btn.pri{background:var(--btn);color:var(--prit);border-color:var(--btn)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.full{width:100%;margin-top:8px}
+.step{font-weight:700;margin:14px 0 2px;font-size:13px}
+.step:first-child{margin-top:0}
+.prog{height:6px;background:var(--soft2);border-radius:4px;overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.msg{font-size:12px;color:var(--sub);margin-top:6px;min-height:18px}
+.msg.err{color:var(--err)}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+#map{height:min(80vh,860px);min-height:560px;border-radius:10px}
+.rtabs{display:none;gap:6px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:thin}
+.rtabs.on{display:flex}
+.rtab{border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:18px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;flex:none}
+.rtab small{font-weight:500;color:var(--sub);margin-left:4px}
+.rtab.on{background:var(--pri);color:#fff;border-color:var(--pri)}.rtab.on small{color:#fff;opacity:.85}
+.rtab.all{border-style:dashed}
+.focusnote{display:none;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;margin:0 0 8px;padding:6px 10px;border-radius:8px;background:var(--soft);border:1px solid var(--line2)}
+.focusnote.on{display:block;line-height:1.7}.focusnote b{color:var(--pri)}
+.focusnote button{background:none;border:0;color:var(--acc);font-weight:700;cursor:pointer;font:inherit;padding:0;margin-left:6px;white-space:nowrap}
+.q2{background:none;border:1px solid var(--acc);color:var(--acc);border-radius:14px;font-size:12px;font-weight:700;padding:2px 10px;cursor:pointer}
+.bars .b.on span:first-child{color:var(--acc);font-weight:700}
+.bars .b.on{background:var(--acc-soft);border-radius:6px}
+.bars .b.dim{opacity:.45}
+.bars .b{display:grid;grid-template-columns:110px 1fr 90px;gap:8px;align-items:center;margin:4px 0;font-size:12px;cursor:pointer}
+.bars .t{height:14px;background:var(--soft);border-radius:4px;overflow:hidden;display:flex}
+.bars .b:hover span:first-child{color:var(--acc)}
+.bars .t i{display:block;height:100%}
+.tbl{overflow:auto;max-height:520px;border:1px solid var(--line2);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--head);cursor:pointer;color:var(--headt);font-weight:600;border-bottom:2px solid var(--acc)}
+th:hover{text-decoration:underline}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.g{display:inline-block;min-width:22px;text-align:center;border-radius:6px;padding:1px 6px;color:#fff;font-weight:700;font-size:11px}
+.gA{background:var(--a)}.gB{background:var(--b)}.gC{background:var(--c)}.gN{background:var(--soft2);color:var(--sub)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-right:3px;font-size:11px;background:var(--card)}
+.chip.hit{border-color:var(--pri2);color:var(--pri2);background:var(--soft);font-weight:600}
+.note{font-size:12px;color:var(--sub);margin-top:8px}
+.badge{display:inline-block;background:var(--c);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;margin-left:6px;vertical-align:middle}
+.sec-title{font-weight:700;margin:0 0 8px}
+details summary{cursor:pointer;font-weight:700;font-size:13px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.q{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--sub);color:var(--sub);font-size:10px;font-weight:700;cursor:pointer;margin-left:4px;vertical-align:1px;background:none;padding:0;line-height:1}
+.q:hover{border-color:var(--pri);color:var(--pri)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:24px 12px;z-index:2000;overflow:auto}
+.modal.on{display:flex}
+.mbox{background:var(--card);color:var(--ink);border-radius:14px;max-width:760px;width:100%;padding:20px 20px 8px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mhead h2{font-size:18px;margin:0}
+.x{background:none;border:0;font-size:22px;cursor:pointer;color:var(--sub);line-height:1}
+.lead{background:var(--soft);border-left:4px solid var(--acc);border-radius:10px;padding:12px 14px;margin:10px 0 14px;font-size:13.5px}
+.help h3{color:var(--pri)}
+.help details{border:1px solid var(--line);border-radius:10px;margin:8px 0;padding:10px 12px}
+.help details[open]{border-color:var(--pri)}
+.help details summary{display:flex;justify-content:space-between;gap:8px;list-style:none}
+.help details summary::-webkit-details-marker{display:none}
+.help .wt{font-weight:600;color:var(--pri);font-size:12px;white-space:nowrap}
+.help dl{display:grid;grid-template-columns:86px 1fr;gap:6px 10px;margin:10px 0 2px;font-size:13px}
+.help dt{color:var(--sub);font-weight:600}
+.help dd{margin:0}
+.help ul{margin:6px 0 4px;padding-left:18px;font-size:13px}
+.help h3{font-size:14px;margin:18px 0 6px}
+.gradebox{display:flex;gap:8px;flex-wrap:wrap;font-size:13px;margin:6px 0}
+.gradebox div{border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+@media (max-width:600px){.help dl{grid-template-columns:1fr}.help dt{margin-top:6px}}
+.mobile-only{display:none}
+.cards{display:none}
+.tabbar{display:none}
+.pb{display:inline-block;margin-left:5px;font-size:11px;font-weight:700;color:#fff;background:var(--pri2);border-radius:10px;padding:0 6px;white-space:nowrap;vertical-align:1px}
+.phd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pstat{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.pstat>span{font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:3px 8px}
+.pstat b{color:var(--pri)}
+.pstat>.new{background:var(--acc-soft);border-color:var(--acc);cursor:pointer}
+.pstat>.new b{color:var(--acc)}
+.ptools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.ptools input[type=text]{width:180px}
+.ptools label{font-size:12px;display:flex;align-items:center;gap:4px;margin:0}
+.ptbl{overflow:auto;max-height:420px;border:1px solid var(--line2);border-radius:10px}
+.ptbl td.nm{font-weight:600}
+.ptbl tr.out td{color:var(--sub)}
+.ptbl .go{border:0;background:none;color:var(--pri2);cursor:pointer;font-weight:600;padding:0;text-decoration:underline}
+.pempty{padding:18px;text-align:center;color:var(--sub);font-size:13px;background:var(--soft);border-radius:10px}
+.listhd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ccard{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--card)}
+.ccard.gA{border-left-color:var(--a)}.ccard.gB{border-left-color:var(--b)}.ccard.gN{border-left-color:var(--soft2)}
+.ccard .t1{display:flex;align-items:center;gap:8px}
+.ccard .nm{font-weight:700;font-size:15px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccard .sc{font-size:20px;font-weight:800;color:var(--pri)}
+.ccard.gA .sc{color:var(--acc)}
+.ccard .t2{color:var(--sub);font-size:12.5px;margin:3px 0 6px}
+.ccard .t3{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.ccard .t4{font-size:12px;color:var(--sub);display:flex;flex-wrap:wrap;gap:4px 10px}
+.ccard .t4 b{color:var(--acc);font-weight:700}
+.ccard .act{display:flex;gap:6px;margin-top:8px}
+.ccard .act a,.ccard .act button{flex:1;text-align:center;text-decoration:none;padding:8px 6px;border-radius:8px;border:1px solid var(--line2);background:var(--soft);color:var(--pri);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.more-btn{width:100%;margin-top:6px}
+@media (max-width:700px){
+  header{padding:14px 12px 4px}
+  h1{font-size:18px}
+  .hdr>.btn{display:none}
+  .hdr .sub{font-size:12px}
+  .kpi .l{font-size:11px}
+  .theme{padding:2px}
+  .theme button{width:32px;height:30px}
+  .wrap{padding:0 12px 96px}
+  .card{padding:12px}
+  .kpis{gap:8px;margin:10px 0}
+  .kpi .v{font-size:20px}
+  #map{height:58vh;min-height:320px}
+  .tbl{display:none}
+  .cards{display:block}
+  .ptools input[type=text]{width:100%}
+  .ptbl{max-height:none;border:0}
+  .ptbl table,.ptbl tbody{display:block}
+  .ptbl thead{display:none}
+  .ptbl tr{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;padding:10px 4px;border-bottom:1px solid var(--line)}
+  .ptbl td{border:0;padding:0;white-space:normal}
+  .ptbl td.c-g{grid-row:span 2}
+  .ptbl td.c-ad,.ptbl td.c-tel{display:none}
+  .ptbl td.c-ow,.ptbl td.c-me,.ptbl td.c-st{grid-column:2 / 4;font-size:12px;color:var(--sub)}
+  .mobile-only{display:block}
+  #mSort{width:auto;font-size:14px;padding:6px 8px}
+  select,input[type=text],input[type=number]{font-size:16px;padding:9px 10px}
+  .btn{min-height:44px}
+  .q{width:22px;height:22px;font-size:12px}
+  .multi .ml{max-height:240px}
+  .multi .ml label{padding:6px 2px;font-size:14px}
+  .side label.opt,.side .tele label{font-size:14px}
+  .bars .b{grid-template-columns:80px 1fr 78px}
+  .rtabs.on{position:sticky;top:0;z-index:1500;background:var(--bg);margin:0 -12px;padding:8px 12px;border-bottom:1px solid var(--line2)}
+  .modal{padding:0}
+  .mbox{border-radius:0;min-height:100vh;max-width:none;padding:16px 16px 80px}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:1600;background:var(--card);border-top:1px solid var(--line2);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:var(--pri);font-size:11px;font-weight:600;padding:4px 0}
+  .tabbar a span{font-size:18px;line-height:1.1}
+  .theme{bottom:calc(64px + env(safe-area-inset-bottom));right:12px}
+  #secFilter,#secMap,#secList{scroll-margin-top:8px}
+}
+@media (max-width:900px){.main{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr!important}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div>
+    <h1><i class="logo" aria-hidden="true"></i>비대면 진료 타깃 병의원 <span id="srcBadge" class="badge">데이터 없음</span></h1>
+    <div class="sub">심평원 Open API 실시간 연동 · 비대면 재진 수요가 클 의원을 지역별로 우선순위화</div>
+  </div>
+  <button class="btn" data-help="top">📘 지표 설명 보기</button>
+</header>
+
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="mbox help">
+    <div class="mhead"><h2 id="helpTitle">지수는 어떻게 계산하나요?</h2><button class="x" id="helpClose" aria-label="닫기">×</button></div>
+
+    <div class="lead" id="h-top">
+      공개 데이터에는 의원별 <b>재진율·비대면 실적</b>이 없습니다. 그래서 이 대시보드는 의원마다 실제로 차이가 나는 공개 정보
+      (<b>진료시간, 내과 전문의, 평가 결과, 개원 연수, 규모</b>)로 점수를 매기고, <b>지역 안 순위</b>로 등급을 나눕니다.<br>
+      한 줄 요약: <b>환자 편의 중심 + 만성질환 관리 역량 + 오래된 동네 내과</b> = 비대면 재진 영업 우선 대상
+    </div>
+
+    <h3>지수를 이루는 6가지 지표</h3>
+    <div class="sub" style="font-size:12px">현재 가중치가 오른쪽에 표시됩니다. 데이터가 없는 지표는 그 의원 점수에서 빼고 나머지로 다시 100점 환산합니다 (빈칸이 감점이 되지 않음).</div>
+
+    <details id="h-w1">
+      <summary><span>① 진료 접근성 (야간·주말 진료)</span><span class="wt" data-wt="1"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>평일 19시 이후 진료하는 날 수, 토요일·일요일 진료 여부</dd>
+        <dt>왜 중요한가</dt><dd>환자 편의를 우선하는 의원일수록 비대면 진료 같은 새로운 진료 방식을 받아들일 가능성이 높고, 직장인 만성질환 환자가 많습니다. 의원마다 차이가 커서 변별력이 높은 지표입니다.</dd>
+        <dt>점수 계산</dt><dd>야간 진료(평일 하루당 8%, 최대 40%) + 토요일 35% + 일요일 25%</dd>
+        <dt>데이터</dt><dd>심평원 의료기관별상세정보서비스 (진료시간)</dd>
+      </dl>
+    </details>
+
+    <details id="h-w2">
+      <summary><span>② 만성질환 관리 역량 (내과·가정의학과 전문의)</span><span class="wt" data-wt="2"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>내과·가정의학과 전문의 수</dd>
+        <dt>왜 중요한가</dt><dd>만성질환 재진 환자를 꾸준히 보는 핵심 인력입니다. 일반의 1인 의원과 내과 전문의가 여럿인 의원을 구분합니다.</dd>
+        <dt>점수 계산</dt><dd>0명 = 0, 1명 = 60%, 2명 = 85%, 3명 이상 = 만점. 과목별 전문의 정보가 없으면 표시과목과 전문의 총수로 추정합니다.</dd>
+        <dt>데이터</dt><dd>심평원 의료기관별상세정보서비스 (과목별 전문의), 병원정보서비스 (전문의 수)</dd>
+      </dl>
+    </details>
+
+    <details id="h-w3">
+      <summary><span>③ 비대면 질환 구성 (Top5)</span><span class="wt" data-wt="3"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>최근 1년 진료량 상위 5개 질병 중 비대면 진료가 가능한 질환의 구성</dd>
+        <dt>점수 계산</dt><dd><b style="color:var(--pri2)">만성</b> 1개당 50%, <b style="color:var(--acc)">조건부</b> 1개당 15%(최대 45%), 제외 0. 예) 감기·위염·고혈압·비염·장염 = 95%</dd>
+        <dt>한계</dt><dd>질병 이름만 오고 환자 수·순위가 없어 보조 지표로만 씁니다. 심평원이 질병정보를 주지 않는 의원은 이 지표를 빼고 계산하며, 목록 전체에 질병정보가 없으면 해당 열을 숨깁니다.</dd>
+        <dt>데이터</dt><dd>심평원 병원진료정보조회서비스</dd>
+      </dl>
+    </details>
+
+    <details id="h-w4">
+      <summary><span>④ 만성질환 평가 우수기관</span><span class="wt" data-wt="4"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>심평원 적정성평가 등급: 고혈압·당뇨병(1~5등급), 만성폐쇄성폐질환(1~5등급), 천식(양호 공개)</dd>
+        <dt>왜 중요한가</dt><dd>평가 핵심 지표가 방문 지속·처방 지속 환자 비율이라, 재진 환자를 꾸준히 관리한다는 공식 확인입니다.</dd>
+        <dt>점수 계산</dt><dd>고혈압·당뇨 등급 최대 75% (1등급 75%, 2등급 56%, 3등급 38%, 4등급 19%, 5등급 0) + COPD 등급 최대 25% + 천식 양호 25%, 합계 최대 100%. 평가 대상이 아닌 의원은 0입니다(평가를 받을 만큼 해당 환자가 많지 않다는 뜻). 1~2등급·양호 의원은 기관명 옆에 질환별 훈장(금색 고혈압·당뇨, 파랑 COPD, 주황 천식)와 등급이 붙습니다.</dd>
+        <dt>데이터</dt><dd>심평원 병원평가정보서비스 API (getHospAsmInfo1). ③ 상세정보 조회 때 의원마다 자동으로 받아옵니다.</dd>
+      </dl>
+    </details>
+
+    <details id="h-w5">
+      <summary><span>⑤ 개원 연수</span><span class="wt" data-wt="5"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>개설일로부터 지난 기간</dd>
+        <dt>왜 중요한가</dt><dd>오래된 의원일수록 장기 재진 환자군이 쌓여 있습니다.</dd>
+        <dt>점수 계산</dt><dd>상한 없이 연속 반영: 25년 = 만점 (예: 5년 = 20%, 15년 = 60%)</dd>
+        <dt>데이터</dt><dd>심평원 병원정보서비스 (개설일자)</dd>
+      </dl>
+    </details>
+
+    <details id="h-w6">
+      <summary><span>⑥ 진료 규모 (의사 수)</span><span class="wt" data-wt="6"></span></summary>
+      <dl>
+        <dt>무엇을 보나</dt><dd>근무 의사 수</dd>
+        <dt>점수 계산</dt><dd>1명 43%, 2명 68%, 3명 86%, 4명 이상 만점</dd>
+        <dt>데이터</dt><dd>심평원 병원정보서비스</dd>
+      </dl>
+    </details>
+
+
+    <h3 id="h-tele">비대면 적합 질환 기준</h3>
+    <ul>
+      <li><b>포함</b>: 증상이 안정적이고 같은 약을 반복 처방하는 <b>만성질환</b>. 개정안상 일반 비대면진료는 6개월 내 같은 증상으로 대면진료를 받은 의료기관에서 하는 것이 원칙이라, 정기 재진 환자가 핵심 대상입니다.</li>
+      <li><b>제외</b>: 개정안에서 비대면 처방이 금지된 <b>마약류·비만치료제</b>가 주로 쓰이는 질환(불면증, 비만, ADHD 등)과 향정신성 약 처방 비중이 높은 질환(불안·공황 등).</li>
+      <li><b>조건부</b>: 감기·장염·비염·피부염·불면·우울 등은 <b>비대면 진료가 가능</b>하므로 점수에 포함하되, 초진 7일 처방·단기 진료가 많아 만성질환보다 낮게 반영합니다. 불면·우울은 마약류·향정 약을 제외한 처방만 가능합니다.</li>
+      <li>복지부가 '오·남용 우려 의약품'을 고시로 추가 지정할 예정이므로, 확정되면 왼쪽 <b>비대면 적합 질환 설정</b>에서 체크를 바꾸면 바로 반영됩니다.</li>
+    </ul>
+
+    <h3 id="h-grade">등급 기준 — 지역 안 순위</h3>
+    <div class="gradebox">
+      <div><span class="g gA">A</span> 상위 <span id="hgA">20</span>% · 우선 방문</div>
+      <div><span class="g gB">B</span> 그다음 <span id="hgB">30</span>% · 관리 대상</div>
+      <div><span class="g gC">C</span> 나머지</div>
+      <div><span class="g gN">-</span> 상세정보 미조회</div>
+    </div>
+    <div class="sub" style="font-size:12px">점수를 정해진 기준점으로 자르지 않고, <b>지금 선택한 지역 안에서 순위</b>로 등급을 매깁니다. 모두가 높은 점수를 받아도 A는 항상 상위 일부만 됩니다. 비율은 왼쪽 '지수 가중치'에서 바꿀 수 있습니다.</div>
+
+    <h3 id="h-vol">진료 규모 지수 (규모 열)</h3>
+    <ul>
+      <li>의원별 진료건수·환자 수·약제비는 공개되지 않아, <b>규모를 간접적으로 보여주는 신호</b>를 모아 0~100점으로 만든 추정치입니다. 비대면 잠재 지수(등급)와는 따로 계산합니다.</li>
+      <li><b>의사 수</b> 30 · <b>평가 대상 항목 수</b> 30 (고혈압·당뇨, COPD, 천식, 항생제, 주사제, 약품목수 등 — 평가 대상이 됐다는 것 자체가 일정 환자 수 이상이라는 뜻, 6개 이상 만점) · <b>문전약국</b> 20 (반경 100m 약국을 주변 의원 수로 나눠 합산, 1.5곳 몫 이상 만점 · 심평원 약국정보서비스) · <b>진료시간</b> 15 (야간·토·일) · <b>개원 연수</b> 5 (20년 만점)</li>
+      <li>데이터가 없는 신호는 그 의원 계산에서 빠집니다. 심평원 평가 기록이 아예 없는 의원은 개원 2년 미만이거나 만성질환(당뇨·고혈압 등)을 보는 곳이면 '자료 없음'으로 빼고(자료 누락 가능성), 그 밖의 의원(미용·검진 위주 등)은 평가 대상 0개로 계산합니다. 평가 대상 항목과 진료시간은 ③ 상세정보 조회 후 반영됩니다.</li>
+      <li><b>대·중·소</b>: 현재 지역 안에서 규모 상위 20% = 대, 다음 40% = 중, 나머지 = 소</li>
+      <li>메디컬빌딩·번화가처럼 의원 여러 곳이 약국을 같이 쓰면 약국 1곳을 의원 수만큼 나눠 계산합니다. 다만 ①에서 불러온 과목의 의원만 세므로, 다른 과목 의원이 많은 건물에서는 여전히 조금 높게 나올 수 있습니다. 회사 거래처 실적과 비교해 가중치를 맞추면 정확도가 올라갑니다.</li>
+    </ul>
+
+    <h3 id="h-source">데이터 출처</h3>
+    <ul>
+      <li><b>의원 목록·개설일·의사 수·좌표</b>: 건강보험심사평가원 병원정보서비스 (공공데이터포털 OpenAPI) — 조회할 때마다 최신</li>
+      <li><b>상위 5개 질병·표시과목</b>: 심평원 병원진료정보조회서비스 — 의원 목록 아래 '평가 마크'에 기준월 표시</li>
+      <li><b>진료시간·전문의 수</b>: 심평원 의료기관별상세정보서비스</li>
+      <li><b>문전약국 위치</b>: 심평원 약국정보서비스</li>
+      <li><b>평가 등급</b>: 심평원 병원평가정보서비스 — 고혈압·당뇨병은 2024년(2주기 2차) 평가 결과(2025년 12월 공개), COPD·천식은 심평원이 공개한 최신 평가 결과</li>
+      <li><b>지도</b>: 브이월드(국토교통부) 또는 OpenStreetMap</li>
+      <li><b>비대면 진료 거래처</b>: 회사 내부 명단 (저장소 data/partners.xlsx)</li>
+    </ul>
+
+    <h3 id="h-limit">한계 — 꼭 알아두세요</h3>
+    <ul>
+      <li>공공데이터에는 의원별 <b>환자 수·재진율·비대면 진료 실적</b>이 없습니다. 이 지수는 "비대면 진료를 할 것이다"의 예측이 아니라 <b>비대면 재진 잠재력이 있는 의원의 영업 우선순위</b>입니다.</li>
+      <li>원장 성향, 비대면 플랫폼 입점 여부처럼 실제 도입을 좌우하는 요인은 공개 데이터에 없어, MR 현장 확인으로 보완해야 합니다.</li>
+      <li>상위 5개 질병은 이름만 오고 순위·환자 수가 없어 보조 지표로만 씁니다.</li>
+    </ul>
+
+    <h3 id="h-partner">비대면 진료 거래처</h3>
+    <ul>
+      <li>회사가 관리하는 <b>비대면 진료 거래처 명단</b>을 불러온 의원 목록과 맞춰 봅니다. 저장소 <code>data/partners.xlsx</code>(또는 .csv) 한 파일을 모든 사용자가 같이 씁니다.</li>
+      <li>요양기관기호가 있으면 그것으로, 없으면 <b>기관명 + 시군구(주소)</b>로 맞춥니다. 같은 이름이 여러 곳이면 주소가 맞는 곳만 연결합니다.</li>
+      <li>연결된 거래처는 의원 리스트에 <span class="pb" style="margin:0">🤝 거래처</span> 표시, 지도에 주황 테두리로 나타나고, 등급·지수를 그대로 보여 줍니다.</li>
+      <li><b>신규 발굴 후보</b>: 현재 지역 A등급 중 거래처가 아닌 의원 수입니다. 누르면 의원 리스트가 그 의원들로 걸러집니다.</li>
+      <li>'현재 불러온 목록에 없음'은 다른 시도이거나, 내과·가정의학과·일반의 외 과목이라 ①에서 불러오지 않은 경우입니다.</li>
+    </ul>
+
+    <h3 id="h-improve">정확도를 높이는 방법</h3>
+    <ul>
+      <li><b>MR 현장 확인</b>: A등급 의원 방문 시 만성질환 환자 비중, 비대면 진료 운영 여부를 CRM에 기록 → 몇 달 뒤 점수와 비교해 가중치 조정</li>
+      <li><b>사내 처방 데이터 결합</b>: 의원별 만성질환 약 처방 건수가 있다면 가장 직접적인 재진 지표</li>
+      <li><b>지역별 실제 비대면 이용량</b>: 국민건강보험공단에 시군구별 비대면 진료 청구 건수를 공공데이터 제공신청하면 가장 직접적인 지역 지표가 됩니다</li>
+    </ul>
+    <div style="text-align:right;margin:14px 0 10px"><button class="btn pri" id="helpOk">확인</button></div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="row kpis">
+    <div class="card kpi"><div class="v" id="kN">-</div><div class="l">상세정보 조회 완료 / 목록</div></div>
+    <div class="card kpi"><div class="v" id="kA">-</div><div class="l">A등급 (우선 방문)</div></div>
+    <div class="card kpi"><div class="v" id="kAvg">-</div><div class="l">평균 지수 (조회 완료 기준)</div></div>
+    <div class="card kpi"><div class="v" id="kTop">-</div><div class="l">A등급 최다 시군구</div></div>
+  </div>
+
+  <div class="row main">
+    <aside class="card side" id="secFilter">
+      <div class="step">① 시도·시군구·진료과목 고르고 의원 목록 불러오기</div>
+      <label>시도</label><select id="aSido"></select>
+      <label>시군구 (여러 곳 선택 가능 · 비우면 시도/전국 전체)</label>
+      <div class="multi"><div class="mh"><span id="sgguSum">전체</span><span><button type="button" id="sgguAll">모두 선택</button> · <button type="button" id="sgguNone">해제</button></span></div>
+        <div class="ml" id="sgguList"></div></div>
+      <label>진료과목</label>
+      <div class="chk pri" id="subPri"></div>
+      <details class="subetc"><summary>그 밖의 진료과목 <span class="sub" id="subEtcSum"></span></summary>
+        <div class="mh2"><button type="button" id="subEtcAll">모두 선택</button> · <button type="button" id="subEtcNone">해제</button></div>
+        <div class="chk etc" id="subEtc"></div>
+      </details>
+      <button class="btn pri full" id="btnBasis">의원 목록 불러오기</button>
+
+      <div class="step">② 읍면동으로 좁히기 (선택)</div>
+      <label>읍면동</label><select id="fEmd"></select>
+
+      <div class="step">③ 상세정보 조회 (진료시간·전문의·질병)</div>
+      <button class="btn pri full" id="btnTop5" disabled>현재 목록 상세정보 조회</button>
+      <button class="btn full" id="btnStop" style="display:none">중지</button>
+      <div class="prog"><i id="prog"></i></div>
+      <div class="msg" id="msg">시도와 시군구를 고르고 ① 불러오기부터 진행하세요.</div>
+
+      <hr>
+      <label>표시과목</label><select id="fSub"></select>
+      <label>등급</label>
+      <select id="fGrade"><option value="">전체</option><option>A</option><option>B</option><option>C</option><option value="N">미조회</option></select>
+      <label>기관명 검색</label><input type="text" id="fQ" placeholder="예) 내과">
+      <label>비대면 진료 거래처</label>
+      <select id="fPartner"><option value="">전체</option><option value="Y">거래처만</option><option value="N">거래처 제외 (신규 발굴)</option></select>
+      <label class="opt"><input type="checkbox" id="oHide">비대면 질환이 0개인 의원 숨기기 (질병정보가 있는 의원만 해당)</label>
+      <label class="opt"><input type="checkbox" id="oOnly" checked>Top5 열에 적합 질환만 표시</label>
+      <label class="opt"><input type="checkbox" id="oAttach" checked>기업·기관 부속의원 숨기기 (일반 환자 진료가 적은 곳)</label>
+      <label class="opt" id="oGoodWrap"><input type="checkbox" id="oGood">평가 우수 의원만 보기 (고혈압·당뇨·COPD·천식 중 하나 이상)</label>
+
+      <hr>
+      <details class="tele">
+        <summary>비대면 적합 질환 설정 <button class="q" data-help="tele" title="기준 설명">?</button></summary>
+        <div class="note">체크한 질환만 '비대면 적합 질환'으로 집계·표시합니다.</div>
+        <div id="teleList"></div>
+        <div class="grp" style="margin-top:12px">조회된 질병명 점검</div>
+        <div class="note">실제 조회된 질병명이 어떻게 분류됐는지 보여줍니다. 체크를 바꾸면 그 질병명만 따로 적합/제외로 고정됩니다. <b style="color:var(--acc)">미분류</b>는 기준에 없는 이름이라 확인이 필요합니다.</div>
+        <div id="dzList"><div class="note">질병정보를 조회하면 여기에 나타납니다.</div></div>
+        <button class="btn full" id="teleReset" style="margin-top:8px">기본값으로 (질병명 고정 포함)</button>
+      </details>
+
+      <hr>
+      <details>
+        <summary>지수 가중치 <button class="q" data-help="top" title="지표 설명">?</button></summary>
+        <label>① 진료 접근성 (야간·주말)<button class="q" data-help="w1" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w1" value="20"><span id="w1v"></span></div>
+        <label>② 내과·가정의학과 전문의<button class="q" data-help="w2" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w2" value="20"><span id="w2v"></span></div>
+        <label>③ 비대면 질환 구성 (Top5)<button class="q" data-help="w3" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w3" value="20"><span id="w3v"></span></div>
+        <label>④ 고혈압·당뇨 양호기관<button class="q" data-help="w4" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w4" value="15"><span id="w4v"></span></div>
+        <label>⑤ 개원 연수<button class="q" data-help="w5" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w5" value="15"><span id="w5v"></span></div>
+        <label>⑥ 진료 규모 (의사 수)<button class="q" data-help="w6" title="설명 보기">?</button></label><div class="w"><input type="range" min="0" max="60" id="w6" value="10"><span id="w6v"></span></div>
+        <label>등급 비율: A 상위 % / B 다음 %<button class="q" data-help="grade" title="설명 보기">?</button></label>
+        <div class="w" style="grid-template-columns:1fr 1fr"><input type="number" id="tA" value="20" min="1" max="90"><input type="number" id="tB" value="30" min="0" max="90"></div>
+        <div class="note">가중치는 자동으로 100점 환산되고, 데이터가 없는 지표는 그 의원 계산에서 빠집니다.</div>
+      </details>
+      <hr>
+      <details id="evalBox">
+        <summary>만성질환 평가 결과 반영 (고혈압·당뇨·COPD·천식) <button class="q" data-help="w4" title="지표 설명">?</button></summary>
+        <div class="note"><b>자동</b>: ③ 상세정보 조회 때 심평원 병원평가 API에서 <b>고혈압·당뇨병 등급(1~5), COPD 등급(1~5), 천식 양호 여부</b>를 의원마다 받아옵니다. 1~2등급·양호 의원은 기관명 옆에 질환별 훈장(금색 고혈압·당뇨, 파랑 COPD, 주황 천식)와 등급이 붙습니다. (data.go.kr '병원평가정보서비스' 활용신청 필요)</div>
+        <div class="evalstat" id="evalStat">평가 데이터 확인 중…</div>
+        <div class="note">※ 이상지질혈증은 심평원이 별도 적정성평가를 하지 않아 등급 자료가 없습니다.</div>
+      </details>
+      <hr>
+      <details>
+        <summary>설정</summary>
+        <label>브이월드 인증키 (지도)</label><input type="text" id="vkey" placeholder="Vercel에 VWORLD_KEY를 넣었으면 비워두세요">
+        <div class="note">브이월드에서 발급받은 키입니다. 비워두면 서버 설정(VWORLD_KEY)을 쓰고, 둘 다 없으면 OpenStreetMap을 씁니다.</div>
+        <label>중계 API 주소</label><input type="text" id="apiBase" placeholder="/api/hira">
+        <div class="note">이 페이지와 같은 Vercel 프로젝트면 비워두세요.</div>
+        <button class="btn full" id="btnCache">상세정보 캐시 비우기</button>
+        <button class="btn full" id="btnSample">샘플 데이터로 미리보기</button>
+        <button class="btn full" id="btnRaw">API 원본 확인 (현재 목록 첫 의원)</button>
+        <pre id="rawOut" style="display:none;white-space:pre-wrap;word-break:break-all;font-size:11px;background:var(--soft);padding:8px;border-radius:8px;max-height:260px;overflow:auto"></pre>
+      </details>
+      <div style="margin-top:12px"><button class="btn pri full" id="export">현재 목록 CSV 내보내기</button></div>
+      <div class="note">개별 의원의 실제 재진율은 공개되지 않아, 공개 지표로 만든 <b>추정 지수</b>입니다. <a href="#" data-help="limit">한계 보기</a></div>
+    </aside>
+
+    <section class="row" style="align-content:start">
+      <div class="rtabs" id="rTabs" role="tablist" aria-label="시군구 보기"></div>
+      <div class="row two" style="grid-template-columns:minmax(0,3fr) minmax(0,1fr)">
+        <div class="card" id="secMap"><div class="sec-title">지도</div><div id="map"></div></div>
+        <div class="card"><div class="sec-title listhd"><span>시군구별 의원 수 (등급 구성)</span><button type="button" class="q2" id="barsBack" style="display:none"></button></div><div class="bars" id="bars"></div>
+          <div class="note"><span class="g gA">A</span> <span class="g gB">B</span> <span class="g gC">C</span> <span class="g gN">미조회</span> · 막대를 누르면 해당 시군구로 필터<br>지도에서 <b style="color:var(--acc)">주황 테두리</b>는 비대면 진료 거래처입니다.</div></div>
+      </div>
+      <div class="card" id="secPartner">
+        <div class="sec-title phd"><span>🤝 비대면 진료 거래처 <span class="sub" id="pCnt"></span> <button class="q" data-help="partner" title="거래처 영역 설명">?</button></span></div>
+        <div class="pstat" id="pStat"></div>
+        <div class="ptools">
+          <input type="text" id="pQ" placeholder="거래처명·담당자 검색">
+          <label><input type="checkbox" id="pArea" checked>현재 선택 지역만</label>
+        </div>
+        <div class="ptbl" id="pWrap"></div>
+      </div>
+      <div class="card" id="secList">
+        <div class="sec-title listhd"><span>의원 리스트 <span class="sub" id="cnt"></span> <button class="q" data-help="top" title="지수·등급 설명">?</button></span>
+          <select id="mSort" class="mobile-only" aria-label="정렬">
+            <option value="score">지수 높은 순</option><option value="vol">진료 규모 큰 순</option><option value="hrsScore">야간·주말 진료 순</option><option value="imSdr">내과 전문의 많은 순</option><option value="years">개원 오래된 순</option><option value="name">기관명 순</option><option value="sggu">시군구 순</option>
+          </select></div>
+        <div class="elegend" id="evLegend"><b>평가 마크</b>
+          <span class="em hd"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span>고혈압·당뇨병
+          <span class="em copd"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span>만성폐쇄성폐질환(COPD)
+          <span class="em ast"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span>천식
+          <span>· 마크 옆 <b>1등급·2등급</b>(5단계 중) 또는 <b>양호</b>만 표시 · 심평원 적정성평가는 고혈압과 당뇨병을 한 등급으로 매깁니다</span>
+          <span><span class="pb" style="margin:0">🤝 거래처</span> 비대면 진료 거래처</span>
+          <span class="vleg"><b>규모</b> <span class="vt L">대</span> 상위 20% · <span class="vt M">중</span> 다음 40% · <span class="vt S">소</span> 나머지 (불러온 지역 안 순위) · 점수 = 의사 수 30 + 평가 대상 항목 수 30 + 문전약국 20 + 진료시간 15 + 개원 연수 5, 자료 없는 항목은 빼고 계산 · 숫자에 마우스를 올리면 근거 표시</span>
+        </div>
+        <div class="focusnote" id="focusNote"></div>
+        <div class="evalstat" id="dataWarn" style="display:none;border-left:4px solid var(--acc);margin-bottom:8px"></div>
+        <div class="tbl"><table id="tbl"><thead><tr>
+          <th data-k="grade">등급</th><th data-k="score">지수</th><th data-k="pct">순위</th><th data-k="vol" title="진료 규모 추정 지수">규모</th><th data-k="name">기관명</th><th data-k="good" class="c-ev">평가</th><th data-k="sggu">시군구</th><th data-k="emd">읍면동</th>
+          <th data-k="subject">과목</th><th data-k="imSdr">전문의</th><th data-k="hrsScore">진료시간</th><th data-k="suit" class="c-t5">질환 구성</th><th data-k="top5" id="thTop5" class="c-t5">비대면 질환</th>
+          <th data-k="years">개원(년)</th><th data-k="doctors">의사</th><th data-k="tel">전화</th><th data-k="addr">주소</th>
+        </tr></thead><tbody></tbody></table></div>
+        <div class="cards" id="cards"></div>
+        <div class="elegend esrcbox"><div class="esrc" id="evSrc"></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="화면 이동">
+  <a href="#secFilter"><span>🔎</span>조건</a>
+  <a href="#secMap"><span>🗺️</span>지도</a>
+  <a href="#secPartner"><span>🤝</span>거래처</a>
+  <a href="#secList"><span>📋</span>목록</a>
+  <a href="#" data-help="top"><span>📘</span>설명</a>
+</nav>
+
+<div class="theme" role="group" aria-label="화면 모드">
+  <button type="button" data-theme-set="light" aria-label="낮 모드" title="낮 모드"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg></button>
+  <button type="button" data-theme-set="dark" aria-label="밤 모드" title="밤 모드"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg></button>
+</div>
+
+<script>
+/* ───────── 기본 설정 ───────── */
+const SIDO = [["110000","서울"],["210000","부산"],["220000","인천"],["230000","대구"],["250000","대전"],["260000","울산"],["410000","세종"],["310000","경기"],["320000","강원"],["330000","충북"],["340000","충남"],["350000","전북"],["360000","전남광주"],["370000","경북"],["380000","경남"],["390000","제주"]];
+const SUBNAME = {"01":"내과","23":"가정의학과","00":"일반의","02":"신경과","03":"정신건강의학과","04":"외과","05":"정형외과","06":"신경외과","07":"심장혈관흉부외과","08":"성형외과","09":"마취통증의학과","10":"산부인과","11":"소아청소년과","12":"안과","13":"이비인후과","14":"피부과","15":"비뇨의학과","16":"영상의학과","21":"재활의학과","24":"응급의학과","25":"직업환경의학과","26":"예방의학과"};
+const PRIOR = ["01","23","00"];   // 비대면 진료·만성질환 평가가 주로 이뤄지는 과목
+/* 자료 출처 — 평가 차수는 심평원이 새 결과를 공개하면 여기만 고치면 됩니다 */
+const EVAL_INFO = {
+  hd:   "고혈압·당뇨병 적정성평가 · 2024년(2주기 2차) 평가, 2025년 12월 공개",
+  copd: "만성폐쇄성폐질환 적정성평가 · 심평원 최신 공개 결과",
+  ast:  "천식 적정성평가 · 심평원 최신 공개 결과"
+};
+const TODAY = new Date().toISOString().slice(0,10);
+/* 심평원 시군구코드 (병원정보서비스 sgguCd) — 시군구만 골라 불러오기 위해 사용 */
+const SGGU = {"110000":[["110001","강남구"],["110002","강동구"],["110024","강북구"],["110003","강서구"],["110004","관악구"],["110023","광진구"],["110005","구로구"],["110025","금천구"],["110022","노원구"],["110006","도봉구"],["110007","동대문구"],["110008","동작구"],["110009","마포구"],["110010","서대문구"],["110021","서초구"],["110011","성동구"],["110012","성북구"],["110018","송파구"],["110020","양천구"],["110013","영등포구"],["110014","용산구"],["110015","은평구"],["110016","종로구"],["110017","중구"],["110019","중랑구"]],"210000":[["210012","부산강서구"],["210011","부산금정구"],["210100","부산기장군"],["210001","부산남구"],["210002","부산동구"],["210003","부산동래구"],["210005","부산북구"],["210015","부산사상구"],["210010","부산사하구"],["210006","부산서구"],["210014","부산수영구"],["210013","부산연제구"],["210007","부산영도구"],["210008","부산중구"],["210004","부산진구"],["210009","부산해운대구"]],"220000":[["220100","인천강화군"],["220012","인천검단구"],["220008","인천계양구"],["220006","인천남동구"],["220001","인천미추홀구"],["220003","인천부평구"],["220011","인천서해구"],["220007","인천연수구"],["220009","인천영종구"],["220200","인천옹진군"],["220010","인천제물포구"]],"230000":[["230200","대구군위군"],["230001","대구남구"],["230007","대구달서구"],["230100","대구달성군"],["230002","대구동구"],["230003","대구북구"],["230004","대구서구"],["230005","대구수성구"],["230006","대구중구"]],"250000":[["250002","대전대덕구"],["250004","대전동구"],["250003","대전서구"],["250001","대전유성구"],["250005","대전중구"]],"260000":[["260001","울산남구"],["260002","울산동구"],["260004","울산북구"],["260100","울산울주군"],["260003","울산중구"]],"310000":[["310001","가평군"],["311901","고양덕양구"],["311903","고양일산동구"],["311902","고양일산서구"],["310900","과천시"],["310100","광명시"],["312600","광주시"],["311000","구리시"],["311400","군포시"],["312300","김포시"],["311500","남양주시"],["310200","동두천시"],["310301","부천소사구"],["310302","부천오정구"],["310303","부천원미구"],["310403","성남분당구"],["310401","성남수정구"],["310402","성남중원구"],["310601","수원권선구"],["310604","수원영통구"],["310602","수원장안구"],["310603","수원팔달구"],["311700","시흥시"],["311101","안산단원구"],["311102","안산상록구"],["312400","안성시"],["310702","안양동안구"],["310701","안양만안구"],["312700","양주시"],["310009","양평군"],["312900","여주시"],["310011","연천군"],["311800","오산시"],["312001","용인기흥구"],["312002","용인수지구"],["312003","용인처인구"],["311600","의왕시"],["310800","의정부시"],["312100","이천시"],["312200","파주시"],["311200","평택시"],["312800","포천시"],["311300","하남시"],["312504","화성동탄구"],["312501","화성만세구"],["312503","화성병점구"],["312502","화성효행구"]],"320000":[["320100","강릉시"],["320001","고성군"],["320200","동해시"],["320700","삼척시"],["320300","속초시"],["320004","양구군"],["320005","양양군"],["320006","영월군"],["320400","원주시"],["320008","인제군"],["320009","정선군"],["320010","철원군"],["320500","춘천시"],["320600","태백시"],["320012","평창군"],["320013","홍천군"],["320014","화천군"],["320015","횡성군"]],"330000":[["330001","괴산군"],["330002","단양군"],["330003","보은군"],["330004","영동군"],["330005","옥천군"],["330006","음성군"],["330300","제천시"],["330011","증평군"],["330009","진천군"],["330101","청주상당구"],["330104","청주서원구"],["330103","청주청원구"],["330102","청주흥덕구"],["330200","충주시"]],"340000":[["340800","계룡시"],["340300","공주시"],["340002","금산군"],["340700","논산시"],["340900","당진시"],["340400","보령시"],["340007","부여군"],["340600","서산시"],["340009","서천군"],["340500","아산시"],["340012","예산군"],["340202","천안동남구"],["340201","천안서북구"],["340014","청양군"],["340016","태안군"],["340015","홍성군"]],"350000":[["350001","고창군"],["350100","군산시"],["350600","김제시"],["350200","남원시"],["350004","무주군"],["350005","부안군"],["350006","순창군"],["350008","완주군"],["350300","익산시"],["350010","임실군"],["350011","장수군"],["350402","전주덕진구"],["350401","전주완산구"],["350500","정읍시"],["350013","진안군"]],"360000":[["360001","강진군"],["360002","고흥군"],["360003","곡성군"],["360700","광양시"],["360804","광주광산구"],["360805","광주남구"],["360801","광주동구"],["360802","광주북구"],["360803","광주서구"],["360006","구례군"],["360200","나주시"],["360008","담양군"],["360300","목포시"],["360009","무안군"],["360010","보성군"],["360400","순천시"],["360012","신안군"],["360500","여수시"],["360014","영광군"],["360015","영암군"],["360016","완도군"],["360017","장성군"],["360018","장흥군"],["360019","진도군"],["360020","함평군"],["360021","해남군"],["360022","화순군"]],"370000":[["371000","경산시"],["370100","경주시"],["370002","고령군"],["370200","구미시"],["370300","김천시"],["370800","문경시"],["370007","봉화군"],["370900","상주시"],["370010","성주군"],["370400","안동시"],["370012","영덕군"],["370013","영양군"],["370500","영주시"],["370600","영천시"],["370017","예천군"],["370019","울진군"],["370021","의성군"],["370022","청도군"],["370023","청송군"],["370024","칠곡군"],["370701","포항남구"],["370702","포항북구"]],"380000":[["381000","거제시"],["380002","거창군"],["380003","고성군"],["380100","김해시"],["380005","남해군"],["380900","밀양시"],["380300","사천시"],["380008","산청군"],["381100","양산시"],["380011","의령군"],["380500","진주시"],["380014","창녕군"],["380702","창원마산합포구"],["380701","창원마산회원구"],["380705","창원성산구"],["380704","창원의창구"],["380703","창원진해구"],["380800","통영시"],["380016","하동군"],["380017","함안군"],["380018","함양군"],["380019","합천군"]],"390000":[["390100","서귀포시"],["390200","제주시"]],"410000":[["410000","세종시"]]};
+/* 비대면 진료 질환 분류 (Top5 질병명에 키워드가 들어 있으면 해당)
+   core = 만성질환(재진 핵심) · cond = 비대면 가능하나 단기·급성 위주 · off = 비대면 처방 제한 약물이 주로 쓰임 */
+const TELE = [
+  {id:"meta", tier:"core", label:"대사증후군 (고혈압·이상지질 포함)", keys:["대사증후군","고혈압","이상지질","고지혈","고콜레스테롤"]},
+  {id:"dm",   tier:"core", label:"당뇨병",                 keys:["당뇨"]},
+  {id:"chron",tier:"core", label:"만성질환 (심평원 분류)",  keys:["만성질환"]},
+  {id:"thy",  tier:"core", label:"갑상선 질환",            keys:["갑상선"]},
+  {id:"osteo",tier:"core", label:"골다공증",               keys:["골다공증"]},
+  {id:"arth", tier:"core", label:"관절염·관절병증",        keys:["관절염","관절병증","관절증"]},
+  {id:"gerd", tier:"core", label:"위식도역류·위궤양",      keys:["위식도역류","역류성","위궤양","소화성궤양","십이지장궤양"]},
+  {id:"heart",tier:"core", label:"순환계통·심장질환",      keys:["순환계통","협심","심부전","부정맥","심방세동","허혈성심"]},
+  {id:"gout", tier:"core", label:"통풍",                   keys:["통풍"]},
+  {id:"resp", tier:"core", label:"천식·만성폐쇄성폐질환",  keys:["천식","만성폐쇄성","COPD"]},
+  {id:"bph",  tier:"core", label:"전립선 질환",            keys:["전립선"]},
+  {id:"liver",tier:"core", label:"간질환",                 keys:["간질환","만성간","간염","지방간"]},
+  {id:"ckd",  tier:"core", label:"만성신장질환",           keys:["만성신","신부전","콩팥"]},
+  {id:"stroke",tier:"core",label:"뇌혈관질환",             keys:["뇌졸중","뇌경색","뇌혈관"]},
+  {id:"dem",  tier:"core", label:"치매·파킨슨병",          keys:["치매","파킨슨"], why:"장기요양수급자 등은 지역 제한 예외"},
+  {id:"meno", tier:"core", label:"갱년기 장애",            keys:["갱년기","폐경"]},
+  {id:"cold", tier:"cond", label:"감기·호흡기 감염",       keys:["감기","상기도","인플루엔자","호흡계통","인두","편도","후두","기관지","폐렴","코로나","독감"], why:"초진 7일 처방, 재진은 적음"},
+  {id:"gi",   tier:"cond", label:"장염·위염·소화기",       keys:["식중독","감염병","장염","위염","소화불량","과민대장","과민성","변비","설사","치질"]},
+  {id:"ent",  tier:"cond", label:"비염·부비동·이비인후",   keys:["부비동","비염","알레르기","중이염","이명","난청","전정"], why:"계절성 반복 처방"},
+  {id:"skin", tier:"cond", label:"피부염·두드러기·가려움",  keys:["피부염","아토피","두드러기","습진","여드름","대상포진","가려움","건선"]},
+  {id:"pain", tier:"cond", label:"척추·근골격 통증",       keys:["척추","경추","협착","디스크","거북목","일자목","근막","오십견","회전근개","상과염","요통","근육","염좌"]},
+  {id:"uti",  tier:"cond", label:"방광·요로·성매개 감염",   keys:["방광","요로","성매개"]},
+  {id:"eye",  tier:"cond", label:"결막염",                 keys:["결막염"]},
+  {id:"hair", tier:"cond", label:"탈모",                   keys:["탈모"]},
+  {id:"insom",tier:"cond", label:"불면증·수면장애",        keys:["불면","수면"], why:"마약류 수면제는 비대면 처방 불가, 그 외 약은 가능"},
+  {id:"dep",  tier:"cond", label:"우울증",                 keys:["우울"], why:"항우울제는 처방 가능, 항불안제(향정)는 불가"},
+  {id:"trauma",tier:"off", label:"손상·골절·화상",          keys:["손상","골절","화상"], why:"대면 처치가 필요"},
+  {id:"dev",  tier:"off",  label:"발달지연",               keys:["발달"], why:"대면 평가가 필요"},
+  {id:"anx",  tier:"off",  label:"불안·공황장애",          keys:["불안","공황"], why:"향정신성 항불안제 처방 비중이 높음"},
+  {id:"obes", tier:"off",  label:"비만",                   keys:["비만"], why:"비만치료제는 비대면 처방 금지"},
+  {id:"adhd", tier:"off",  label:"ADHD",                   keys:["ADHD","주의력결핍"], why:"치료제가 마약류 → 비대면 처방 금지"},
+];
+const TIER_NAME = {core:"만성", cond:"조건부", off:"제외", unk:"미분류"};
+let TELE_ON = {};
+let OVR = {};   // 질병명별 고정 {이름: "core"|"cond"|"off"} — loadTele()에서 불러옴
+const nz = s => String(s||"").replace(/\s/g,"");   // "위식도 역류질환 " 같은 공백 차이 무시
+const ruleOf = d => { const x = nz(d); return TELE.find(t => t.keys.some(k => x.includes(nz(k)))); };
+function tierOf(d){
+  if(d in OVR) return OVR[d];
+  const t = ruleOf(d); if(!t) return "unk";
+  return TELE_ON[t.id] ? t.tier : "off";
+}
+const isChronic = d => tierOf(d) === "core";
+const isSuit = d => { const t = tierOf(d); return t === "core" || t === "cond"; };
+function renderDz(){
+  const cnt = {}; RAW.forEach(r => { if(r.looked) (r.top5||"").split("|").filter(Boolean).forEach(d => cnt[d] = (cnt[d]||0) + 1); });
+  const names = Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a]);
+  if(!names.length){ $("dzList").innerHTML = '<div class="note">질병정보를 조회하면 여기에 나타납니다.</div>'; return; }
+  $("dzList").innerHTML = names.map(d => {
+    const t = tierOf(d), fixed = d in OVR;
+    const opt = ["core","cond","off"].map(v => `<option value="${v}" ${t===v?"selected":""}>${TIER_NAME[v]}</option>`).join("") + (t==="unk" ? `<option value="unk" selected>미분류</option>` : "");
+    return `<div class="dz"><span>${esc(d)} <span class="est">${cnt[d]}곳${fixed?" · 고정":""}</span></span><select data-dz="${esc(d)}" class="dzsel t-${t}">${opt}</select></div>`;
+  }).join("");
+  $("dzList").querySelectorAll("select").forEach(sel => sel.onchange = () => { if(sel.value !== "unk"){ OVR[sel.dataset.dz] = sel.value; store.set("chronic_ovr2", OVR); } apply(); renderDz(); });
+}
+function loadTele(){
+  const saved = store.get("chronic_tele2", null);
+  TELE.forEach(t => TELE_ON[t.id] = saved && t.id in saved ? !!saved[t.id] : t.tier !== "off");
+  OVR = store.get("chronic_ovr2", {});
+}
+function renderTele(){
+  const row = t => `<label><input type="checkbox" data-tele="${t.id}" ${TELE_ON[t.id]?"checked":""}><span>${t.label}</span>${t.why?`<small>${t.why}</small>`:""}</label>`;
+  const grp = (tier, title, cls) => `<div class="grp ${cls||""}">${title}</div>` + TELE.filter(t => t.tier === tier).map(row).join("");
+  $("teleList").innerHTML = grp("core","만성질환 · 재진 핵심 (1개당 50%)") + grp("cond","조건부 · 비대면 가능, 단기 위주 (1개당 15%, 최대 45%)","c") + grp("off","기본 제외 · 비대면 처방 제한 약물","x");
+  $("teleList").querySelectorAll("input").forEach(cb => cb.onchange = () => { TELE_ON[cb.dataset.tele] = cb.checked; store.set("chronic_tele2", TELE_ON); apply(); });
+}
+const $ = id => document.getElementById(id);
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let RAW = [], VIEW = [], VIEW0 = [], FOCUS = "", sortK = "score", sortDir = -1, map, layer, stopFlag = false;
+let T5 = store.get("chronic_t5v2", {});   // ykiho → {d:[질병], s:표시과목}
+try{ ["chronic_t5","chronic_det"].forEach(k => localStorage.removeItem(k)); }catch(e){}
+let DET = store.get("chronic_det2", {});  // ykiho → {h:{night,sat,sun}|null, im:내과·가정 전문의 수|null}
+
+/* ───────── API ───────── */
+const apiBase = () => ($("apiBase").value.trim() || "/api/hira");
+async function api(params){
+  const r = await fetch(apiBase() + "?" + new URLSearchParams(params));
+  let j; try{ j = await r.json(); }catch(e){ throw new Error(`중계 API 응답 오류 (HTTP ${r.status})`); }
+  if(!r.ok || j.error) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+const yrs = d => { if(!d||d.length<8) return ""; const t = new Date(+d.slice(0,4), +d.slice(4,6)-1, +d.slice(6,8)); return +((Date.now()-t)/31557600000).toFixed(1); };
+
+const BCACHE = {};   // "시도|시군구|과목" → 받은 기관 목록 (같은 화면에서 다시 받지 않음)
+let LOADED = new Set(), LOADED_SIDO = "", LOADED_SUBS = "";
+// [시군구코드, 이름, 시도코드] — "ALL"이면 전국 전체
+const sgguTable = sido => sido === "ALL" ? SIDO.flatMap(([s]) => (SGGU[s] || []).map(([c,n]) => [c,n,s])) : (SGGU[sido] || []).map(([c,n]) => [c,n,sido]);
+const sidoName = sd => sd === "ALL" ? "전국" : (SIDO.find(s => s[0] === sd) || [, ""])[1];
+const curSubs = () => [...document.querySelectorAll(".chk input:checked")].map(x=>x.value);
+async function loadBasis(){
+  const sido = $("aSido").value, subs = curSubs();
+  if(!subs.length){ say("진료과목을 하나 이상 고르세요.", true); return; }
+  const tbl = sgguTable(sido);
+  // 비우면 시도 전체 (전국이면 시도 17곳을 하나씩 통째로)
+  const picks = SEL.size ? tbl.filter(([,n]) => SEL.has(n)) : sido === "ALL" ? SIDO.map(([s,n]) => ["", n + " 전체", s]) : (tbl.length ? tbl : [["", "", sido]]);
+  if(sido === "ALL" && !SEL.size && !confirm("전국 의원 전체를 불러옵니다.\n과목·지역에 따라 수 분이 걸리고 API 호출이 많습니다. 계속할까요?\n(시군구를 골라 불러오면 훨씬 빠릅니다)")) return;
+  const jobs = []; picks.forEach(([code,name,sd]) => subs.forEach(sub => jobs.push({code, name, sub, sd})));
+  $("btnBasis").disabled = true; setProg(0);
+  const seen = new Map();
+  try{
+    for(const [ji,{code,name,sub,sd}] of jobs.entries()){
+      const key = `${sd}|${code||"*"}|${sub}`;
+      if(!BCACHE[key]){
+        const items = []; let page = 1, total = 1, fetched = 0;
+        while(fetched < total){
+          say(`${name || sidoName(sd)+" 전체"} · ${SUBNAME[sub]} 불러오는 중… (${ji+1}/${jobs.length})`);
+          // 일반의: 진료과목 코드(00)로는 조회되지 않아, 의원 전체를 받은 뒤 이름에 과목이 없는 곳만 남김
+          const q = {svc:"basis", sidoCd:sd, clCd:"31", numOfRows:500, pageNo:page}; if(sub !== "00") q.dgsbjtCd = sub; if(code) q.sgguCd = code;
+          const j = await api(q);
+          total = j.totalCount; items.push(...(sub === "00" ? j.items.filter(it => !guessSubject(it.yadmNm||"", "__")) : j.items));
+          fetched += j.items.length;
+          if(!j.items.length) break;
+          page++;
+        }
+        BCACHE[key] = items;
+      }
+      BCACHE[key].forEach(it => { if(it.ykiho && !seen.has(it.ykiho)) seen.set(it.ykiho, toRow(it, sub)); });
+      setProg((ji+1) / jobs.length * 100);
+    }
+    const keep = new Set(SEL);
+    RAW = [...seen.values()];
+    PH_ERR = "";
+    try{ countPharm(RAW, await loadPharm(sido, picks)); }catch(e){ RAW.forEach(r => r.ph = null); PH_ERR = e.message; }
+    applyT5(); mergeGood(); matchPartners();
+    LOADED = new Set(RAW.map(r => r.sggu)); LOADED_SIDO = sido; LOADED_SUBS = subs.join(",");
+    const sdn = sidoName(sido);
+    $("srcBadge").textContent = `실데이터 · ${sdn}${keep.size ? (keep.size === 1 ? " " + [...keep][0] : ` ${keep.size}개 시군구`) : " 전체"}`; $("srcBadge").style.background = "var(--pri)";
+    say(`의원 ${RAW.length.toLocaleString()}곳을 불러왔습니다. ③ 상세정보를 조회하세요.` + (PH_ERR ? ` (문전약국은 계산 못 함: ${PH_ERR} — data.go.kr '약국정보서비스' 활용신청 필요)` : ""), !!PH_ERR && false);
+    resetFilters(); keep.forEach(s => SEL.add(s)); refreshOpts(); apply();
+  }catch(e){ say("불러오기 실패: " + e.message, true); }
+  $("btnBasis").disabled = false; $("btnTop5").disabled = !RAW.length; markNeed();
+}
+// 선택이 바뀌어 아직 안 받은 시군구가 있으면 불러오기 버튼을 강조
+function markNeed(){
+  const sido = $("aSido").value, b = $("btnBasis");
+  const need = !RAW.length || sido !== LOADED_SIDO || curSubs().join(",") !== LOADED_SUBS || (SEL.size ? [...SEL].some(s => !LOADED.has(s)) : sgguTable(sido).some(([,n]) => !LOADED.has(n)));
+  const n = SEL.size;
+  b.classList.toggle("need", need && !!RAW.length);
+  b.textContent = need ? `의원 목록 불러오기 (${n ? `시군구 ${n}곳` : sido === "ALL" ? "전국 전체 · 오래 걸림" : "시도 전체"})` : "불러온 목록 사용 중 ✓";
+}
+function toRow(it, sub){
+  return { ykiho:it.ykiho, name:it.yadmNm||"", sido:it.sidoCdNm||"", sggu:it.sgguCdNm||"", emd:it.emdongNm||"", addr:it.addr||"", tel:it.telno||"",
+    subject:guessSubject(it.yadmNm||"", sub), subjEst:true, doctors:+(it.drTotCnt||0), years:yrs(it.estbDd), lat:+(it.YPos||it.yPos||0), lng:+(it.XPos||it.xPos||0),
+    sdr:+(it.mdeptSdrCnt||0), top5:"", looked:false, hp_good:"", dm_good:"" };
+}
+function guessSubject(name, sub){
+  if(/내과/.test(name)) return "내과";
+  if(/가정의학/.test(name)) return "가정의학과";
+  const m = name.match(/(소아청소년과|소아과|이비인후과|정형외과|신경외과|흉부외과|성형외과|신경과|비뇨의학과|비뇨기과|피부과|안과|산부인과|재활의학과|정신건강의학과|마취통증의학과|영상의학과|외과)/);
+  if(m) return m[1];
+  return SUBNAME[sub] || "";
+}
+function applyT5(){ RAW.forEach(r=>{
+  const c = T5[r.ykiho]; if(c){ r.top5 = c.d.join("|"); r.ym = c.ym || ""; if(c.s){ r.subject = c.s; r.subjEst = false; } }
+  const d = DET[r.ykiho]; if(d){ r.hrs = d.h; r.im = d.im; r.asm = d.asm; r.at = d.at || ""; }
+  r.looked = !!(c || d);
+}); }
+// 진료시간: "0900", "09:00", 900 등 → 분
+const hm = v => { const s = String(v||"").replace(/[^0-9]/g,""); if(s.length < 3) return null; const n = +s.padStart(4,"0"); return Math.floor(n/100)*60 + n%100; };
+function parseHours(it){
+  if(!it) return null;
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], e = {}, s = {};
+  let any = false;
+  days.forEach(d => { s[d] = hm(it["trmt"+d+"Start"]); e[d] = hm(it["trmt"+d+"End"]); if(s[d] != null || e[d] != null) any = true; });
+  if(!any) return null;
+  const night = days.slice(0,5).filter(d => e[d] != null && e[d] >= 19*60).length;
+  return { night, sat: s.Sat != null && e.Sat != null && e.Sat > s.Sat, sun: s.Sun != null && e.Sun != null && e.Sun > s.Sun,
+           wk: s.Mon != null && e.Mon != null ? `${String(it.trmtMonStart).replace(/(\d\d)(\d\d)$/,"$1:$2")}~${String(it.trmtMonEnd).replace(/(\d\d)(\d\d)$/,"$1:$2")}` : "" };
+}
+// 병원평가 등급: asmGrd24 고혈압·당뇨병(1~5등급), asmGrd17 만성폐쇄성폐질환(1~5등급), asmGrd16 천식(양호 공개)
+const grdNum = v => { const n = parseInt(String(v||"").replace(/[^0-9]/g,""), 10); return n >= 1 && n <= 5 ? n : null; };
+function parseAsm(it){
+  if(!it) return { hd:null, copd:null, ast:false, none:true };
+  return { hd: grdNum(it.asmGrd24), copd: grdNum(it.asmGrd17), ast: /^(1|Y|양호)$/.test(String(it.asmGrd16||"").trim()),
+           abx: grdNum(it.asmGrd07), inj: grdNum(it.asmGrd08),
+           n: ["03","07","08","09","16","17","23","24"].filter(k => grdNum(it["asmGrd"+k]) || /양호/.test(String(it["asmGrd"+k]||""))).length };
+}
+function parseSpc(items){
+  if(!items || !items.length) return null;
+  return items.filter(x => ["01","23"].includes(String(x.dgsbjtCd).padStart(2,"0"))).reduce((a,x) => a + (+(x.dtlSdrCnt ?? x.mdeptSdrCnt) || 0), 0);
+}
+
+async function loadTop5(){
+  const todo = VIEW.filter(r => !r.looked);
+  if(!todo.length){ say("현재 목록은 모두 조회되어 있습니다."); return; }
+  if(todo.length > 1500 && !confirm(`${todo.length.toLocaleString()}곳을 조회합니다. 의원 1곳당 API 3건(진료시간·전문의·질병)을 쓰므로 시군구로 좁히는 걸 권장합니다. 계속할까요?`)) return;
+  stopFlag = false; $("btnTop5").disabled = true; $("btnStop").style.display = "block";
+  let done = 0, fail = 0, idx = 0, limitHit = false, lastErr = "";
+  const cnt = {h:0, s:0, t:0, a:0}, err = {};
+  const one = async (svc, ykiho) => { try{ return await api({svc, ykiho}); }catch(e){ err[svc] = e.message; if(/LIMITED_NUMBER/.test(e.message)){ stopFlag = true; limitHit = true; } return null; } };
+  const worker = async () => {
+    while(idx < todo.length && !stopFlag){
+      const r = todo[idx++];
+      const [jd, js, jt, ja] = await Promise.all([one("dtl", r.ykiho), one("spc", r.ykiho), one("top5", r.ykiho), one("asm", r.ykiho)]);
+      if(!jd && !js && !jt && !ja){ fail++; lastErr = Object.values(err).pop() || ""; if(fail >= 8 && done < 12) stopFlag = true; }
+      else {
+        const h = jd ? parseHours(jd.items[0]) : null, im = js ? parseSpc(js.items) : null;
+        const asm = ja ? parseAsm(ja.items[0]) : undefined;
+        DET[r.ykiho] = { h, im, asm, at: TODAY }; r.hrs = h; r.at = TODAY; r.im = im; r.asm = asm; if(h) cnt.h++; if(im != null) cnt.s++; if(asm && (asm.hd || asm.copd || asm.ast)) cnt.a++;
+        if(jt){ const it = jt.items[0] || {};
+          // 실제 응답 필드: mfrnIntrsIlnsCdNm1~5 / shwSbjtCdNm (명세서의 mfrnIntrsIlnsNm, shwSbjtNm과 다름)
+          const d = [1,2,3,4,5].map(n => String(it["mfrnIntrsIlnsCdNm"+n] ?? it["mfrnIntrsIlnsNm"+n] ?? "").trim()).filter(Boolean);
+          const sj = String(it.shwSbjtCdNm ?? it.shwSbjtNm ?? "").trim();
+          T5[r.ykiho] = { d, s: sj, ym: it.crtrYm || "" }; r.top5 = d.join("|"); r.ym = it.crtrYm || ""; if(d.length) cnt.t++;
+          if(sj){ r.subject = sj; r.subjEst = false; } }
+        r.looked = true;
+      }
+      done++; setProg(done/todo.length*100);
+      if(done % 10 === 0){ say(`상세정보 조회 ${done}/${todo.length}${fail?` (실패 ${fail})`:""}`); store.set("chronic_t5v2", T5); store.set("chronic_det2", DET); apply(true); }
+    }
+  };
+  await Promise.all([worker(),worker(),worker()]);
+  store.set("chronic_t5v2", T5); store.set("chronic_det2", DET);
+  $("btnTop5").disabled = false; $("btnStop").style.display = "none";
+  const ok = done - fail;
+  if(limitHit) say(`API 호출 한도에 도달해 멈췄습니다 (${ok}곳 완료). 한도가 풀린 뒤 다시 누르면 남은 곳부터 이어서 조회합니다.`, true);
+  else if(fail && ok === 0) say(`상세정보 조회가 모두 실패했습니다. 원인: ${lastErr}`, true);
+  else {
+    let m = `조회 ${stopFlag?"중지":"완료"}: ${ok}곳 · 진료시간 ${cnt.h}곳, 과목별 전문의 ${cnt.s}곳, 질병정보 ${cnt.t}곳, 평가등급 ${cnt.a}곳 확보`;
+    if(ok && !cnt.h && err.dtl) m += ` ⚠ 진료시간 API 오류: ${err.dtl} — data.go.kr '의료기관별상세정보서비스' 활용신청을 확인하세요.`;
+    else if(ok && !cnt.h) m += " ⚠ 진료시간 정보가 비어 있습니다.";
+    if(err.asm && !cnt.a) m += ` ⚠ 평가등급 API 오류: ${err.asm}`;
+    if(ok && !cnt.t) m += " (질병정보는 오지 않아 해당 지표·열을 숨겼습니다)";
+    say(m, !!fail || /⚠/.test(m));
+  }
+  apply();
+  if(isMobile() && ok > 0) $("secList").scrollIntoView({behavior:"smooth"});
+}
+
+/* ───────── 양호기관 병합 ───────── */
+const SIDO_N = [["서울특별시","서울"],["부산광역시","부산"],["대구광역시","대구"],["인천광역시","인천"],["광주광역시","광주"],["대전광역시","대전"],["울산광역시","울산"],["세종특별자치시","세종"],["경기도","경기"],["강원특별자치도","강원"],["강원도","강원"],["충청북도","충북"],["충청남도","충남"],["전북특별자치도","전북"],["전라북도","전북"],["전라남도","전남"],["경상북도","경북"],["경상남도","경남"],["제주특별자치도","제주"]];
+const nName = s => String(s||"").replace(/[\s·.,\-_]/g,"").replace(/\(주\)|㈜/g,"");
+const nNameLoose = s => nName(String(s||"").replace(/\([^)]*\)/g,""));
+const nAddr = s => { let a = String(s||"").replace(/\s/g,""); for(const [l,sh] of SIDO_N) if(a.startsWith(l)){ a = sh + a.slice(l.length); break; } return a; };
+const prefixLen = (a,b) => { let i = 0; while(i<a.length && i<b.length && a[i]===b[i]) i++; return i; };
+const EV_T = [
+  {t:"hp",   name:"고혈압",          short:"고혈압", re:/고혈압/},
+  {t:"dm",   name:"당뇨병",          short:"당뇨",   re:/당뇨/},
+  {t:"copd", name:"만성폐쇄성폐질환", short:"COPD",  re:/만성폐쇄성|COPD/i},
+  {t:"ast",  name:"천식",            short:"천식",   re:/천식/},
+];
+let EVAL = {hp:null, dm:null, copd:null, ast:null};   // {hp:{rows:[[name,addr]],file,at,src}, dm:...} — 공용(data 폴더)이 기본, 관리자 미리보기만 임시 덮어씀
+let EIDX = {};
+function buildIdx(){
+  EIDX = {};
+  EV_T.forEach(({t}) => {
+    const idx = {strict:{}, loose:{}};
+    (EVAL[t]?.rows||[]).forEach(([n,a]) => { (idx.strict[nName(n)] ||= []).push(nAddr(a)); (idx.loose[nNameLoose(n)] ||= []).push(nAddr(a)); });
+    EIDX[t] = idx;
+  });
+}
+function evalLoaded(){ return EV_T.some(({t}) => EVAL[t]?.rows?.length); }
+function matchEval(t, r){
+  const idx = EIDX[t]; if(!idx) return false;
+  const ra = nAddr(r.addr), cands = idx.strict[nName(r.name)] || idx.loose[nNameLoose(r.name)];
+  if(!cands) return false;
+  if(cands.length === 1){ const a = cands[0]; return !a || prefixLen(a, ra) >= 4 || (r.sggu && a.includes(r.sggu)); }
+  return cands.some(a => prefixLen(a, ra) >= 8);
+}
+function mergeGood(){
+  RAW.forEach(r => { EV_T.forEach(({t}) => r[t+"_good"] = matchEval(t, r) ? "Y" : ""); });
+  evalStatus();
+}
+function evalStatus(){
+  const L = RAW.filter(r => r.looked), A = L.filter(r => r.asm && !r.asm.none);
+  if(!L.length){ $("evalStat").innerHTML = "③ 상세정보 조회 후 표시됩니다"; return; }
+  const hd = A.filter(r => r.asm.hd && r.asm.hd <= 2).length, cp = A.filter(r => r.asm.copd && r.asm.copd <= 2).length, as = A.filter(r => r.asm.ast).length;
+  $("evalStat").innerHTML = `조회 <b>${L.length}</b>곳 중 평가등급 <b>${A.length}</b>곳 · 고혈압·당뇨 1~2등급 <b>${hd}</b> · COPD 1~2등급 <b>${cp}</b> · 천식 양호 <b>${as}</b>`;
+}
+// 엑셀/CSV → 2차원 배열
+function sheetRows(buf){
+  const wb = XLSX.read(new Uint8Array(buf), {type:"array"});
+  let best = [];
+  wb.SheetNames.forEach(n => { const rows = XLSX.utils.sheet_to_json(wb.Sheets[n], {header:1, raw:false, defval:""}); if(rows.length > best.length) best = rows; });
+  return best;
+}
+const readSheet = file => file.arrayBuffer().then(sheetRows);
+// 공용 평가 데이터: 저장소 data 폴더의 eval_hp / eval_dm 파일을 모든 사용자가 같이 씀
+async function loadSharedEval(){
+  if(!window.XLSX){ evalStatus(); return; }
+  for(const {t} of EV_T){
+    for(const ext of ["xlsx","xls","csv"]){
+      try{
+        const res = await fetch(`data/eval_${t}.${ext}`, {cache:"no-cache"});
+        if(!res.ok) continue;
+        const { out } = parseEval(sheetRows(await res.arrayBuffer()), t);
+        if(!out.length) continue;
+        const mod = res.headers.get("last-modified");
+        EVAL[t] = { rows: out, file: `eval_${t}.${ext}`, at: mod ? new Date(mod).toLocaleDateString("ko-KR") + " 갱신" : "공용", src: "shared" };
+        break;
+      }catch(e){}
+    }
+  }
+  buildIdx(); mergeGood(); apply();
+}
+// 평가 파일 해석: 기관명·주소·등급 열을 자동으로 찾음
+function parseEval(rows, t){
+  const et = EV_T.find(x => x.t === t), label = et.short, lre = et.re;
+  let hi = rows.findIndex((r,i) => i < 30 && r.some(c => /요양기관명|기관명|병원명|의료기관/.test(String(c))));
+  if(hi < 0) throw new Error("기관명 열을 찾지 못했습니다. 심평원에서 받은 원본 파일인지 확인해 주세요.");
+  const H = rows[hi].map(c => String(c).replace(/\s/g,""));
+  const col = re => H.findIndex(c => re.test(c));
+  const ci = { name: col(/요양기관명|기관명|병원명|의료기관/), addr: col(/주소|소재지/), sido: col(/^시도/), sggu: col(/시군구/),
+               item: col(/평가항목|세부항목|^항목/), grade: -1 };
+  const lc = H.findIndex(c => lre.test(c) && !/평가항목|세부항목/.test(c));
+  ci.grade = lc >= 0 ? lc : col(/등급|평가결과|결과|양호/);
+  const out = []; let skipped = 0;
+  for(const r of rows.slice(hi+1)){
+    const name = String(r[ci.name]||"").trim(); if(!name) continue;
+    if(ci.item >= 0 && r[ci.item] && !lre.test(String(r[ci.item]))){ skipped++; continue; }
+    if(ci.grade >= 0){
+      const g = String(r[ci.grade]||"").replace(/\s/g,"");
+      const good = (/양호/.test(g) && !/비양호|미흡|불량/.test(g)) || /^1(등급)?$/.test(g) || /^(Y|O|○|●)$/i.test(g);
+      if(!good){ skipped++; continue; }
+    }
+    const addr = ci.addr >= 0 ? r[ci.addr] : [ci.sido>=0?r[ci.sido]:"", ci.sggu>=0?r[ci.sggu]:""].join(" ");
+    out.push([name, String(addr||"").trim()]);
+  }
+  return { out, skipped, hasGrade: ci.grade >= 0, headers: H };
+}
+async function onEvalFile(t, file){
+  if(!file) return;
+  if(!window.XLSX){ say("엑셀 읽기 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.", true); return; }
+  $("goodMsg").className = "msg"; $("goodMsg").textContent = "파일 읽는 중…";
+  try{
+    const rows = await readSheet(file);
+    const { out, skipped, hasGrade } = parseEval(rows, t);
+    if(!out.length) throw new Error("양호 기관을 한 곳도 찾지 못했습니다. 파일 내용을 확인해 주세요.");
+    EVAL[t] = { rows: out, file: file.name, at: file.name, src: "local" };
+    buildIdx(); mergeGood(); apply();
+    $("goodMsg").textContent = `미리보기: ${EV_T.find(x=>x.t===t).name} 우수 ${out.length.toLocaleString()}곳${hasGrade?` (등급 미달 ${skipped.toLocaleString()}곳 제외)`:" (등급 열이 없어 목록 전체를 양호로 처리)"}. 매칭이 맞으면 이 파일을 GitHub data 폴더에 eval_${t}.${file.name.split(".").pop()} 이름으로 올리세요.`;
+  }catch(e){ $("goodMsg").className = "msg err"; $("goodMsg").textContent = "읽기 실패: " + e.message; }
+}
+try{ localStorage.removeItem("chronic_eval"); }catch(e){}   // 예전 버전의 개인 저장분 정리
+buildIdx();
+
+/* ───────── 점수 ───────── */
+// 질환 구성 비율: 만성 1개당 50%, 조건부 1개당 15%(최대 45%), 합계 최대 100%
+const suitRatio = (core, cond) => Math.min(1, .5*core + Math.min(.45, .15*cond));
+const NW = 6;
+function W(){ const w=[...Array(NW)].map((_,i)=>+$("w"+(i+1)).value); const t=w.reduce((a,b)=>a+b,0)||1; return w.map(x=>x/t*100); }
+function rawW(){ return [...Array(NW)].map((_,i)=>+$("w"+(i+1)).value); }
+function score(rows){
+  const w = rawW(), ev = evalLoaded();
+  rows.forEach(r=>{
+    const t5 = (r.top5||"").split("|").filter(Boolean);
+    r.coreN = t5.filter(d => tierOf(d) === "core").length; r.condN = t5.filter(d => tierOf(d) === "cond").length;
+    r.chronicN = r.looked && t5.length ? r.coreN + r.condN : "";
+    r.noData = r.looked && !t5.length;
+    r.suit = r.looked && t5.length ? Math.round(suitRatio(r.coreN, r.condN) * 100) : "";
+    let good, goodScore = null;
+    if(r.asm){   // 심평원 API 등급 (우선)
+      const a = r.asm, gs = [0, 1, .75, .5, .25, 0];
+      good = (a.hd && a.hd <= 2 ? 1 : 0) + (a.copd && a.copd <= 2 ? 1 : 0) + (a.ast ? 1 : 0);
+      goodScore = Math.min(1, (a.hd ? gs[a.hd] * .75 : 0) + (a.copd ? gs[a.copd] * .25 : 0) + (a.ast ? .25 : 0));
+    } else {
+      good = EV_T.filter(({t}) => r[t+"_good"]==="Y").length;
+      if(ev) goodScore = Math.min(1, (r.hp_good==="Y"?.5:0) + (r.dm_good==="Y"?.5:0) + (r.copd_good==="Y"?.25:0) + (r.ast_good==="Y"?.25:0));
+    }
+    r.good = good; r.hdGrd = r.asm?.hd || 9;
+    // 각 지표 0~1, 데이터 없으면 null(계산에서 제외)
+    const h = r.hrs;
+    const x1 = h ? Math.min(.4, .08*h.night) + (h.sat?.35:0) + (h.sun?.25:0) : null;
+    r.hrsScore = x1 == null ? -1 : Math.round(x1*100);
+    let im = r.im; if(im != null && r.doctors > 0) im = Math.min(im, r.doctors);
+    if(im == null){ im = /내과|가정의학/.test(r.subject) && r.sdr > 0 ? Math.min(r.sdr, 3) : null; }
+    r.imSdr = im == null ? -1 : im;
+    const x2 = im == null ? (/내과|가정의학/.test(r.subject) ? .3 : /일반의/.test(r.subject) ? .15 : .05) : [0,.6,.85,1][Math.min(im,3)];
+    const x3 = t5.length ? suitRatio(r.coreN, r.condN) : null;
+    const x4 = goodScore;
+    const x5 = Math.min(1, (+r.years||0)/25);
+    const x6 = Math.min(1, Math.log2(1 + (+r.doctors||0)) / Math.log2(5));
+    const xs = [x1,x2,x3,x4,x5,x6];
+    let s = 0, tw = 0; xs.forEach((x,i) => { if(x != null && w[i] > 0){ s += w[i]*x; tw += w[i]; } });
+    r.score = tw ? Math.round(s / tw * 1000) / 10 : 0;
+  });
+}
+// 지역 안 순위로 등급: 상위 tA% = A, 다음 tB% = B
+function grade(pool){
+  const tA = Math.max(1, +$("tA").value||20) / 100, tB = Math.max(0, +$("tB").value||30) / 100;
+  RAW.forEach(r => { r.grade = "N"; r.pct = ""; });
+  const L = pool.filter(r => r.looked).sort((a,b) => b.score - a.score), n = L.length;
+  L.forEach((r,i) => {
+    const rank = L.findIndex(x => x.score === r.score);   // 동점은 같은 순위
+    const p = (rank + 1) / n;
+    r.pct = Math.max(1, Math.round(p * 100));
+    r.grade = p <= tA ? "A" : p <= tA + tB ? "B" : "C";
+  });
+}
+
+/* ───────── 진료 규모 추정 지수 (진료건수·환자 수·약제비의 간접 신호) ───────── */
+const VW = {dr:30, an:30, ph:20, hr:15, yr:5};
+// 평가 기록이 아예 없을 때: 개원 2년 미만(아직 평가 전)이거나 만성질환을 보는 의원(자료 누락 가능성)은 "자료 없음"으로 빼고,
+// 그 밖(미용·검진 위주 등)은 실제로 평가 대상이 아닌 것으로 보고 0개로 계산
+function asmCount(a, r){ if(!a) return null;
+  if(a.none) return ((+r?.years||0) < 2 || (r?.coreN||0) > 0 || /당뇨|고혈압|대사증후군/.test(r?.top5||"")) ? null : 0;
+  if(a.n != null) return a.n; return [a.hd,a.copd,a.ast||null,a.abx,a.inj].filter(Boolean).length; }
+function volume(pool){
+  pool.forEach(r => {
+    const h = r.hrs, an = r.looked ? asmCount(r.asm, r) : null;
+    const xs = {
+      dr: Math.min(1, Math.log2(1 + (+r.doctors||0)) / Math.log2(5)),
+      an: an == null ? null : Math.min(1, an / 6),
+      ph: r.phS == null ? null : Math.min(1, r.phS / 1.5),
+      hr: h ? Math.min(.4, .08*h.night) + (h.sat?.35:0) + (h.sun?.25:0) : null,
+      yr: Math.min(1, (+r.years||0) / 20)
+    };
+    let s = 0, w = 0; for(const k in VW) if(xs[k] != null){ s += xs[k] * VW[k]; w += VW[k]; }
+    r.vol = w ? Math.round(s / w * 100) : 0; r.asmN = an == null ? "" : an;
+    r.volWhy = [`의사 ${+r.doctors||0}명`, `평가 대상 ${an == null ? "자료 없음" : an + "개"}`, `문전약국 ${r.ph == null ? "자료 없음" : r.ph + "곳" + (r.ph ? ` (주변 의원과 나눠 ${r.phS})` : "")}`,
+      `진료시간 ${h ? (h.night ? "야간 " + h.night + "일" : "야간 없음") + (h.sat ? "·토" : "") + (h.sun ? "·일" : "") : "자료 없음"}`, `개원 ${r.years || 0}년`].join(" · ");
+  });
+  const L = [...pool].sort((a,b) => b.vol - a.vol), n = L.length;
+  L.forEach((r,i) => { const rank = L.findIndex(x => x.vol === r.vol), p = (rank + 1) / n; r.volT = p <= .2 ? "L" : p <= .6 ? "M" : "S"; });
+}
+const VT_NAME = {L:"대", M:"중", S:"소"};
+const volHtml = r => r.vol == null ? "" : `<span title="${esc(r.volWhy||"")}">${r.vol}</span><span class="vt ${r.volT}" title="${esc(r.volWhy||"")}">${VT_NAME[r.volT]}</span>`;
+// 문전약국: 의원 반경 100m 안 약국 수
+const PHC = {}; let PH_ERR = "";
+async function loadPharm(sido, picks){
+  const all = [];
+  for(const [code,name,sd] of picks){
+    const key = `${sd}|${code||"*"}`;
+    if(!PHC[key]){
+      const items = []; let page = 1, total = 1;
+      while(items.length < total){
+        say(`${name || "시도 전체"} 약국 위치 불러오는 중… (문전약국 계산)`);
+        const q = {svc:"pharm", sidoCd:sd, numOfRows:500, pageNo:page}; if(code) q.sgguCd = code;
+        const j = await api(q); total = j.totalCount; items.push(...j.items.map(it => [+(it.YPos||0), +(it.XPos||0)]).filter(([a,b]) => a && b));
+        if(!j.items.length) break; page++;
+      }
+      PHC[key] = items;
+    }
+    all.push(...PHC[key]);
+  }
+  const seen = new Set(); return all.filter(p => { const k = p[0]+","+p[1]; if(seen.has(k)) return false; seen.add(k); return true; }).map(p => [p[0], p[1], 0]);
+}
+function countPharm(rows, ph){
+  const cell = (la,lo) => Math.floor(la/.001) + ":" + Math.floor(lo/.0012), G = {};
+  ph.forEach(p => (G[cell(p[0],p[1])] ||= []).push(p));
+  const dist = (a,b,c,d) => { const x = (d-b) * 88800, y = (c-a) * 111000; return Math.sqrt(x*x + y*y); };
+  // 약국마다 반경 100m 안 의원 수를 세어, 여러 의원이 함께 쓰는 약국은 나눠서 계산 (메디컬빌딩·번화가 보정)
+  const near = (la, lo, fn) => { const ci = Math.floor(la/.001), cj = Math.floor(lo/.0012);
+    for(let i=-1;i<=1;i++) for(let j=-1;j<=1;j++) (G[(ci+i)+":"+(cj+j)]||[]).forEach(p => { if(dist(la,lo,p[0],p[1]) <= 100) fn(p); }); };
+  ph.forEach(p => p[2] = 0);
+  rows.forEach(r => { if(r.lat && r.lng) near(r.lat, r.lng, p => p[2]++); });
+  rows.forEach(r => {
+    if(!r.lat || !r.lng){ r.ph = null; r.phS = null; return; }
+    let n = 0, s = 0; near(r.lat, r.lng, p => { n++; s += 1 / Math.max(1, p[2]); });
+    r.ph = n; r.phS = Math.round(s * 100) / 100;
+  });
+}
+
+const isAttached = r => /부속의원|부속\s*의원|사내의원|의무실/.test(r.name) || (+r.doctors === 0 && /센터|조합|은행|공사|공단|그룹|주식회사|\(주\)/.test(r.name));
+
+/* ───────── 필터·정렬 ───────── */
+const uniq = a => [...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,"ko"));
+function opts(el, vals){ const cur = el.value; el.innerHTML = `<option value="">전체</option>` + vals.map(v=>`<option>${v}</option>`).join(""); if(vals.includes(cur)) el.value = cur; }
+let SEL = new Set();   // 선택된 시군구 (비어 있으면 전체)
+function renderSggu(){
+  const sido = $("aSido").value, cnt = {};
+  if(sido === LOADED_SIDO) RAW.forEach(r => { if(r.sggu) cnt[r.sggu] = (cnt[r.sggu]||0) + 1; });
+  const tblE = sgguTable(sido);
+  let list = tblE.map(([,n]) => n);
+  if(!list.length) list = uniq(Object.keys(cnt));
+  [...SEL].forEach(s => { if(!list.includes(s)) SEL.delete(s); });
+  let lastG = "";
+  $("sgguList").innerHTML = list.length ? list.map((s, i) => { const ld = LOADED_SIDO === sido && LOADED.has(s);
+      let head = "";
+      if(sido === "ALL" && tblE[i] && tblE[i][2] !== lastG){ lastG = tblE[i][2]; const all = SGGU[lastG].every(([,n]) => SEL.has(n));
+        head = `<div class="grp"><span>${esc(sidoName(lastG))}</span><button type="button" data-g="${lastG}">${all ? "해제" : "전체"}</button></div>`; }
+      return head + `<label class="${SEL.has(s) && !ld ? "nl" : ""}"><input type="checkbox" value="${esc(s)}" ${SEL.has(s)?"checked":""}>${esc(s)}<span>${ld ? (cnt[s]||0) : ""}</span></label>`; }).join("")
+    : `<div class="empty">시군구 목록이 없습니다. 비워 두고 불러오면 시도 전체를 받습니다.</div>`;
+  $("sgguList").querySelectorAll("input").forEach(cb => cb.onchange = () => { cb.checked ? SEL.add(cb.value) : SEL.delete(cb.value); $("fEmd").value=""; renderSggu(); sgguChanged(); });
+  $("sgguList").querySelectorAll("[data-g]").forEach(b => b.onclick = () => { const L = SGGU[b.dataset.g].map(([,n]) => n), all = L.every(n => SEL.has(n));
+    L.forEach(n => all ? SEL.delete(n) : SEL.add(n)); $("fEmd").value=""; renderSggu(); sgguChanged(); });
+  sgguSummary(); markNeed();
+}
+function sgguSummary(){
+  const n = SEL.size;
+  $("sgguSum").innerHTML = !n ? ($("aSido").value === "ALL" ? "전국 전체" : "시도 전체") : n === 1 ? `<b>${esc([...SEL][0])}</b>` : `<b>${n}곳</b> 선택`;
+}
+function sgguChanged(){ sgguSummary(); refreshEmd(); apply(); }
+function refreshEmd(){
+  const el = $("fEmd"), one = FOCUS || (SEL.size === 1 ? [...SEL][0] : "");
+  if(one){ el.disabled = false; opts(el, uniq(RAW.filter(r => r.sggu === one).map(r => r.emd))); }
+  else { el.disabled = true; el.innerHTML = `<option value="">${SEL.size ? "시군구 1곳을 고르면 사용 (위 탭·오른쪽 막대)" : "전체"}</option>`; }
+}
+// 시군구 한 곳만 들여다보기 (불러온 선택은 그대로 두고 화면만 좁힘)
+function setFocus(k){
+  FOCUS = k || ""; $("fEmd").value = ""; refreshEmd(); apply();
+  if(isMobile() && $("rTabs").classList.contains("on")) $("rTabs").scrollIntoView({block:"start"});
+}
+function refreshOpts(){
+  renderSggu(); refreshEmd();
+  opts($("fSub"), uniq(RAW.map(r=>r.subject)));
+}
+function resetFilters(){ SEL.clear(); FOCUS = ""; ["fEmd","fSub","fGrade","fPartner"].forEach(id=>$(id).value=""); $("fQ").value=""; }
+function apply(light){
+  score(RAW);
+  const f = {emd:$("fEmd").value,sub:$("fSub").value,g:$("fGrade").value,q:$("fQ").value.trim(),p:$("fPartner").value};
+  if(FOCUS && !RAW.some(r => r.sggu === FOCUS && (!SEL.size || SEL.has(r.sggu)))) FOCUS = "";
+  const pool = RAW.filter(r=>(!SEL.size||SEL.has(r.sggu))&&(!f.sub||r.subject===f.sub));
+  grade(pool); volume(pool);   // 등급·규모는 선택한 시군구 전체 기준 (한 곳을 골라 봐도 등급이 바뀌지 않음)
+  VIEW0 = pool.filter(r=>(!f.g||r.grade===f.g)&&(!f.q||r.name.includes(f.q))&&(!$("oHide").checked||!r.looked||r.noData||r.chronicN>0)&&(!$("oGood").checked||r.good>0)&&(!$("oAttach").checked||!isAttached(r))&&(!f.p||(f.p==="Y"?!!r.partner:!r.partner)));
+  VIEW0.sort((a,b)=>{ if(a.looked!==b.looked) return a.looked?-1:1; const x=a[sortK],y=b[sortK];
+    return (typeof x==="number"&&typeof y==="number" ? x-y : String(x??"").localeCompare(String(y??""),"ko"))*sortDir; });
+  VIEW = FOCUS || f.emd ? VIEW0.filter(r => (!FOCUS || r.sggu === FOCUS) && (!f.emd || r.emd === f.emd)) : VIEW0;
+  render(light);
+}
+
+/* ───────── 비대면 진료 거래처 (공용 파일 data/partners) ───────── */
+let PARTNERS = [], P_SRC = "";   // [{name,code,ykiho,sido,sggu,addr,owner,platform,memo,match}]
+const pBadge = r => r.partner ? `<span class="pb" title="비대면 진료 거래처${r.partner.owner?" · 담당 "+esc(r.partner.owner):""}">🤝 거래처</span>` : "";
+function parsePartners(rows){
+  const hi = rows.findIndex((r,i) => i < 30 && r.some(c => /거래처명|기관명|병원명|의원명|요양기관명|^거래처$/.test(String(c).replace(/\s/g,""))));
+  if(hi < 0) return [];
+  const H = rows[hi].map(c => String(c).replace(/\s/g,""));
+  const col = re => H.findIndex(c => re.test(c));
+  const ci = { name: col(/거래처명|요양기관명|기관명|병원명|의원명|^거래처$/), ykiho: col(/요양기관기호|암호화|ykiho/i), code: col(/거래처코드|^코드$/),
+               sido: col(/^시도/), sggu: col(/시군구/), addr: col(/주소|소재지/), owner: col(/담당|^MR|사원|영업/), platform: col(/플랫폼|앱/), memo: col(/비고|메모|특이/) };
+  const g = (r,k) => ci[k] >= 0 ? String(r[ci[k]] ?? "").trim() : "";
+  return rows.slice(hi+1).map(r => ({ name: g(r,"name"), ykiho: g(r,"ykiho"), code: g(r,"code"), sido: g(r,"sido"), sggu: g(r,"sggu"),
+    addr: g(r,"addr"), owner: g(r,"owner"), platform: g(r,"platform"), memo: g(r,"memo"), match: null })).filter(p => p.name);
+}
+async function loadPartners(){
+  if(!window.XLSX) return;
+  for(const ext of ["xlsx","xls","csv"]){
+    try{
+      const res = await fetch(`data/partners.${ext}`, {cache:"no-cache"});
+      if(!res.ok) continue;
+      const list = parsePartners(sheetRows(await res.arrayBuffer()));
+      if(!list.length) continue;
+      const mod = res.headers.get("last-modified");
+      PARTNERS = list; P_SRC = `partners.${ext}${mod ? " · " + new Date(mod).toLocaleDateString("ko-KR") + " 갱신" : ""}`;
+      break;
+    }catch(e){}
+  }
+  matchPartners(); apply();
+}
+function matchPartners(){
+  RAW.forEach(r => r.partner = null);
+  if(!PARTNERS.length) return;
+  const byY = {}, byN = {}, byL = {};
+  RAW.forEach(r => { byY[r.ykiho] = r; (byN[nName(r.name)] ||= []).push(r); (byL[nNameLoose(r.name)] ||= []).push(r); });
+  PARTNERS.forEach(p => {
+    p.match = null;
+    let r = p.ykiho && byY[p.ykiho];
+    if(!r){
+      const c = byN[nName(p.name)] || byL[nNameLoose(p.name)] || [];
+      const pa = nAddr(p.addr), sg = p.sggu.replace(/\s/g,"");
+      const fits = x => (sg && (x.sggu||"").replace(/\s/g,"") === sg) || (pa && (prefixLen(pa, nAddr(x.addr)) >= 6 || (x.sggu && pa.includes(x.sggu.replace(/\s/g,"")))));
+      const ok = c.filter(fits);
+      r = ok.length === 1 ? ok[0] : (!sg && !pa && c.length === 1 ? c[0] : null);
+    }
+    if(r && !r.partner){ r.partner = p; p.match = r; }
+  });
+}
+function partnerInArea(p){
+  if(p.match) return (!SEL.size || SEL.has(p.match.sggu)) && (!FOCUS || p.match.sggu === FOCUS);
+  if(FOCUS) return (p.sggu + p.addr).replace(/\s/g,"").includes(FOCUS.replace(/\s/g,""));
+  if(!RAW.length) return false;
+  const txt = (p.sido + p.sggu + p.addr).replace(/\s/g,"");
+  if(SEL.size) return [...SEL].some(s => txt.includes(s.replace(/\s/g,"")));
+  if($("aSido").value === "ALL") return true;
+  const sd = (SIDO.find(([c]) => c === $("aSido").value) || [])[1];
+  const keys = sd === "전남광주" ? ["광주","전남","전라남"] : sd ? [sd] : [];
+  return keys.some(k => nAddr(p.sido + p.addr).includes(k) || txt.includes(k));
+}
+function renderPartners(){
+  const wrap = $("pWrap");
+  if(!PARTNERS.length){
+    $("pCnt").textContent = ""; $("pStat").innerHTML = "";
+    wrap.innerHTML = `<div class="pempty">아직 거래처 명단이 없습니다.<br>저장소 <b>data 폴더</b>에 <code>partners.xlsx</code>를 올리면 모든 사용자에게 같은 거래처가 표시됩니다.</div>`;
+    return;
+  }
+  const q = $("pQ").value.trim(), areaOnly = $("pArea").checked && RAW.length > 0;
+  let list = PARTNERS.filter(p => (!areaOnly || partnerInArea(p)) && (!q || (p.name + p.owner + p.memo).includes(q)));
+  const gr = p => p.match ? (p.match.grade === "N" ? 3 : "ABC".indexOf(p.match.grade)) : 4;
+  list.sort((a,b) => gr(a) - gr(b) || (b.match?.score||0) - (a.match?.score||0) || a.name.localeCompare(b.name, "ko"));
+  const inA = PARTNERS.filter(partnerInArea), m = inA.filter(p => p.match), cnt = k => m.filter(p => p.match.grade === k).length;
+  const pool = RAW.filter(r => (!SEL.size || SEL.has(r.sggu)) && (!FOCUS || r.sggu === FOCUS));
+  const newA = pool.filter(r => r.grade === "A" && !r.partner).length;
+  $("pCnt").textContent = `(전체 ${PARTNERS.length.toLocaleString()}곳${P_SRC ? " · " + P_SRC : ""})`;
+  $("pStat").innerHTML = RAW.length ? `<span>현재 지역 거래처 <b>${inA.length}</b>곳</span><span>목록 연결 <b>${m.length}</b>곳</span>`
+    + `<span><span class="g gA">A</span> <b>${cnt("A")}</b> · <span class="g gB">B</span> <b>${cnt("B")}</b> · <span class="g gC">C</span> <b>${cnt("C")}</b> · 미조회 <b>${cnt("N")}</b></span>`
+    + (newA ? `<span class="new" id="pNew" title="누르면 의원 리스트를 신규 발굴 후보로 거릅니다">🎯 신규 발굴 후보(A등급·비거래처) <b>${newA}</b>곳</span>` : "")
+    : `<span>① 의원 목록을 불러오면 등급과 연결됩니다</span>`;
+  const st = p => { const r = p.match; if(!r) return '<span class="sub">현재 불러온 목록에 없음</span>';
+    if(!r.looked) return '<span class="sub">상세정보 미조회</span>';
+    const core = r.coreN ? `만성 ${r.coreN}` : "", cond = r.condN ? `조건부 ${r.condN}` : "";
+    return `지수 ${r.score} · 상위 ${r.pct}% · 규모 ${r.vol}(${VT_NAME[r.volT]})${core||cond?` · ${[core,cond].filter(Boolean).join(" · ")}`:""}${evalBadge(r)}`; };
+  wrap.innerHTML = list.length ? `<table><thead><tr><th>등급</th><th>거래처명</th><th>시군구</th><th>담당</th><th>현재 평가</th><th>비고</th><th>전화</th><th>주소</th></tr></thead><tbody>${
+    list.slice(0, 500).map(p => { const r = p.match;
+      return `<tr class="${r ? "" : "out"}"><td class="c-g">${r ? `<span class="g g${r.grade}">${r.grade==="N"?"-":r.grade}</span>` : '<span class="g gN">·</span>'}</td>
+      <td class="nm">${r && r.lat ? `<button type="button" class="go" data-pgo="${esc(r.ykiho)}">${esc(p.name)}</button>` : esc(p.name)}${p.platform?` <span class="chip">${esc(p.platform)}</span>`:""}</td>
+      <td class="c-sg">${esc(r ? r.sggu : p.sggu || "")}</td><td class="c-ow">${p.owner ? "담당 " + esc(p.owner) : ""}</td><td class="c-st">${st(p)}</td>
+      <td class="c-me">${esc(p.memo)}</td><td class="c-tel">${esc(r ? r.tel : "")}</td><td class="c-ad">${esc(r ? r.addr : p.addr)}</td></tr>`; }).join("")
+    }</tbody></table>` : `<div class="pempty">${areaOnly ? "현재 선택 지역에 거래처가 없습니다. '현재 선택 지역만'을 끄면 전체 명단을 볼 수 있습니다." : "검색 결과가 없습니다."}</div>`;
+  wrap.querySelectorAll("[data-pgo]").forEach(b => b.onclick = () => goMap(b.dataset.pgo));
+  const nb = $("pNew"); if(nb) nb.onclick = () => { $("fPartner").value = "N"; $("fGrade").value = "A"; apply(); $("secList").scrollIntoView({behavior:"smooth"}); };
+}
+
+function renderSrc(){
+  const L = RAW.filter(r => r.looked), ats = uniq(L.map(r => r.at)), yms = uniq(L.map(r => r.ym));
+  const ymTxt = yms.length ? yms.map(y => `${y.slice(0,4)}년 ${+y.slice(4,6)}월`).join(", ") : "";
+  $("evSrc").innerHTML = `<b>자료 출처</b> 건강보험심사평가원 병원평가정보서비스 (공공데이터포털 OpenAPI)<br>`
+    + `<span class="em hd"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span> ${esc(EVAL_INFO.hd)} · <span class="em copd"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span> ${esc(EVAL_INFO.copd)} · <span class="em ast"><svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg></span> ${esc(EVAL_INFO.ast)}`
+    + (ats.length ? `<br>이 화면의 등급 조회일: ${ats.join(", ")}` : "")
+    + (ymTxt ? ` · 질병 Top5 기준월: ${ymTxt}` : "")
+    + ` · <a href="https://www.hira.or.kr" target="_blank" rel="noopener">심평원 병원평가 바로가기</a>`;
+}
+
+/* ───────── 렌더 ───────── */
+const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const chipHtml = (r, only) => r.looked ? (((r.top5||"").split("|").filter(Boolean).filter(d => !only || isSuit(d)).map(d => { const t = tierOf(d); return `<span class="chip ${t==="core"?"hit":t==="cond"?"cond":t==="unk"?"unk":"off"}" title="${TIER_NAME[t]}">${esc(d)}</span>`; }).join("")) || `<span class="sub">${r.top5?"적합 질환 없음":"질병정보 없음 (과목·개원·의사 수로만 평가)"}</span>`) : '<span class="sub">미조회</span>';
+const EM = {hd:["고당","고혈압·당뇨병"], dm:["당","당뇨병"], hp:["고","고혈압"], copd:["C","만성폐쇄성폐질환(COPD)"], ast:["천","천식"]};
+const MEDAL = '<svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M3 0h4l2 6H5z" fill="var(--rb1)"/><path d="M9 0h4l-2 6H7z" fill="var(--rb2)"/><circle cx="8" cy="13" r="6.2" fill="var(--m1)" stroke="var(--m2)" stroke-width="1.3"/><path d="M8 9.6l1 2.1 2.3.3-1.7 1.6.4 2.3L8 14.8l-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="var(--m3)"/></svg>';
+const em = (k, txt) => `<span class="em ${k==="hp"?"hd":k}" title="${esc(EVAL_INFO[k==="hp"||k==="dm"?"hd":k] || EM[k][1])} — ${txt}">${MEDAL}${txt}</span>`;
+const evalBadge = r => {
+  if(r.asm){ const a = r.asm, b = [];
+    if(a.hd && a.hd <= 2) b.push(em("hd", `${a.hd}등급`));
+    if(a.copd && a.copd <= 2) b.push(em("copd", `${a.copd}등급`));
+    if(a.ast) b.push(em("ast", "양호"));
+    return b.join(""); }
+  return EV_T.filter(({t}) => r[t+"_good"]==="Y").map(({t}) => em(t, "양호")).join("");
+};
+const evalTxt = r => r.asm ? [r.asm.hd?`고혈압·당뇨 ${r.asm.hd}등급`:"", r.asm.copd?`COPD ${r.asm.copd}등급`:"", r.asm.ast?"천식 양호":""].filter(Boolean).join(" · ") || '<span class="sub">평가 대상 아님</span>'
+  : EV_T.filter(({t}) => r[t+"_good"]==="Y").map(x=>x.short).join(" · ");
+const hrsHtml = r => { const h = r.hrs; if(!h) return '<span class="sub">-</span>';
+  return `<span class="hb ${h.night?"on":""}">야간${h.night>1?" "+h.night:""}</span><span class="hb ${h.sat?"on":""}">토</span><span class="hb ${h.sun?"on":""}">일</span>`; };
+const sdrTxt = r => r.imSdr < 0 ? "-" : `${r.imSdr}명${r.im == null ? '<span class="est">추정</span>' : ""}`;
+const suitTxt = r => r.noData ? "-" : r.looked ? `${r.coreN?`만성 ${r.coreN}`:""}${r.coreN&&r.condN?" · ":""}${r.condN?`조건부 ${r.condN}`:""}` || "0" : "";
+function render(light){
+  const L2 = VIEW.filter(r=>r.looked), a = L2.filter(r=>r.grade==="A").length;
+  $("kN").textContent = `${L2.length.toLocaleString()} / ${VIEW.length.toLocaleString()}`;
+  $("kA").textContent = L2.length ? a.toLocaleString() : "-";
+  $("kAvg").textContent = L2.length ? Math.round(L2.reduce((s,r)=>s+r.score,0)/L2.length) : "-";
+  const by = {}; VIEW0.forEach(r=>{ const k=r.sggu||"(미상)"; (by[k]=by[k]||{A:0,B:0,C:0,N:0,n:0})[r.grade]++; by[k].n++; });
+  const ent = Object.entries(by).sort((x,y)=>y[1].A-x[1].A||y[1].n-x[1].n);
+  $("kTop").textContent = ent.length&&ent[0][1].A ? `${ent[0][0]} (${ent[0][1].A})` : "-";
+  const mx = Math.max(1,...ent.map(e=>e[1].n));
+  $("bars").innerHTML = ent.slice(0,15).map(([k,v])=>`<div class="b${FOCUS===k?" on":FOCUS?" dim":""}" data-s="${esc(k)}" title="${FOCUS===k?"다시 누르면 전체로":"이 시군구만 보기"}"><span>${esc(k)}</span><div class="t">
+    <i style="width:${v.A/mx*100}%;background:var(--a)"></i><i style="width:${v.B/mx*100}%;background:var(--b)"></i><i style="width:${v.C/mx*100}%;background:var(--c)"></i><i style="width:${v.N/mx*100}%;background:var(--line)"></i></div>
+    <span class="sub">${v.n}곳 · A ${v.A}</span></div>`).join("") || `<div class="sub">데이터 없음</div>`;
+  document.querySelectorAll("#bars .b").forEach(el=>el.onclick=()=>setFocus(FOCUS===el.dataset.s ? "" : el.dataset.s));
+  const multi = ent.length >= 2 || !!FOCUS, tot = VIEW0.length;
+  $("rTabs").classList.toggle("on", multi);
+  $("rTabs").innerHTML = multi ? `<button type="button" class="rtab all${FOCUS?"":" on"}" data-f="">전체 ${ent.length}곳<small>${tot.toLocaleString()}</small></button>`
+    + ent.map(([k,v]) => `<button type="button" class="rtab${FOCUS===k?" on":""}" data-f="${esc(k)}">${esc(k)}<small>${v.n} · A ${v.A}</small></button>`).join("") : "";
+  $("rTabs").querySelectorAll("[data-f]").forEach(b => b.onclick = () => setFocus(b.dataset.f));
+  const back = $("barsBack"); back.style.display = FOCUS ? "" : "none"; back.textContent = `← 전체 ${ent.length}곳`; back.onclick = () => setFocus("");
+  const fn = $("focusNote"); fn.classList.toggle("on", !!FOCUS);
+  fn.innerHTML = FOCUS ? `📍 <b>${esc(FOCUS)}</b>만 보는 중 (${VIEW.length.toLocaleString()}곳) · 등급은 선택한 ${ent.length}개 시군구 전체 기준 <button type="button" id="fnBack">← 전체 ${ent.length}곳 다시 보기</button>` : "";
+  if(FOCUS) $("fnBack").onclick = () => setFocus("");
+  $("cnt").textContent = `(${VIEW.length.toLocaleString()}곳${VIEW.length>1000?", 상위 1,000곳 표시":""})`;
+  $("btnTop5").textContent = `현재 목록 상세정보 조회 (미조회 ${VIEW.filter(r=>!r.looked).length.toLocaleString()}곳)`;
+  document.querySelector("#tbl tbody").innerHTML = VIEW.slice(0,1000).map(r=>`<tr>
+    <td><span class="g g${r.grade}">${r.grade==="N"?"-":r.grade}</span></td><td class="n">${r.looked?r.score:""}</td><td class="pct">${r.pct?`상위 ${r.pct}%`:""}</td><td class="n">${volHtml(r)}</td><td>${esc(r.name)}${pBadge(r)}</td><td class="c-ev">${evalBadge(r)}</td><td>${esc(r.sggu)}</td><td>${esc(r.emd)}</td>
+    <td>${/^(내과|가정의학과|일반의)$/.test(r.subject)?`<span class="subp">${esc(r.subject)}</span>`:esc(r.subject)}${r.subjEst?'<span class="est">추정</span>':""}</td><td>${r.looked?sdrTxt(r):""}</td><td>${r.looked?hrsHtml(r):'<span class="sub">미조회</span>'}</td><td class="c-t5">${suitTxt(r)}</td>
+    <td class="c-t5">${r.noData?'<span class="sub">-</span>':chipHtml(r, $("oOnly").checked)}</td>
+    <td class="n">${r.years??""}</td><td class="n">${r.doctors||""}</td><td>${esc(r.tel)}</td><td>${esc(r.addr)}</td></tr>`).join("");
+  const L3 = VIEW.filter(r => r.looked), hasT5 = L3.some(r => !r.noData);
+  const hasEv = evalLoaded() || L3.some(r => r.asm);
+  $("tbl").classList.toggle("no-t5", !hasT5); $("tbl").classList.toggle("no-ev", !hasEv);
+  $("oGoodWrap").style.display = hasEv ? "" : "none"; if(!hasEv) $("oGood").checked = false;
+  const dw = $("dataWarn"), nh = L3.filter(r => !r.hrs).length;
+  if(L3.length >= 5 && nh / L3.length > 0.8){ dw.style.display = "block"; dw.innerHTML = `⚠ 조회한 ${L3.length}곳 중 ${nh}곳의 <b>진료시간 정보가 없습니다.</b> data.go.kr에서 <b>'의료기관별상세정보서비스'</b> 활용신청이 됐는지, 설정 → API 원본 확인 결과를 확인해 주세요.`; }
+  else dw.style.display = "none";
+  if(isMobile()) renderCards(); else $("cards").innerHTML = "";
+  renderPartners();
+  renderSrc();
+  if(!light){ drawMap(); renderDz(); evalStatus(); }
+}
+const MQ = window.matchMedia("(max-width:700px)");
+const isMobile = () => MQ.matches;
+let CARD_N = 50;
+function renderCards(){
+  const only = $("oOnly").checked, list = VIEW.slice(0, CARD_N);
+  $("cards").innerHTML = list.map(r => {
+    const chips = chipHtml(r, only);
+    const good = r.good;
+    const tel = (r.tel||"").replace(/[^0-9]/g,"");
+    return `<div class="ccard g${r.grade}">
+      <div class="t1"><span class="g g${r.grade}">${r.grade==="N"?"-":r.grade}</span><span class="nm">${esc(r.name)}${pBadge(r)}</span><span class="sc">${r.looked?r.score:""}</span></div>
+      ${r.good ? `<div class="t3">${evalBadge(r)}</div>` : ""}
+      <div class="t2">${esc(r.sggu)} ${esc(r.emd)} · ${esc(r.subject)}${r.subjEst?'<span class="est">추정</span>':""}${r.pct?` · 상위 ${r.pct}%`:""}</div>
+      ${r.looked ? `<div class="t3">${hrsHtml(r)}${r.imSdr>=0?`<span class="hb">전문의 ${r.imSdr}명</span>`:""}</div>` : '<div class="t3"><span class="sub">상세정보 미조회</span></div>'}
+      ${r.looked && !r.noData ? `<div class="t3">${chips}</div>` : ""}
+      <div class="t4"><span>규모 ${volHtml(r)}</span><span>개원 ${r.years||"-"}년</span><span>의사 ${r.doctors||"-"}명</span>${r.hrs?.wk?`<span>평일 ${esc(r.hrs.wk)}</span>`:""}</div>
+      <div class="act">${tel?`<a href="tel:${tel}">📞 전화</a>`:""}${r.lat&&r.lng?`<button type="button" data-go="${esc(r.ykiho)}">📍 지도</button>`:""}</div>
+    </div>`;
+  }).join("") + (VIEW.length > CARD_N ? `<button class="btn more-btn" id="moreCards">더 보기 (${(VIEW.length-CARD_N).toLocaleString()}곳 남음)</button>` : "") || '<div class="note">표시할 의원이 없습니다.</div>';
+  $("cards").querySelectorAll("[data-go]").forEach(b => b.onclick = () => goMap(b.dataset.go));
+  const mb = $("moreCards"); if(mb) mb.onclick = () => { CARD_N += 50; renderCards(); };
+}
+let MARK = {};
+function goMap(ykiho){
+  const m = MARK[ykiho]; if(!m || !map) return;
+  $("secMap").scrollIntoView({behavior:"smooth"});
+  setTimeout(() => { map.invalidateSize(); map.setView(m.getLatLng(), 16); m.openPopup(); }, 350);
+}
+/* ───────── 배경 지도: 브이월드(국토교통부) + OpenStreetMap 대체 ───────── */
+let VKEY = "", BASE = {}, baseCtl = null, curBase = null, userBase = store.get("chronic_base", ""), progBase = false;
+async function loadVkey(){
+  VKEY = ($("vkey").value || "").trim();
+  if(!VKEY){ try{ const r = await fetch(apiBase() + "?svc=config"); const j = await r.json(); VKEY = j.vworldKey || ""; }catch(e){} }
+}
+function buildBases(){
+  const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom:19, attribution:"© OpenStreetMap"});
+  BASE = { "OpenStreetMap": osm };
+  if(VKEY){
+    const v = (layer, ext, extra) => L.tileLayer(`https://api.vworld.kr/req/wmts/1.0.0/${VKEY}/${layer}/{z}/{y}/{x}.${ext}`,
+      Object.assign({maxZoom:19, minZoom:6, attribution:'© <a href="https://www.vworld.kr" target="_blank">VWorld</a> (국토교통부)'}, extra||{}));
+    const sat = L.layerGroup([v("Satellite","jpeg"), v("Hybrid","png")]);
+    BASE = { "브이월드 기본": v("Base","png"), "브이월드 회색": v("gray","png"), "브이월드 야간": v("midnight","png"), "브이월드 위성": sat, "OpenStreetMap": osm };
+    let errs = 0;
+    [BASE["브이월드 기본"], BASE["브이월드 회색"], BASE["브이월드 야간"]].forEach(l => l.on("tileerror", () => {
+      if(++errs === 8 && curBase !== "OpenStreetMap"){ setBase("OpenStreetMap"); say("브이월드 지도를 불러오지 못해 OpenStreetMap으로 바꿨습니다. 인증키와 등록 도메인(chronic-flame.vercel.app)을 확인하세요.", true); }
+    }));
+  }
+}
+function defaultBase(){
+  if(userBase && BASE[userBase]) return userBase;
+  if(!VKEY) return "OpenStreetMap";
+  return document.documentElement.dataset.theme === "dark" ? "브이월드 야간" : "브이월드 기본";
+}
+function setBase(name){
+  if(!map || !BASE[name]) return;
+  Object.values(BASE).forEach(l => { if(map.hasLayer(l)) map.removeLayer(l); });
+  progBase = true; BASE[name].addTo(map); progBase = false; curBase = name;
+  if(layer) layer.bringToFront?.();
+}
+function addBaseCtl(){
+  baseCtl = L.control.layers(BASE, null, {position:"topright", collapsed:true}).addTo(map);
+  // 사용자가 직접 고른 지도만 기억 (프로그램이 바꾼 것은 저장하지 않음)
+  baseCtl.getContainer().addEventListener("change", e => {
+    const lab = e.target.closest("label"); if(!lab) return;
+    const name = lab.textContent.trim(); if(BASE[name]){ userBase = name; store.set("chronic_base", name); }
+  });
+}
+function initMap(){
+  map = L.map("map", {zoomControl:true});
+  buildBases();
+  addBaseCtl();
+  map.on("baselayerchange", e => { curBase = e.name; });
+  setBase(defaultBase());
+  map.setView(HERE || [36.5,127.8], HERE ? 14 : 7);
+  if(!HERE) locate();
+  L.Control.Locate = L.Control.extend({ onAdd(){ const b = L.DomUtil.create("button","loc-btn"); b.type = "button"; b.title = "내 위치로"; b.innerHTML = "📍";
+    L.DomEvent.on(b, "click", e => { L.DomEvent.stop(e); locate(true); }); return b; } });
+  new L.Control.Locate({position:"topleft"}).addTo(map);
+}
+// 현재 위치(GPS): 처음 화면을 내 주변으로. 거부·실패하면 전국 지도 유지
+let HERE = null, hereMark = null;
+function locate(force){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(p => {
+    HERE = [p.coords.latitude, p.coords.longitude];
+    if(!map) return;
+    if(hereMark) hereMark.remove();
+    hereMark = L.circleMarker(HERE, {radius:8, color:"#fff", weight:3, fillColor:"#2f6fd1", fillOpacity:1}).bindTooltip("현재 위치").addTo(map);
+    if(force || !VIEW.length) map.setView(HERE, 14);
+  }, () => { if(force) say("현재 위치를 가져오지 못했습니다. 브라우저의 위치 권한을 확인하세요.", true); }, {enableHighAccuracy:false, timeout:8000, maximumAge:600000});
+}
+async function resetMapBase(){
+  await loadVkey();
+  if(!map) return;
+  const keep = curBase;
+  Object.values(BASE).forEach(l => { if(map.hasLayer(l)) map.removeLayer(l); });
+  if(baseCtl) baseCtl.remove();
+  buildBases();
+  addBaseCtl();
+  setBase(BASE[keep] && keep !== "OpenStreetMap" ? keep : defaultBase());
+}
+function drawMap(){
+  if(!window.L) return;
+  if(!map) initMap();
+  if(layer) layer.remove();
+  const cs = getComputedStyle(document.documentElement), col = {A:cs.getPropertyValue("--a"),B:cs.getPropertyValue("--b"),C:cs.getPropertyValue("--c"),N:"#8a94a0"};
+  const pts = VIEW.filter(r=>r.lat&&r.lng).slice(0,3000).sort((a,b)=>(!!a.partner)-(!!b.partner));
+  MARK = {};
+  layer = L.layerGroup(pts.map(r=>MARK[r.ykiho]=L.circleMarker([r.lat,r.lng],r.partner?{radius:r.grade==="A"?9:7,color:cs.getPropertyValue("--acc"),fillColor:col[r.grade],fillOpacity:.9,weight:3}:{radius:r.grade==="A"?7:5,color:col[r.grade],fillColor:col[r.grade],fillOpacity:r.grade==="N"?.35:.8,weight:1})
+    .bindPopup(`<b>${esc(r.name)}</b>${pBadge(r)}${evalBadge(r)}${r.partner?.owner?`<br>담당 ${esc(r.partner.owner)}`:""}<br>${r.grade==="N"?"상세정보 미조회":`${r.grade}등급 · 지수 ${r.score} · 상위 ${r.pct}%`}<br>${esc(r.subject)}${r.hrs?` · ${r.hrs.night?"야간 ":""}${r.hrs.sat?"토 ":""}${r.hrs.sun?"일 ":""}진료`:""}<br>${esc(r.tel)}`))).addTo(map);
+  if(pts.length) map.fitBounds(L.latLngBounds(pts.map(r=>[r.lat,r.lng])),{padding:[20,20],maxZoom:14}); else map.setView(HERE || [36.5,127.8], HERE ? 14 : 7);
+}
+function say(t, err){ $("msg").textContent = t; $("msg").className = "msg" + (err?" err":""); }
+function setProg(p){ $("prog").style.width = Math.min(100,p) + "%"; }
+
+/* ───────── 샘플 (가상 기관, 미리보기용) ───────── */
+function sample(){
+  const areas = [["서울","중랑구",37.606,127.093,["신내동","면목동","상봉동","망우동"]],["서울","노원구",37.654,127.056,["상계동","중계동","하계동","월계동"]],["서울","강서구",37.551,126.850,["화곡동","등촌동","가양동","방화동"]]];
+  const subs = ["내과","내과","내과","가정의학과","일반의"], pool = ["고혈압","당뇨병","감기","이상지질혈증","위식도역류질환","관절염","비염","장염","골다공증","갑상선질환","불면증","천식"];
+  let s = 7; const rnd = () => (s = (s*9301+49297)%233280)/233280, out = [];
+  areas.forEach(([sido,sggu,la,ln,emds],ai)=>{ for(let i=0;i<25;i++){
+    const sub = subs[Math.floor(rnd()*subs.length)], t = new Set();
+    while(t.size<5) t.add(rnd()<(sub==="일반의"?.2:.55) ? pool[Math.floor(rnd()*4)] : pool[Math.floor(rnd()*pool.length)]);
+    out.push({ykiho:`S${ai}${i}`,name:`샘플${sub}의원 ${ai+1}-${String(i+1).padStart(2,"0")}`,sido,sggu,emd:emds[Math.floor(rnd()*emds.length)],addr:`${sido} ${sggu} (샘플)`,tel:"",
+      subject:sub,doctors:1+Math.floor(rnd()*3),years:+(rnd()*25).toFixed(1),top5:[...t].join("|"),looked:i%6!==0,sdr:1,
+      hrs:{night:rnd()<.4?Math.ceil(rnd()*5):0,sat:rnd()<.7,sun:rnd()<.15,wk:"09:00~18:30"},im:sub==="일반의"?0:Math.floor(rnd()*3),ph:Math.floor(rnd()*4),hp_good:rnd()<.4?"Y":"",dm_good:rnd()<.3?"Y":"",lat:la+(rnd()-.5)*.04,lng:ln+(rnd()-.5)*.05});
+  }});
+  return out.map(r=>r.looked?r:{...r,top5:""});
+}
+
+/* ───────── 이벤트 ───────── */
+$("aSido").innerHTML = `<option value="ALL">전국 (전체 시도)</option>` + SIDO.map(([c,n])=>`<option value="${c}">${n}</option>`).join("");
+$("aSido").value = store.get("chronic_sido","110000");
+$("aSido").onchange = () => { store.set("chronic_sido", $("aSido").value); SEL.clear(); $("fEmd").value = ""; renderSggu(); sgguChanged(); };
+const SUB_SAVED = store.get("chronic_subs", PRIOR);
+$("subPri").innerHTML = PRIOR.map(c => `<label><input type="checkbox" value="${c}" ${SUB_SAVED.includes(c)?"checked":""}>${SUBNAME[c]}</label>`).join("");
+$("subEtc").innerHTML = Object.keys(SUBNAME).filter(c => !PRIOR.includes(c)).sort((a,b)=>SUBNAME[a].localeCompare(SUBNAME[b],"ko")).map(c => `<label><input type="checkbox" value="${c}" ${SUB_SAVED.includes(c)?"checked":""}>${SUBNAME[c]}</label>`).join("");
+function subChanged(){ const s = curSubs(); store.set("chronic_subs", s); const n = s.filter(c => !PRIOR.includes(c)).length; $("subEtcSum").textContent = n ? `(${n}개 선택)` : ""; markNeed(); }
+document.querySelectorAll(".chk input").forEach(cb => cb.addEventListener("change", subChanged));
+$("subEtcAll").onclick = () => { $("subEtc").querySelectorAll("input").forEach(i => i.checked = true); subChanged(); };
+$("subEtcNone").onclick = () => { $("subEtc").querySelectorAll("input").forEach(i => i.checked = false); subChanged(); };
+subChanged();
+$("apiBase").value = store.get("chronic_api","");
+$("apiBase").onchange = () => store.set("chronic_api", $("apiBase").value.trim());
+$("vkey").value = store.get("chronic_vkey", "");
+$("vkey").onchange = () => { store.set("chronic_vkey", $("vkey").value.trim()); resetMapBase(); };
+$("btnBasis").onclick = loadBasis;
+$("btnTop5").onclick = loadTop5;
+$("btnStop").onclick = () => { stopFlag = true; say("중지했습니다. 다시 누르면 남은 곳부터 이어서 조회합니다."); };
+$("btnRaw").onclick = async () => {
+  const r = VIEW[0] || RAW[0], out = $("rawOut"); out.style.display = "block";
+  if(!r){ out.textContent = "먼저 의원 목록을 불러오세요."; return; }
+  out.textContent = `${r.name} 조회 중…`;
+  try{
+    let txt = r.name + "\n";
+    for(const svc of ["dtl","spc","top5","asm"]){
+      const res = await fetch(apiBase() + "?" + new URLSearchParams({svc, ykiho:r.ykiho}));
+      txt += `\n[${svc}] HTTP ${res.status}\n` + JSON.stringify(await res.json(), null, 1).slice(0, 1500) + "\n";
+    }
+    out.textContent = txt;
+  }catch(e){ out.textContent = "오류: " + e.message; }
+};
+$("btnCache").onclick = () => { if(confirm("저장된 상세정보(진료시간·전문의·질병·평가등급) 캐시를 지울까요?")){ T5 = {}; DET = {}; store.set("chronic_t5v2", T5); store.set("chronic_det2", DET); RAW.forEach(r=>{r.looked=false;r.top5="";r.hrs=null;r.im=null;r.asm=undefined;}); apply(); } };
+$("btnSample").onclick = () => { RAW = sample(); if(!PARTNERS.length || P_SRC === "샘플"){ PARTNERS = RAW.filter((r,i) => i % 7 === 1).map((r,i) => ({name:r.name, ykiho:"", code:"", sido:r.sido, sggu:r.sggu, addr:"", owner:["김유한","이버들","박나무"][i%3], platform:"", memo:i%4===0?"월 1회 방문":"", match:null})); PARTNERS.push({name:"샘플타지역내과의원", ykiho:"", code:"", sido:"서울", sggu:"중랑구", addr:"", owner:"김유한", platform:"", memo:"", match:null}); P_SRC = "샘플"; } matchPartners(); $("aSido").value = "110000"; LOADED_SIDO = "110000"; LOADED = new Set(RAW.map(r=>r.sggu)); LOADED_SUBS = curSubs().join(","); $("srcBadge").textContent = "샘플 데이터 (가상 기관)"; $("srcBadge").style.background = "var(--acc)"; resetFilters(); refreshOpts(); apply(); $("btnTop5").disabled = true; say("샘플 미리보기입니다. 실제 데이터는 ①부터 진행하세요."); };
+$("export").onclick = () => {
+  RAW.forEach(r => r.partnerY = r.partner ? "거래처" : "");
+  const cols = ["grade","score","pct","vol","volT","asmN","ph","name","partnerY","sido","sggu","emd","subject","imSdr","hrsScore","suit","coreN","condN","top5","hdGrd","hp_good","dm_good","copd_good","ast_good","years","doctors","tel","addr"];
+  const csv = "﻿" + [cols.join(",")].concat(VIEW.map(r=>cols.map(c=>`"${String(c==="grade"&&r.grade==="N"?"미조회":r[c]??"").replace(/"/g,'""')}"`).join(","))).join("\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download = "chronic_targets.csv"; a.click();
+};
+function showW(){ const w=W(); w.forEach((x,i)=>$("w"+(i+1)+"v").textContent=Math.round(x)); }
+["w1","w2","w3","w4","w5","w6"].forEach(id=>$(id).oninput=()=>{showW();apply(true);});
+["w1","w2","w3","w4","w5","w6"].forEach(id=>$(id).onchange=()=>apply());
+[$("tA"),$("tB"),$("fGrade"),$("fSub"),$("fEmd")].forEach(el=>el.onchange=()=>apply());
+$("fQ").oninput = () => { CARD_N = 50; apply(true); };
+$("mSort").onchange = () => { sortK = $("mSort").value; sortDir = sortK==="name"||sortK==="sggu" ? 1 : -1; CARD_N = 50; apply(true); };
+MQ.addEventListener ? MQ.addEventListener("change", () => apply(true)) : MQ.addListener(() => apply(true));
+$("oHide").onchange = () => apply();
+$("oAttach").onchange = () => apply();
+$("oGood").onchange = () => { CARD_N = 50; apply(); };
+$("oOnly").onchange = () => { $("thTop5").textContent = $("oOnly").checked ? "비대면 적합 질환" : "Top5 질병"; apply(true); };
+$("teleReset").onclick = () => { TELE.forEach(t => TELE_ON[t.id] = t.tier !== "off"); store.set("chronic_tele2", TELE_ON); OVR = {}; store.set("chronic_ovr2", OVR); renderTele(); apply(); renderDz(); };
+loadTele(); renderTele();
+$("sgguAll").onclick = () => { sgguTable($("aSido").value).forEach(([,n]) => SEL.add(n)); renderSggu(); sgguChanged(); };
+$("sgguNone").onclick = () => { SEL.clear(); renderSggu(); sgguChanged(); };
+document.querySelectorAll("#tbl th").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; sortDir = sortK===k ? -sortDir : -1; sortK=k; apply(true); });
+/* ───────── 지표 설명 ───────── */
+function openHelp(sec){
+  const w = W();
+  document.querySelectorAll(".help .wt").forEach(el => el.textContent = `현재 ${Math.round(w[+el.dataset.wt-1])}점`);
+  $("hgA").textContent = $("tA").value; $("hgB").textContent = $("tB").value;
+  $("helpModal").classList.add("on");
+  document.body.style.overflow = "hidden";
+  const target = document.getElementById("h-" + (sec || "top"));
+  document.querySelectorAll(".help details").forEach(d => d.open = d === target);
+  if(target) setTimeout(() => target.scrollIntoView({behavior:"smooth", block:"start"}), 30);
+}
+function closeHelp(){ $("helpModal").classList.remove("on"); document.body.style.overflow = ""; }
+document.querySelectorAll("[data-help]").forEach(el => el.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); openHelp(el.dataset.help); }));
+$("helpClose").onclick = closeHelp; $("helpOk").onclick = closeHelp;
+$("helpModal").onclick = e => { if(e.target.id === "helpModal") closeHelp(); };
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeHelp(); });
+
+/* ───────── 낮/밤 전환 ───────── */
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  try{ localStorage.setItem("chronic_theme", t); }catch(e){}
+  document.querySelectorAll("[data-theme-set]").forEach(b => b.classList.toggle("on", b.dataset.themeSet === t));
+  if(map && !userBase && VKEY) setBase(defaultBase());
+  if(RAW.length) drawMap();
+}
+document.querySelectorAll("[data-theme-set]").forEach(b => b.onclick = () => setTheme(b.dataset.themeSet));
+setTheme(document.documentElement.dataset.theme || "light");
+
+loadVkey().then(() => { if(map) resetMapBase(); });
+loadSharedEval();
+loadPartners();
+$("pQ").oninput = () => renderPartners();
+$("pArea").onchange = () => renderPartners();
+$("fPartner").onchange = () => apply();
+showW(); refreshOpts(); apply();
+</script>
+</body>
+</html>
