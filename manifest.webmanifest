@@ -42,5 +42,14 @@
       "platform": "webapp",
       "url": "https://mujjinhwan-prog.github.io/voy/manifest.webmanifest"
     }
-  ]
+  ],
+  "share_target": {
+    "action": "./?share=1",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
