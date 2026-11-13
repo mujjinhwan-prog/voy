@@ -508,16 +508,17 @@ body:has(.policy) .theme-fab{display:none}
 @keyframes mcFly{0%{transform:rotate(var(--a)) translateY(0) scale(.4);opacity:1}100%{transform:rotate(var(--a)) translateY(-150px) rotate(220deg) scale(1);opacity:0}}
 .box-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
 .box-q{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:12px;padding:0 10px;background:var(--surface2)}.box-q input{border:0!important;background:none!important;flex:1;height:40px;outline:none;box-shadow:none!important}
-.box-chips{display:flex;gap:5px;overflow-x:auto}.box-chips button{flex-shrink:0;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:5px 11px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.box-chips{display:flex;gap:5px;overflow-x:auto}.box-chips button{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:4px 10px 4px 6px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer}.box-chips button:first-child{padding-left:10px}
+.bxi{display:inline-block;width:20px;height:20px;flex-shrink:0;font-style:normal}.bxi.lg{width:28px;height:28px}.bxi svg,.bx-ic svg{display:block}
 .box-chips button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
 .box-list{list-style:none;margin:0;padding:0;max-height:430px;overflow-y:auto}.box-list li{display:flex;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
 .bx-main{flex:1;min-width:0;display:flex;align-items:center;gap:9px;border:0;background:none;padding:11px 2px;cursor:pointer;text-align:left;color:var(--text)}
-.bx-ic{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--c)}
+.bx-ic{flex-shrink:0;width:36px;height:36px}
 .bx-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px;font-weight:600}.bx-d{flex-shrink:0;color:var(--muted);font-size:12px}
 .bx-more{border:0;background:none;font-size:20px;color:var(--muted);padding:4px 8px;cursor:pointer;line-height:1}
-.bx-memo{flex-basis:100%;padding:4px 4px 12px 39px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text2)}
+.bx-memo{flex-basis:100%;padding:4px 4px 12px 47px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;color:var(--text2)}
 .bx-empty{display:block!important;text-align:center;color:var(--muted);font-size:13px;padding:22px 8px!important;line-height:1.7;border:0!important}
-.bx-types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}.bx-types button{border:1.5px solid var(--border);background:var(--surface2);border-radius:11px;padding:9px 2px;font-size:12.5px;font-weight:800;color:var(--text);cursor:pointer}
+.bx-types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}.bx-types button{display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--border);background:var(--surface2);border-radius:11px;padding:9px 2px 7px;font-size:11.5px;font-weight:800;color:var(--text);cursor:pointer}
 .bx-types button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .bx-url{display:flex;gap:6px}.bx-url input{flex:1}.bx-acts{flex-wrap:wrap}
 .rv-banner{cursor:pointer;border-color:color-mix(in srgb,#7c3aed 45%,transparent)!important;background:color-mix(in srgb,#7c3aed 8%,var(--surface))!important}
@@ -2407,13 +2408,13 @@ function todoRender() {
   const prev = todoPrevLeft(), dt = new Date();
   const hist = [...Array(14)].map((_, i) => { const t = new Date(); t.setDate(t.getDate() - 13 + i); const k = dayKey(t);
     return `<span class="td-day ${d.done[k] ? 'ok' : (d.todos[k] || []).length ? 'part' : ''} ${k === today ? 'today' : ''}" title="${k}${d.done[k] ? ' · 미션 컴플릿' : ''}">${t.getDate()}</span>`; }).join('');
-  el.innerHTML = `<div class="my-h"><h4>✅ 오늘 할 일 <small>${dt.getMonth() + 1}/${dt.getDate()}(${'일월화수목금토'[dt.getDay()]})</small></h4>${all ? '<span class="td-stamp">🎉 오늘 완료</span>' : list.length ? `<b class="td-cnt">${n} / ${list.length}</b>` : ''}</div>
+  el.innerHTML = `<div class="my-h"><h4>✅ To do list !! <small>${dt.getMonth() + 1}/${dt.getDate()}(${'일월화수목금토'[dt.getDay()]})</small></h4>${all ? '<span class="td-stamp">🎉 오늘 완료</span>' : list.length ? `<b class="td-cnt">${n} / ${list.length}</b>` : ''}</div>
     ${list.length ? `<div class="td-bar"><i style="width:${list.length ? n / list.length * 100 : 0}%"></i></div>` : ''}
     ${prev ? `<div class="td-carry">📌 ${+prev.day.slice(5, 7)}/${+prev.day.slice(8)}에 못 한 일 <b>${prev.left.length}개</b><span><button class="btn primary sm" data-act="td-carry" data-y="1">가져오기</button><button class="btn sm" data-act="td-carry" data-y="0">버리기</button></span></div>` : ''}
     <ul class="td-list">${list.map((x, i) => `<li class="${x.done ? 'done' : ''}" data-i="${i}"><button class="td-ck" data-act="td-ck" data-id="${x.id}" aria-label="체크">${x.done ? '✓' : ''}</button>
       <span class="td-t" data-act="td-ck" data-id="${x.id}">${esc(x.t)}</span><span class="td-mv"><button data-act="td-mv" data-id="${x.id}" data-d="-1" ${i ? '' : 'disabled'} aria-label="위로">▲</button><button data-act="td-mv" data-id="${x.id}" data-d="1" ${i < list.length - 1 ? '' : 'disabled'} aria-label="아래로">▼</button></span>
       <button class="td-x" data-act="td-del" data-id="${x.id}" aria-label="삭제">${I('x', 14)}</button></li>`).join('')}</ul>
-    <div class="td-add"><input id="tdIn" maxlength="80" placeholder="오늘 할 일을 적고 엔터 (예: 거래처 3곳 방문)" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
+    <div class="td-add"><input id="tdIn" maxlength="80" placeholder="오늘 꼭 해야 할 일을 적고 추가 클릭" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
     <div class="td-hist"><small>최근 2주</small>${hist}</div>`;
   const inp = document.getElementById('tdIn');
   inp.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); todoAdd(); } };
@@ -2435,15 +2436,20 @@ function missionComplete(n) {
     <div class="modal-foot"><button class="btn primary block" data-close>오늘도 해냈다! 🎉</button></div>`);
 }
 /* ---------- 📦 내 Multi 보관함 ---------- */
-const BOX_T = { yt: ['▶', '유튜브', '#ff0000'], ig: ['📷', '인스타', '#d6249f'], web: ['🌐', '웹페이지', '#228be6'], memo: ['📝', '메모', '#e8590c'] };
+const BOX_SVG = {
+  yt: '<svg viewBox="0 0 24 24" width="100%" height="100%"><circle cx="12" cy="12" r="10" fill="#e53935"/><path d="M10 8.2v7.6l6-3.8z" fill="#fff"/></svg>',
+  ig: '<svg viewBox="0 0 24 24" width="100%" height="100%"><defs><linearGradient id="bxg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#8134af"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#bxg)"/><path d="M8 9.2h1.6l1-1.6h2.8l1 1.6H16a1.4 1.4 0 0 1 1.4 1.4v4.6A1.4 1.4 0 0 1 16 16.6H8a1.4 1.4 0 0 1-1.4-1.4v-4.6A1.4 1.4 0 0 1 8 9.2Z" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="12.8" r="2.1" fill="none" stroke="#fff" stroke-width="1.5"/></svg>',
+  web: '<svg viewBox="0 0 24 24" width="100%" height="100%"><circle cx="12" cy="12" r="10" fill="#228be6"/><g fill="none" stroke="#fff" stroke-width="1.4"><circle cx="12" cy="12" r="6.2"/><path d="M5.8 12h12.4M12 5.8c-2.2 2.1-2.2 10.3 0 12.4M12 5.8c2.2 2.1 2.2 10.3 0 12.4"/></g></svg>',
+  memo: '<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="3" y="2" width="18" height="20" rx="4" fill="#f59f00"/><path d="M7.5 8h9M7.5 12h9M7.5 16h5.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>' };
+const BOX_T = { yt: [BOX_SVG.yt, '유튜브', '#e53935'], ig: [BOX_SVG.ig, '인스타', '#dd2a7b'], web: [BOX_SVG.web, '웹페이지', '#228be6'], memo: [BOX_SVG.memo, '메모', '#f59f00'] };
 const boxGuess = u => /youtu\.?be/i.test(u) ? 'yt' : /instagram\.com|instagr\.am/i.test(u) ? 'ig' : 'web';
 const boxUrlIn = t => { const m = String(t || '').match(/https?:\/\/[^\s<>"']+/i); return m ? m[0].replace(/[),.]+$/, '') : ''; };
 function boxRender() {
   const el = document.getElementById('myBox'); if (!el) return;
   const d = MY.load(), f = S.boxF = S.boxF || { q: '', t: '' };
-  el.innerHTML = `<div class="my-h"><h4>📦 내 Multi 보관함 <small>${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
+  el.innerHTML = `<div class="my-h"><h4>📦 Digital Hub <small>${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
     <div class="box-tools"><div class="box-q">${I('search', 15)}<input id="boxQ" value="${esc(f.q)}" placeholder="제목·키워드 검색"></div>
-    <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, v[0] + ' ' + v[1]])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>`).join('')}</div></div>
+    <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, `<i class="bxi">${v[0]}</i>${v[1]}`])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>`).join('')}</div></div>
     <ul class="box-list" id="boxList"></ul>`;
   boxList();
   const q = document.getElementById('boxQ'); q.oninput = () => { f.q = q.value; boxList(); };
@@ -2453,15 +2459,15 @@ function boxList() {
   const d = MY.load(), f = S.boxF, q = f.q.trim().toLowerCase();
   const l = d.box.filter(x => (!f.t || x.type === f.t) && (!q || (x.title + ' ' + (x.type === 'memo' ? x.text || '' : '')).toLowerCase().includes(q))).sort((a, b) => b.at - a.at);
   ul.innerHTML = l.length ? l.map(x => { const t = BOX_T[x.type] || BOX_T.web, dd = new Date(x.at);
-    return `<li data-id="${x.id}"><button class="bx-main" data-act="box-open" data-id="${x.id}"><span class="bx-ic" style="--c:${t[2]}">${t[0]}</span><span class="bx-t">${esc(x.title)}</span><span class="bx-d">${dd.getMonth() + 1}/${dd.getDate()}</span></button>
+    return `<li data-id="${x.id}"><button class="bx-main" data-act="box-open" data-id="${x.id}"><span class="bx-ic">${t[0]}</span><span class="bx-t">${esc(x.title)}</span><span class="bx-d">${dd.getMonth() + 1}/${dd.getDate()}</span></button>
       <button class="bx-more" data-act="box-more" data-id="${x.id}" aria-label="더보기">⋯</button>
       ${x.type === 'memo' && S.boxOpen === x.id ? `<div class="bx-memo">${linkify(x.text || '')}</div>` : ''}</li>`; }).join('')
     : `<li class="bx-empty">${d.box.length ? '찾는 항목이 없어요' : '유튜브·인스타·웹 주소나 메모를 저장해 보세요.<br><small>안드로이드: 유튜브·블로그 등에서 <b>공유 → VOY™</b>로 바로 저장돼요</small>'}</li>`;
 }
 function boxForm(item, pre) {
   const x = item || { type: pre && pre.url ? boxGuess(pre.url) : pre ? 'memo' : 'yt', title: (pre && pre.title) || '', url: (pre && pre.url) || '', text: (pre && pre.text) || '' };
-  openModal(`<div class="modal-head"><h3>${item ? '보관함 수정' : pre ? '📥 공유받은 내용 저장' : '📦 보관함에 추가'}</h3><button class="icon-x" data-close>${I('x')}</button></div>
-    <div class="modal-body"><label class="lbl">종류</label><div class="bx-types">${Object.entries(BOX_T).map(([k, v]) => `<button type="button" data-bt="${k}" class="${x.type === k ? 'on' : ''}">${v[0]} ${v[1]}</button>`).join('')}</div>
+  openModal(`<div class="modal-head"><h3>${item ? 'Digital Hub 수정' : pre ? '📥 공유받은 내용 저장' : '📦 Digital Hub에 추가'}</h3><button class="icon-x" data-close>${I('x')}</button></div>
+    <div class="modal-body"><label class="lbl">종류</label><div class="bx-types">${Object.entries(BOX_T).map(([k, v]) => `<button type="button" data-bt="${k}" class="${x.type === k ? 'on' : ''}"><i class="bxi lg">${v[0]}</i>${v[1]}</button>`).join('')}</div>
       <label class="lbl">제목·키워드 <span style="color:#e03131">*</span></label><input id="bxTitle" maxlength="60" value="${esc(x.title)}" placeholder="검색할 때 쓸 제목이나 키워드">
       <div id="bxUrlW"><label class="lbl">주소</label><div class="bx-url"><input id="bxUrl" inputmode="url" value="${esc(x.url)}" placeholder="https://"><button type="button" class="btn sm" id="bxPaste">붙여넣기</button></div></div>
       <div id="bxTextW"><label class="lbl">내용</label><textarea id="bxText" rows="5" maxlength="3000" placeholder="메모 내용">${esc(x.text)}</textarea></div></div>
@@ -2479,7 +2485,7 @@ function boxForm(item, pre) {
         if (type === 'memo' && !text) { toast('메모 내용을 입력해 주세요', 'err'); return; }
         const d = MY.load(), o = { type, title, url: type === 'memo' ? '' : url, text: type === 'memo' ? text : '' };
         if (item) Object.assign(d.box.find(y => y.id === item.id), o, { up: Date.now() }); else d.box.push({ id: myId(), at: Date.now(), ...o });
-        MY.save(); close(); toast(item ? '수정했어요' : '📦 보관함에 저장했어요'); if (document.getElementById('myBox')) boxRender(); else go('#/me');
+        MY.save(); close(); toast(item ? '수정했어요' : '📦 Digital Hub에 저장했어요'); if (document.getElementById('myBox')) boxRender(); else go('#/me');
       };
     } });
 }
@@ -2499,7 +2505,7 @@ function bakRender() {
   const d = MY.load(), last = d.lastBak, days = last ? Math.floor((Date.now() - last) / 864e5) : null;
   const cnt = Object.values(d.todos).reduce((a, l) => a + l.length, 0) + d.box.length;
   el.innerHTML = `<div class="my-h"><h4>💾 내 기기 데이터 백업·복원</h4></div>
-    <p class="hint" style="margin:0 0 8px">오늘 할 일과 Multi 보관함은 <b>이 기기에만</b> 저장돼요. 앱을 지우거나 폰을 바꾸기 전에 <b>백업 파일</b>을 받아 두고, 새 기기에서 올리면 그대로 복원돼요.</p>
+    <p class="hint" style="margin:0 0 8px">To do list와 Digital Hub는 <b>이 기기에만</b> 저장돼요. 앱을 지우거나 폰을 바꾸기 전에 <b>백업 파일</b>을 받아 두고, 새 기기에서 올리면 그대로 복원돼요.</p>
     ${cnt && (days === null || days >= 30) ? `<div class="td-carry">⚠️ ${days === null ? '아직 백업한 적이 없어요' : `마지막 백업 ${days}일 전`} — 백업 파일을 받아 두세요</div>` : ''}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary sm" data-act="bak-down">⬇ 백업 파일 받기</button><button class="btn sm" data-act="bak-up">⬆ 백업 파일 올리기</button>${last ? `<small class="muted" style="align-self:center">마지막 백업 ${fmtDT(new Date(last).toISOString())}</small>` : ''}</div>
     <input type="file" id="bakFile" accept=".json,application/json" hidden>`;
@@ -2517,7 +2523,7 @@ async function bakRestore(f) {
   const ids = new Set(d.box.map(x => x.id)); (o.box || []).forEach(x => { if (!ids.has(x.id)) { d.box.push(x); nb++; } });
   Object.entries(o.todos || {}).forEach(([k, l]) => { const cur = d.todos[k] = d.todos[k] || [], have = new Set(cur.map(x => x.id)); l.forEach(x => { if (!have.has(x.id)) { cur.push(x); nt++; } }); });
   Object.assign(d.done, o.done || {}); Object.assign(d.asked, o.asked || {});
-  MY.save(); myRenderAll(); toast(`복원했어요 — 보관함 ${nb}개 · 할 일 ${nt}개 추가 (이미 있던 항목은 그대로)`);
+  MY.save(); myRenderAll(); toast(`복원했어요 — Digital Hub ${nb}개 · 할 일 ${nt}개 추가 (이미 있던 항목은 그대로)`);
 }
 /* ---------------- Voice 심사 (지정된 심사자만) ---------------- */
 const rvDue = iso => { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}(${'일월화수목금토'[d.getDay()]}) ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
@@ -3326,7 +3332,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261113.2001</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.0055</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3357,7 +3363,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261113.2001`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.0055`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3453,7 +3459,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261113.2001" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.0055" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3478,7 +3484,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261113.2001" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.0055" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3588,7 +3594,7 @@ document.addEventListener('click', async e => {
     case 'box-f': S.boxF.t = t.dataset.t; boxRender(); break;
     case 'box-open': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; if (x.type === 'memo') { S.boxOpen = S.boxOpen === x.id ? null : x.id; boxList(); } else window.open(x.url, '_blank', 'noopener'); break; }
     case 'box-more': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break;
-      openModal(`<div class="modal-head"><h3>${(BOX_T[x.type] || BOX_T.web)[0]} ${esc(x.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
+      openModal(`<div class="modal-head"><h3 style="display:flex;align-items:center;gap:8px"><i class="bxi lg">${(BOX_T[x.type] || BOX_T.web)[0]}</i>${esc(x.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
         <div class="modal-body"><p class="hint" style="word-break:break-all;white-space:pre-wrap">${esc(x.type === 'memo' ? x.text : x.url)}</p></div>
         <div class="modal-foot bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">복사</button><button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>`); break; }
     case 'box-go': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) window.open(x.url, '_blank', 'noopener'); break; }
