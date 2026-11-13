@@ -242,7 +242,7 @@ textarea.inp{min-height:77px;resize:vertical;line-height:1.4}
       <div class="ptitle">🎯 룰렛 칸 <span class="cnt" id="menuCnt"></span></div>
       <div class="chips" id="menuChips"></div>
       <div class="row" style="gap:6.5px">
-        <input class="inp" id="menuInp" maxlength="12" placeholder="칸 추가 (예: 1번, 당첨)">
+        <input class="inp" id="menuInp" maxlength="12" placeholder="칸 추가 (예: 품목명, 당첨)">
         <button class="btn sm y" id="menuAdd" style="flex:0 0 auto">추가</button>
       </div>
       <div class="presets" id="presets"></div>
@@ -501,13 +501,14 @@ addEventListener('hashchange',route);
    1. 룰렛 다트
 ========================================================= */
 const PRESETS={
-  '1~6':['1','2','3','4','5','6'],
-  '1~10':['1','2','3','4','5','6','7','8','9','10'],
-  'A~F':['A','B','C','D','E','F'],
+  '🎲 주사위':['⚀','⚁','⚂','⚃','⚄','⚅'],
+  'ETC':['로수바미브','아토바미브','자디앙','트루셋','리알트리스','트윈스타','에독사반'],
+  'OTC':['안티푸라민','라라올라','비판텐','삐콤씨','마그비','메가트루','비타민씨','아이미루'],
   'O · X':['O','X'],
   '당첨 · 꽝':['당첨','꽝','꽝','꽝','꽝','꽝']
 };
-let menu=store.get('wheelItems',PRESETS['1~6'].slice()), wAngle=0, spinning=false;
+let menu=store.get('wheelItems',PRESETS['🎲 주사위'].slice()), wAngle=0, spinning=false;
+if(menu.join()==='1,2,3,4,5,6')menu=PRESETS['🎲 주사위'].slice();   // 예전 1~6 → 주사위
 $('#presets').innerHTML=Object.keys(PRESETS).map(k=>`<button class="btn sm w" data-p="${k}">${k}</button>`).join('');
 $$('[data-p]').forEach(b=>b.onclick=()=>{if(spinning)return;menu=PRESETS[b.dataset.p].slice();renderMenu();toast(`${b.dataset.p} 룰렛으로 바꿨어요`)});
 function renderMenu(){
@@ -526,6 +527,16 @@ function addMenu(){
 $('#menuAdd').onclick=addMenu;
 $('#menuInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)addMenu()});
 
+/* 주사위 눈(점 1~6) 그리기 */
+function drawDie(ctx,x,y,s,v){
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/2);
+  const h=s/2,rr=s*.2;
+  ctx.beginPath();ctx.moveTo(-h+rr,-h);ctx.arcTo(h,-h,h,h,rr);ctx.arcTo(h,h,-h,h,rr);ctx.arcTo(-h,h,-h,-h,rr);ctx.arcTo(-h,-h,h,-h,rr);ctx.closePath();
+  ctx.fillStyle='#fff';ctx.fill();ctx.lineWidth=5;ctx.strokeStyle=INK;ctx.stroke();
+  const q=s*.27,P={1:[[0,0]],2:[[-q,-q],[q,q]],3:[[-q,-q],[0,0],[q,q]],4:[[-q,-q],[q,-q],[-q,q],[q,q]],5:[[-q,-q],[q,-q],[0,0],[-q,q],[q,q]],6:[[-q,-q],[q,-q],[-q,0],[q,0],[-q,q],[q,q]]}[v];
+  ctx.fillStyle=v===1?'#ff4d4d':INK;P.forEach(([a,b])=>{ctx.beginPath();ctx.arc(a,b,s*(v===1?.13:.095),0,2*Math.PI);ctx.fill()});
+  ctx.restore();
+}
 function drawWheel(){
   const c=$('#wheel'),ctx=c.getContext('2d'),S=c.width,cx=S/2,r=S/2-30,n=menu.length,seg=2*Math.PI/n;
   ctx.clearRect(0,0,S,S);
@@ -538,6 +549,8 @@ function drawWheel(){
   const fs=n<=6?46:n<=10?38:n<=13?32:28;
   for(let i=0;i<n;i++){
     ctx.save();ctx.rotate((i+.5)*seg-Math.PI/2);
+    const dv='⚀⚁⚂⚃⚄⚅'.indexOf(menu[i]);
+    if(dv>=0){drawDie(ctx,r*.6,0,fs*1.25,dv+1);ctx.restore();continue}
     let t=menu[i];if(t.length>6)t=t.slice(0,6)+'…';
     ctx.font=`${fs}px "Jua","Malgun Gothic",sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.lineWidth=9;ctx.strokeStyle='#fff';ctx.lineJoin='round';ctx.strokeText(t,r*.6,0);
@@ -564,7 +577,7 @@ function spin(){
     if(p<1)requestAnimationFrame(f);
     else{
       wAngle=fin%TAU;drawWheel();spinning=false;$('#spinBtn').disabled=false;
-      const m=menu[idx];fanfare();confetti();
+      const m=('⚀⚁⚂⚃⚄⚅'.indexOf(menu[idx])>=0?'🎲 '+('⚀⚁⚂⚃⚄⚅'.indexOf(menu[idx])+1):menu[idx]);fanfare();confetti();
       modal({emoji:'🎯',label:'룰렛이 멈춘 곳은~',title:esc(m)+'!',sub:'답이 보이(VOY)죠? 😉',buttons:[
         {t:'공유',cls:'w',fn:()=>copyText(`룰렛 결과: ${m}! 🎯 (VOY FunVOY!! 룰렛 다트)`)},
         {t:'한 번 더!',cls:'r',fn:()=>setTimeout(spin,250)}]});
@@ -726,7 +739,7 @@ emptyTray();renderHist();
    4. 랜덤 뽑기
 ========================================================= */
 let drawMode='win',drawK=store.get('dk',1),drawBusy=false;
-$('#drawNames').value=store.get('dnames','김대리, 이과장, 박주임, 최사원, 정차장, 한부장');
+$('#drawNames').value=store.get('dnames','유일한, 호미리, 유재라, 서재필, 유특한, 유명한');
 const getNames=()=>[...new Set($('#drawNames').value.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean))];
 function syncDraw(){
   const n=getNames().length;$('#drawCnt').textContent=`${n}명`;
