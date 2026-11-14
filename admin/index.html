@@ -235,6 +235,13 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .rv-tot td{border-top:2px solid var(--border)!important;background:var(--surface2)}
 .rv-v{color:#7c3aed}.rv-top1 td{background:var(--gold-soft,#fff7e0)}
 .lastm{min-width:120px;line-height:1.3}.lastm b{display:block;font-size:12.5px;white-space:nowrap}.lastm small{color:var(--muted);font-size:11px;white-space:nowrap}
+.ar-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}@media(max-width:1100px){.ar-grid{grid-template-columns:1fr}}
+.ar-form{display:flex;gap:12px;flex-wrap:wrap}.ar-form>div{flex:1;min-width:160px}
+.ar-imgs{display:flex;gap:8px;flex-wrap:wrap}.ar-th{position:relative;width:76px;height:76px}.ar-th img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.ar-th button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:#222;color:#fff;font-size:11px;cursor:pointer}
+.ar-add{width:76px;height:76px;border-radius:10px;border:1.5px dashed var(--border);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:20px;cursor:pointer;color:var(--muted)}.ar-add small{font-size:10.5px}
+.ar-list{max-height:640px;overflow-y:auto}.ar-row{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}.ar-row.on{background:var(--accent-soft)}
+.ar-main{flex:1;min-width:0;text-align:left;border:0;background:none;padding:10px 4px;cursor:pointer;color:var(--text)}.ar-main small{display:block;color:var(--muted);font-size:11.5px}.ar-main b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13.5px}
 .no-chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:800;border:1px solid var(--border);color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .no-chip.gold{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--gold)}
 .no-chip.dash{border-style:dashed;color:var(--muted)}
@@ -881,6 +888,7 @@ const Local = (() => {
   function load() {
     if (db) return db; try { db = JSON.parse(ls.get(K)); } catch (e) { db = null; }
     if (!db || !db.users || db.ver !== DEMO_VER) { ls.del(S); seed(); db.ver = DEMO_VER; save(); }   // 예전 버전 데모 데이터 → 새로 만들기
+    if (!db.boards.some(b => b.id === 'arch_etc')) { db.boards.push({ id: 'arch_etc', name: '📦 이전 VOY', color: '#94a3b8', sort: 99, admin_only: true }, { id: 'arch_otc', name: '📦 이전 VOY', color: '#94a3b8', sort: 99, admin_only: true, org: 'otc' }); save(); }
     return db;
   }
   function save() {
@@ -980,9 +988,11 @@ const API = {
   },
   /* 최근 사용 메뉴 기록 (관리자 콘솔 회원 관리 '최근 사용'에 표시) · 같은 메뉴는 1분에 한 번만 */
   _lastMenu: null,
-  async touchMenu(menu) {
+  async touchMenu(menu, hold) {
     if (!this.uid || !menu) return; const now = Date.now();
-    if (this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
+    if (!hold && this._holdUntil > now && /^(피드|글 보기)$/.test(menu)) return;   // 글 등록 직후 자동으로 넘어가는 화면은 덮어쓰지 않음
+    if (hold) this._holdUntil = now + 120e3;
+    if (!hold && this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
     this._lastMenu = { m: menu, t: now }; const iso = new Date(now).toISOString();
     try {
       if (LOCAL) { const u = Local.db.users.find(x => x.id === this.uid); if (u) { u.last_seen = iso; u.last_menu = menu; u.last_menu_at = iso; Local.save(); } }
@@ -1035,9 +1045,9 @@ const API = {
       if (month) a = a.filter(p => p.month_key === month); if (board) a = a.filter(p => p.board_id === board);
       if (mine) a = a.filter(p => p.user_id === this.uid);
       if (q) { const s = q.toLowerCase(); a = a.filter(p => (p.title + ' ' + p.body + ' ' + p.author_nickname).toLowerCase().includes(s)); }
-      a.sort((x, y) => y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
+      a.sort((x, y) => (y.created_at || '').localeCompare(x.created_at || '') || y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
     }
-    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('id', { ascending: false }).range(offset, offset + limit - 1);
+    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + limit - 1);   // 원래 날짜순 (이전 VOY 글도 제 날짜 자리에)
     if (pinned === true) qy = qy.eq('is_pinned', true); if (pinned === false) qy = qy.eq('is_pinned', false);
     if (month) qy = qy.eq('month_key', month); if (board) qy = qy.eq('board_id', board);
     if (mine) qy = qy.eq('mine', true);
@@ -1083,6 +1093,19 @@ const API = {
     const row = must(res);
     if (row.is_pinned && !keepPinned) await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', row.id);
     return this.getPost(row.id);
+  },
+  /* 📦 이전 VOY 글 옮겨 담기 (admin 전용) */
+  async archivePost({ board_id, nick, date, title, body, images, link }) {
+    if (!LOCAL) return must(await sb.rpc('admin_archive_post', { board_: board_id, nick, at_: date, title_: title, body_: body || '', images_: images || [], link_: link || null }));
+    if (this.profile?.role !== 'super') throw new Error('이전 글 가져오기는 최고관리자만 할 수 있습니다');
+    const db = Local.db, b = db.boards.find(x => x.id === board_id), at = new Date(date + 'T09:00:00+09:00').toISOString();
+    const p = { id: ++db.seq.post, org: orgOf(b) || this.room, user_id: null, board_id, title, body: body || '', link_url: link || null, images: images || [], pdf: null, is_pinned: false,
+      month_key: date.slice(2, 4) + date.slice(5, 7), month_seq: null, author_nickname: nick, author_dept: null, author_role: 'archive', like_count: 0, dislike_count: 0, comment_count: 0, created_at: at, updated_at: at };
+    db.posts.push(p); Local.save(); return p.id;
+  },
+  async archiveUpdate(id, { nick, date, title, body }) {
+    if (!LOCAL) { must(await sb.rpc('admin_archive_update', { pid: id, nick, at_: date, title_: title, body_: body || '' })); return; }
+    const p = Local.db.posts.find(x => x.id === id); Object.assign(p, { author_nickname: nick, title, body, month_key: date.slice(2, 4) + date.slice(5, 7), created_at: new Date(date + 'T09:00:00+09:00').toISOString() }); Local.save();
   },
   async updatePost(id, patch) {
     id = +id;
@@ -1939,7 +1962,7 @@ const root = document.getElementById('root');
 const A = { likeCounts: [], dtList: {}, dtView: {}, popups: [], me: null, page: 'posts', boards: [], settings: {}, posts: [], comments: [], profiles: [], events: [], sel: new Set(), pageNo: 1,
   f: { posts: { month: curMonth(), board: '', sort: 'new', q: '' }, comments: { month: curMonth(), q: '' }, members: { role: '', likeMonth: curMonth() }, rank: { month: curMonth(), inclAdmin: false }, events: { month: curMonth() } } };
 const PER = 30;
-const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '권한·운영진'], ['rank', 'trophy', '순위·점수 관리'], ['review', 'clipboard', 'Voice 심사'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
+const NAV = [['posts', 'doc', '게시글 관리'], ['comments', 'msg', '댓글 관리'], ['members', 'users', '회원 관리'], ['admins', 'shield', '권한·운영진'], ['rank', 'trophy', '순위·점수 관리'], ['review', 'clipboard', 'Voice 심사'], ['archive', 'download', '이전 VOY 글'], ['events', 'gift', '이벤트 관리'], ['popups', 'image', '팝업 관리'], ['research', 'clipboard', '리서치'], ['settings', 'settings', '설정']];
 const pmap = () => { const m = {}; A.profiles.forEach(p => m[p.id] = p); return m; };
 const boardOf = id => A.boards.find(b => b.id === id) || { name: '-', color: '#888' };
 const W = () => A.settings.score || { like: 1, comment: 2 };
@@ -1969,7 +1992,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261114.1323</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.0733</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -1986,7 +2009,7 @@ function renderLogin(msg) {
   };
 }
 window.addEventListener('hashchange', () => { if (A.me) route(); });
-const navAllowed = () => NAV.filter(([k]) => k === 'admins' || k === 'review' ? A.me.role === 'super' : hasPerm(A.me, k));
+const navAllowed = () => NAV.filter(([k]) => k === 'admins' || k === 'review' || k === 'archive' ? A.me.role === 'super' : hasPerm(A.me, k));
 function route() {
   const p = location.hash.replace(/^#\/?/, '') || 'posts', allowed = navAllowed();
   if (!allowed.length) { root.innerHTML = `<div class="login"><div class="box"><h1>권한이 없습니다</h1><p class="hint">최고관리자에게 메뉴 권한을 요청하세요.</p><button class="btn block" data-act="logout" style="margin-top:14px">로그아웃</button></div></div>`; return; }
@@ -2010,7 +2033,7 @@ function layout() {
 function renderPage() {
   const c = document.getElementById('content'); if (!c) return;
   const fa = document.activeElement, keep = fa && fa.dataset && fa.dataset.tf ? { t: fa.dataset.tf, k: fa.dataset.k, pos: fa.selectionStart } : null;
-  ({ posts: pagePosts, comments: pageComments, members: pageMembers, admins: pageAdmins, rank: pageRank, review: pageReview, events: pageEvents, popups: pagePopups, research: pageResearch, settings: pageSettings })[A.page](c);
+  ({ posts: pagePosts, comments: pageComments, members: pageMembers, admins: pageAdmins, rank: pageRank, review: pageReview, archive: pageArchive, events: pageEvents, popups: pagePopups, research: pageResearch, settings: pageSettings })[A.page](c);
   if (keep) { const n = document.querySelector(`[data-tf="${keep.t}"][data-k="${keep.k}"]`); if (n) { n.focus(); try { n.setSelectionRange(keep.pos, keep.pos); } catch (e) {} } }
 }
 /* 한 줄짜리 작은 통계 (회원 관리와 같은 모양) */
@@ -2083,7 +2106,7 @@ function postCols() {
   const P = pmap(), w = W();
   return [
     { k: 'id', l: '누적', v: p => p.id, cls: 'num dim' },
-    { k: 'no', l: '글번호', v: p => postNo(p), r: p => postNo(p) ? `<span class="no-chip">${postNo(p)}</span>` : `<span class="dim" title="admin·운영진·통합 회원 글은 글번호·시상에서 제외">${p.author_role === 'admin' ? '관리자' : (k => k ? KIND_LABEL[k].replace(/ \(.*\)/, '') : '제외')(memberKind((A.profiles || []).find(u => u.id === p.user_id)))}</span>` },
+    { k: 'no', l: '글번호', v: p => postNo(p), r: p => postNo(p) ? `<span class="no-chip">${postNo(p)}</span>` : `<span class="dim" title="admin·운영진·통합 회원 글·이전 VOY 글은 글번호·시상에서 제외">${p.author_role === 'archive' ? '📦 이전 VOY' : p.author_role === 'admin' ? '관리자' : (k => k ? KIND_LABEL[k].replace(/ \(.*\)/, '') : '제외')(memberKind((A.profiles || []).find(u => u.id === p.user_id)))}</span>` },
     { k: 'board', l: '게시판', v: p => boardOf(p.board_id).name, cls: 'nowrap' },
     { k: 'nick', l: '닉네임', v: p => p.author_nickname, cls: 'b nowrap' },
     { k: 'name', l: '성명 🔒', sup: true, v: p => (P[p.user_id] || {}).real_name || (p.user_id ? '' : '탈퇴'), cls: 'nowrap' },
@@ -2687,6 +2710,50 @@ function rvCSV(V) {
   rows.forEach(r => out.push([r.rank || '', 'V' + r.seq, r.month_key && r.month_seq ? `${r.month_key}_${String(r.month_seq).padStart(3, '0')}` : '', r.title || '', r.nickname || '', r.real_name || '', r.total, r.n3, r.n2, r.n1, r.voters]));
   csv(`VOY_심사_${D.round.org}_${D.round.month_key}_${D.round.id}.csv`, out);
 }
+
+/* ---------------- 📦 이전 VOY 글 가져오기 (최고관리자 전용) ----------------
+   이전 VOY에서 복사한 글을 '그때의 닉네임 + 원래 날짜'로 '📦 이전 VOY' 게시판에 옮겨 담음.
+   회원 계정과 연결하지 않음 · 글번호·순위·시상·히든 보이스 제외 · 새 글 알림 없음 */
+function arState() { return A.ar = A.ar || { board: '', date: '', imgs: [], edit: null }; }
+function pageArchive(c) {
+  const V = arState(), boards = A.boards;
+  const archB = boards.find(b => /^arch_/.test(b.id));
+  if (!V.board || !boards.some(b => b.id === V.board)) V.board = archB ? archB.id : (boards[0] || {}).id;
+  const list = A.posts.filter(p => p.author_role === 'archive').sort((a, b) => b.id - a.id);
+  const E = V.edit && A.posts.find(p => p.id === V.edit);
+  const d0 = E ? E.created_at.slice(0, 10) : V.date;
+  c.innerHTML = `<div class="ar-grid"><div class="panel"><div class="panel-head"><div><h2>${I('download', 19)} ${E ? '이전 VOY 글 고치기' : '이전 VOY 글 가져오기'} · ${ORG_NAME[API.room]}</h2>
+      <p>이전 VOY에서 <b>제목·본문을 복사해 붙여넣고</b> 그때의 닉네임과 날짜를 적으면 <b>📦 이전 VOY</b> 게시판에 원래 날짜 순서로 들어가요 · 회원 계정과 연결되지 않고, 글번호·순위·시상·알림에서 빠져요</p></div>
+      ${E ? `<button class="btn sm" data-act="ar-cancel">${I('x', 14)} 고치기 취소</button>` : ''}</div>
+    ${archB ? '' : '<div class="notice-box" style="margin-bottom:10px">⚠️ <b>📦 이전 VOY</b> 게시판이 아직 없어요 — Supabase에서 <b>voy_patch_archive.sql</b>을 먼저 실행해 주세요.</div>'}
+    <div class="ar-form">
+      <div><label class="lbl">게시판</label><select id="arBoard" ${E ? 'disabled' : ''}>${boards.map(b => `<option value="${b.id}" ${(E ? E.board_id : V.board) === b.id ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div>
+      <div><label class="lbl">원래 날짜</label><input type="date" id="arDate" value="${esc(d0 || '')}" max="${new Date().toISOString().slice(0, 10)}"></div>
+      <div style="flex:2"><label class="lbl">원래 닉네임</label><input id="arNick" maxlength="30" autocomplete="off" value="${esc(E ? E.author_nickname : '')}" placeholder="예) 반짝이는수달27"></div></div>
+    <label class="lbl">제목</label><input id="arTitle" maxlength="120" autocomplete="off" value="${esc(E ? E.title : '')}" placeholder="이전 VOY 글 제목 붙여넣기">
+    <label class="lbl">본문</label><textarea id="arBody" rows="12" placeholder="이전 VOY 글 본문 붙여넣기">${esc(E ? (E.body || '') : '')}</textarea>
+    ${E ? '' : `<label class="lbl">사진 (선택 · 최대 10장)</label><div class="ar-imgs" id="arImgs"></div><input type="file" id="arFile" accept="image/*" multiple hidden>
+    <label class="lbl">링크 (선택)</label><input id="arLink" inputmode="url" autocomplete="off" placeholder="https://">`}
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">${E ? `<button class="btn primary" data-act="ar-update" data-id="${E.id}">${I('edit', 16)} 고친 내용 저장</button>`
+      : `<button class="btn primary" data-act="ar-save">${I('plus', 16)} 저장하고 다음 글 ▶</button>`}</div></div>
+    <div class="panel"><div class="panel-head"><div><h2>가져온 글 <small class="dim" style="font-weight:600">${list.length}건</small></h2><p>원래 날짜 · 닉네임 · 제목 — 누르면 고치기</p></div></div>
+      <div class="ar-list">${list.map(p => `<div class="ar-row ${V.edit === p.id ? 'on' : ''}"><button class="ar-main" data-act="ar-edit" data-id="${p.id}"><small>${fmtDate(p.created_at)} · ${esc(p.author_nickname || '')} · ${esc((A.boards.find(b => b.id === p.board_id) || {}).name || '')}</small><b>${esc(p.title)}</b></button>
+        <button class="icon-x" data-act="ar-del" data-id="${p.id}" title="삭제">${I('trash', 15)}</button></div>`).join('') || '<div class="empty">아직 가져온 글이 없어요</div>'}</div></div></div>`;
+  const up = document.getElementById('arImgs'), fi = document.getElementById('arFile');
+  const paint = () => { if (!up) return; up.innerHTML = V.imgs.map((f, k) => `<span class="ar-th"><img src="${f.prev}" alt=""><button type="button" data-rm="${k}">✕</button></span>`).join('') + (V.imgs.length < 10 ? `<button type="button" class="ar-add" id="arAdd">📷<small>사진 추가</small></button>` : '');
+    up.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { V.imgs.splice(+b.dataset.rm, 1); paint(); }); const ab = document.getElementById('arAdd'); if (ab) ab.onclick = () => fi.click(); };
+  if (fi) fi.onchange = () => { [...fi.files].slice(0, 10 - V.imgs.length).forEach(f => V.imgs.push({ file: f, prev: URL.createObjectURL(f) })); fi.value = ''; paint(); };
+  paint();
+  const b = document.getElementById('arBoard'); if (b && !E) b.onchange = () => { V.board = b.value; };
+  document.getElementById('arDate').onchange = e => { if (!E) V.date = e.target.value; };
+}
+async function arCollect() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const o = { board_id: g('arBoard'), date: g('arDate'), nick: g('arNick').trim(), title: g('arTitle').trim(), body: g('arBody').replace(/\s+$/, ''), link: g('arLink').trim() };
+  if (!o.date) throw new Error('원래 날짜를 고르세요'); if (!o.nick) throw new Error('원래 닉네임을 입력하세요'); if (!o.title) throw new Error('제목을 붙여넣으세요');
+  if (o.link && !/^https?:\/\//i.test(o.link)) throw new Error('링크는 http로 시작해야 해요');
+  return o;
+}
 /* ---------------- 이벤트(히든보이스) 관리 ---------------- */
 function slotsFor(ev) {
   return [...ev.numbers].sort((a, b) => a - b).map((n, i) => {
@@ -3233,6 +3300,17 @@ document.addEventListener('click', async e => {
     case 'mrole': A.f.members.role = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
     case 'morg': A.f.members.org = t.dataset.v; tsOf('members').page = 1; renderPage(); break;
     case 'org': if (API.room !== t.dataset.org) { API.setRoom(t.dataset.org); A.awMonth = A.awMonth; A.rv = null; root.querySelector('#content').innerHTML = '<div class="loading">불러오는 중…</div>'; await loadAll(); route(); toast(`${ORG_NAME[t.dataset.org]} 커뮤니티 관리로 전환했어요`); } break;
+    case 'ar-save': { const V = arState(); let o; try { o = await arCollect(); } catch (er) { toast(er.message, 'err'); break; }
+      busy(t, true); try { const images = []; for (const x of V.imgs) images.push(await API.upload(x.file, 'image'));
+        await API.archivePost({ ...o, images }); V.board = o.board_id; V.date = o.date; V.imgs = [];
+        A.posts = await API.allPosts(); toast(`📦 저장했어요 — ${o.nick} · ${o.date}`); renderPage(); setTimeout(() => document.getElementById('arNick')?.focus(), 50); }
+      catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
+    case 'ar-edit': arState().edit = +t.dataset.id; renderPage(); window.scrollTo(0, 0); break;
+    case 'ar-cancel': arState().edit = null; renderPage(); break;
+    case 'ar-update': { let o; try { o = await arCollect(); } catch (er) { toast(er.message, 'err'); break; }
+      busy(t, true); try { await API.archiveUpdate(+t.dataset.id, o); A.posts = await API.allPosts(); arState().edit = null; toast('고쳤어요'); renderPage(); } catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
+    case 'ar-del': { const p = A.posts.find(x => x.id === +t.dataset.id); if (!p || !(await confirmBox(`「${esc(p.title)}」 을(를) 삭제할까요?`, '삭제', true))) break;
+      try { await API.deletePosts([p.id]); A.posts = await API.allPosts(); if (arState().edit === p.id) arState().edit = null; toast('삭제했어요'); renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'rv-new': { const V = rvState(); V.view = 'new'; V.draft = rvNewDraft(); renderPage(); break; }
     case 'rv-back': { const V = rvState(); V.view = 'list'; V.list = null; V.detail = null; renderPage(); break; }
     case 'rv-open': rvOpen(+t.dataset.id); break;

@@ -545,6 +545,7 @@ body:has(.policy) .theme-fab{display:none}
 .bx-url{display:flex;gap:6px}.bx-url input{flex:1}
 .bx-acts{display:flex;flex-wrap:wrap;gap:5px;padding:6px 22px 4px}.bx-acts .btn{height:28px;min-height:0;padding:0 10px;font-size:11.5px;border-radius:8px;flex:0 0 auto}
 .bx-view{margin:0;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:55vh;overflow-y:auto}
+.arch-b{flex-shrink:0;font-size:11px;font-weight:800;color:#64748b;background:color-mix(in srgb,#94a3b8 18%,var(--surface));border-radius:99px;padding:2px 8px;margin-left:6px}
 .rv-banner{cursor:pointer;border-color:color-mix(in srgb,#7c3aed 45%,transparent)!important;background:color-mix(in srgb,#7c3aed 8%,var(--surface))!important}
 .rv-banner .gi{background:color-mix(in srgb,#7c3aed 16%,transparent)!important;font-size:18px}
 .rv-banner b{color:#7c3aed}
@@ -1067,6 +1068,7 @@ const Local = (() => {
   function load() {
     if (db) return db; try { db = JSON.parse(ls.get(K)); } catch (e) { db = null; }
     if (!db || !db.users || db.ver !== DEMO_VER) { ls.del(S); seed(); db.ver = DEMO_VER; save(); }   // 예전 버전 데모 데이터 → 새로 만들기
+    if (!db.boards.some(b => b.id === 'arch_etc')) { db.boards.push({ id: 'arch_etc', name: '📦 이전 VOY', color: '#94a3b8', sort: 99, admin_only: true }, { id: 'arch_otc', name: '📦 이전 VOY', color: '#94a3b8', sort: 99, admin_only: true, org: 'otc' }); save(); }
     return db;
   }
   function save() {
@@ -1223,9 +1225,9 @@ const API = {
       if (month) a = a.filter(p => p.month_key === month); if (board) a = a.filter(p => p.board_id === board);
       if (mine) a = a.filter(p => p.user_id === this.uid);
       if (q) { const s = q.toLowerCase(); a = a.filter(p => (p.title + ' ' + p.body + ' ' + p.author_nickname).toLowerCase().includes(s)); }
-      a.sort((x, y) => y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
+      a.sort((x, y) => (y.created_at || '').localeCompare(x.created_at || '') || y.id - x.id); return a.slice(offset, offset + limit).map(x => this._vis(x));
     }
-    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('id', { ascending: false }).range(offset, offset + limit - 1);
+    let qy = sb.from('posts_v').select('*').eq('org', this.room).order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + limit - 1);   // 원래 날짜순 (이전 VOY 글도 제 날짜 자리에)
     if (pinned === true) qy = qy.eq('is_pinned', true); if (pinned === false) qy = qy.eq('is_pinned', false);
     if (month) qy = qy.eq('month_key', month); if (board) qy = qy.eq('board_id', board);
     if (mine) qy = qy.eq('mine', true);
@@ -1271,6 +1273,19 @@ const API = {
     const row = must(res);
     if (row.is_pinned && !keepPinned) await sb.from('posts').update({ is_pinned: false }).eq('is_pinned', true).neq('id', row.id);
     return this.getPost(row.id);
+  },
+  /* 📦 이전 VOY 글 옮겨 담기 (admin 전용) */
+  async archivePost({ board_id, nick, date, title, body, images, link }) {
+    if (!LOCAL) return must(await sb.rpc('admin_archive_post', { board_: board_id, nick, at_: date, title_: title, body_: body || '', images_: images || [], link_: link || null }));
+    if (this.profile?.role !== 'super') throw new Error('이전 글 가져오기는 최고관리자만 할 수 있습니다');
+    const db = Local.db, b = db.boards.find(x => x.id === board_id), at = new Date(date + 'T09:00:00+09:00').toISOString();
+    const p = { id: ++db.seq.post, org: orgOf(b) || this.room, user_id: null, board_id, title, body: body || '', link_url: link || null, images: images || [], pdf: null, is_pinned: false,
+      month_key: date.slice(2, 4) + date.slice(5, 7), month_seq: null, author_nickname: nick, author_dept: null, author_role: 'archive', like_count: 0, dislike_count: 0, comment_count: 0, created_at: at, updated_at: at };
+    db.posts.push(p); Local.save(); return p.id;
+  },
+  async archiveUpdate(id, { nick, date, title, body }) {
+    if (!LOCAL) { must(await sb.rpc('admin_archive_update', { pid: id, nick, at_: date, title_: title, body_: body || '' })); return; }
+    const p = Local.db.posts.find(x => x.id === id); Object.assign(p, { author_nickname: nick, title, body, month_key: date.slice(2, 4) + date.slice(5, 7), created_at: new Date(date + 'T09:00:00+09:00').toISOString() }); Local.save();
   },
   async updatePost(id, patch) {
     id = +id;
@@ -2385,6 +2400,7 @@ function shell(inner, tab, fab = true) {
 /* 소속 표시: 모든 글(관리자 글 포함)의 소속은 최고관리자(admin) 화면에만 — 서버도 다른 사람에게는 값을 보내지 않음 */
 function deptHTML(x) {
   if (!S.me || S.me.role !== 'super') return '';
+  if (x.author_role === 'archive') return '';
   if (x.author_role === 'admin') return '<span class="dept">관리팀</span>';
   if (!x.author_dept) return '';
   const short = String(x.author_dept).trim().split(/\s+/).map(w => w.replace(/(.{2,})지점$/, '$1')).join(' ');   // Clinic1부 서부지점 → Clinic1부 서부
@@ -2400,7 +2416,7 @@ function cardHTML(p) {
     <div class="post-head">
       <div class="avatar" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
       <div class="post-main">
-        <div class="meta">${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}</div>
+        <div class="meta">${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${p.author_role === 'archive' ? '<span class="arch-b">📦 이전 VOY</span>' : ''}${deptHTML(p)}</div>
         <div class="card-row"><div class="card-txt">
           <h3 class="title">${esc(p.title)}</h3>
           <p class="excerpt one">${esc(String(p.body || '').split(/\n/).find(x => x.trim()) || '')}</p></div>
@@ -2408,7 +2424,7 @@ function cardHTML(p) {
             : p.link_url ? `<div class="card-thumbs"><span class="link-th" data-lthumb="${esc(p.link_url)}"${p.link_image ? '' : ' hidden'}>${p.link_image ? `<img src="${esc(p.link_image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.hidden=true">` : ''}<i>${I('link', 11)}</i></span></div>` : ''}
         </div>
         <div class="tags"><span class="tag" style="--c:${b.color}">${esc(b.name)}</span>${p.link_url ? `<span class="link-mini">${I('link', 13)} ${esc(p.link_title || host)}</span>` : ''}</div>
-        <div class="foot"><span>${timeAgo(p.created_at)}</span>
+        <div class="foot"><span>${p.author_role === 'archive' ? fmtDate(p.created_at) : timeAgo(p.created_at)}</span>
           <span class="stats"><span class="${S.react[p.id] === 'like' ? 'liked' : ''}">${I('heart', 16)} ${p.like_count}</span><span>${I('msg', 16)} ${p.comment_count}</span></span></div>
       </div>
     </div></article>`;
@@ -2748,8 +2764,8 @@ async function viewPost(id) {
       ${p.is_pinned ? `<div class="badge-row pin">${I('pin', 15)} 공지</div>` : ''}
       ${win ? `<div class="badge-row win">${I('gift', 15)} 🎉 ${+p.month_key.slice(2)}월 이벤트 당첨! ${win.rank}번째 히든 보이스 주인공!</div>` : ''}
       <div class="meta"><div class="avatar xs" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
-        ${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${deptHTML(p)}
-        <span class="spacer"></span><span class="muted" style="font-size:12px">${fmtDate(p.created_at, true)}</span></div>
+        ${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${p.author_role === 'archive' ? '<span class="arch-b">📦 이전 VOY</span>' : ''}${deptHTML(p)}
+        <span class="spacer"></span><span class="muted" style="font-size:12px">${fmtDate(p.created_at, p.author_role !== 'archive')}</span></div>
       <h2 class="title">${esc(p.title)}</h2>
       <div class="body-full">${linkify(p.body)}</div>
       ${p.link_url ? `<a class="link-wrap" href="${esc(safeUrl(p.link_url))}" target="_blank" rel="noopener"><img class="lw-img" data-lthumb="${esc(p.link_url)}" ${p.link_image ? `src="${esc(p.link_image)}"` : 'hidden'} alt="" referrerpolicy="no-referrer" onerror="this.hidden=true"><span class="link-card"><span class="lc-ic">${I('link', 18)}</span><span class="lc-txt"><b>${esc(p.link_title || (() => { try { return new URL(safeUrl(p.link_url)).host; } catch (e) { return '첨부 링크'; } })())}</b><small>${esc(p.link_url)}</small></span></span></a>` : ''}
@@ -3410,7 +3426,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1420</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261115.0733</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3441,7 +3457,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1420`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261115.0733`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3537,7 +3553,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1420" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261115.0733" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3562,7 +3578,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1420" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261115.0733" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
