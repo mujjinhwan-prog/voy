@@ -233,6 +233,7 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .rv-c3{background:color-mix(in srgb,#7c3aed 30%,transparent);font-weight:900}.rv-c2{background:color-mix(in srgb,#7c3aed 18%,transparent);font-weight:800}.rv-c1{background:color-mix(in srgb,#7c3aed 9%,transparent)}
 .rv-tot td{border-top:2px solid var(--border)!important;background:var(--surface2)}
 .rv-v{color:#7c3aed}.rv-top1 td{background:var(--gold-soft,#fff7e0)}
+.lastm{min-width:120px;line-height:1.3}.lastm b{display:block;font-size:12.5px;white-space:nowrap}.lastm small{color:var(--muted);font-size:11px;white-space:nowrap}
 .no-chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:800;border:1px solid var(--border);color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 .no-chip.gold{background:var(--gold-soft);border-color:color-mix(in srgb,var(--gold) 55%,transparent);color:var(--gold)}
 .no-chip.dash{border-style:dashed;color:var(--muted)}
@@ -974,6 +975,17 @@ const API = {
     try {
       if (LOCAL) { const u = Local.db.users.find(x => x.id === this.uid); if (u) { u.last_seen = new Date().toISOString(); Local.save(); } }
       else await sb.from('profiles').update({ last_seen: new Date().toISOString() }).eq('id', this.uid);
+    } catch (e) {}
+  },
+  /* 최근 사용 메뉴 기록 (관리자 콘솔 회원 관리 '최근 사용'에 표시) · 같은 메뉴는 1분에 한 번만 */
+  _lastMenu: null,
+  async touchMenu(menu) {
+    if (!this.uid || !menu) return; const now = Date.now();
+    if (this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
+    this._lastMenu = { m: menu, t: now }; const iso = new Date(now).toISOString();
+    try {
+      if (LOCAL) { const u = Local.db.users.find(x => x.id === this.uid); if (u) { u.last_seen = iso; u.last_menu = menu; u.last_menu_at = iso; Local.save(); } }
+      else await sb.from('profiles').update({ last_seen: iso, last_menu: String(menu).slice(0, 40), last_menu_at: iso }).eq('id', this.uid);
     } catch (e) {}
   },
   async changeNickname(nick, targetId) {
@@ -1816,6 +1828,7 @@ const QL = {
    ===================================================================== */
 function openSiteViewer(name, url, icon) {
   closeSiteViewer(true);
+  try { if (typeof API !== 'undefined' && API.touchMenu && !/\/admin\//.test(location.pathname)) API.touchMenu('바로가기 · ' + String(name).replace(/\|/g, ' ')); } catch (e) {}
   const sameOrigin = (() => { try { return new URL(url).origin === location.origin; } catch (e) { return false; } })();
   const w = document.createElement('div'); w.className = 'siteview'; w.id = 'siteViewer';
   w.innerHTML = `<div class="sv-bar">
@@ -1955,7 +1968,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261113.0931</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261114.1224</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -2162,6 +2175,7 @@ function pageMembers(c) {
     { k: 'posts', l: '게시글 🔒', sup: true, v: p => pc[p.id] || 0, cls: 'num', ns: true },
     { k: 'cmts', l: '댓글 🔒', sup: true, v: p => cc[p.id] || 0, cls: 'num', ns: true },
     { k: 'likes', l: `${I('heart', 14)} 누른 좋아요<br><small style="font-weight:500">${f.likeMonth ? monthLabel(f.likeMonth, true) : '누적'}</small>`, v: p => likesOf(p.id, f.likeMonth), cls: 'num c-like', ns: true },
+    { k: 'lastm', l: '최근 사용', v: p => p.last_menu_at || '', s: p => p.last_menu ? `${p.last_menu} ${fmtDT(p.last_menu_at)}` : '', r: p => p.last_menu ? `<div class="lastm"><b>${esc(p.last_menu)}</b><small>${fmtDT(p.last_menu_at)} · ${timeAgo(p.last_menu_at)}</small></div>` : '<span class="dim">-</span>' },
     { k: 'act', l: '관리', nosort: true, ns: true, v: () => '', r: p => `<div class="acts"><button class="ib" data-act="edit-member" data-id="${p.id}" title="회원 수정">${I('edit', 16)}</button></div>` }
   ]), { empty: '회원이 없습니다. [엑셀 일괄 등록]으로 회원 명단을 올려주세요.' });
   const nPw = users.filter(p => p.must_change_pw).length, nNew = users.filter(p => monthKeyOf(p.created_at) === mk).length;
@@ -3252,7 +3266,7 @@ document.addEventListener('click', async e => {
       const det = u => D.map(([f]) => (u || {})[f] || '');
       if (k === 'posts') csv(`게시글_${A.f.posts.month || '전체'}.csv`, [['누적번호', '글번호', '게시판', '닉네임', ...D.map(x => x[1]), '제목', '좋아요', '댓글', '점수', '작성일시'], ...list.map(p => [p.id, postNo(p), boardOf(p.board_id).name, p.author_nickname, ...det(P[p.user_id]), p.title, p.like_count, p.comment_count, scoreOf(p, w), fmtDT(p.created_at)])]);
       if (k === 'comments') csv(`댓글_${A.f.comments.month || '전체'}.csv`, [['누적번호', '닉네임', ...D.map(x => x[1]), '댓글', '원문 글번호', '작성일시'], ...list.map(x => [x.id, x.author_nickname, ...det(P[x.user_id]), x.body, x.post_id, fmtDT(x.created_at)])]);
-      if (k === 'members') csv('회원목록.csv', [['이메일', ...D.map(x => x[1]), '닉네임', '상태', '비밀번호 미변경', '가입일', '최근접속', '게시글', '댓글', `누른 좋아요(${A.f.members.likeMonth ? monthLabel(A.f.members.likeMonth) : '누적'})`], ...list.map(p => [p.email, ...det(p), p.nickname, p.status, p.must_change_pw ? 'Y' : '', fmtDT(p.created_at), fmtDT(p.last_seen), pc[p.id] || 0, cc[p.id] || 0, likesOf(p.id, A.f.members.likeMonth)])]);
+      if (k === 'members') csv('회원목록.csv', [['이메일', ...D.map(x => x[1]), '닉네임', '상태', '비밀번호 미변경', '가입일', '최근접속', '게시글', '댓글', `누른 좋아요(${A.f.members.likeMonth ? monthLabel(A.f.members.likeMonth) : '누적'})`, '최근 사용 메뉴', '최근 사용 일시'], ...list.map(p => [p.email, ...det(p), p.nickname, p.status, p.must_change_pw ? 'Y' : '', fmtDT(p.created_at), fmtDT(p.last_seen), pc[p.id] || 0, cc[p.id] || 0, likesOf(p.id, A.f.members.likeMonth), p.last_menu || '', p.last_menu_at ? fmtDT(p.last_menu_at) : ''])]);
       if (k === 'admins') csv('관리자계정.csv', [['아이디', ...D.map(x => x[1]), '역할', '메뉴권한', '가입일', '최근접속'], ...list.map(p => [p.login_id, ...det(p), p.role, (p.perms || []).join('/'), fmtDT(p.created_at), fmtDT(p.last_seen)])]);
       if (k === 'rank') csv(`순위_${A.f.rank.month || '전체'}.csv`, [['순위', '닉네임', ...D.map(x => x[1]), '게시글', '받은 좋아요', '댓글', '점수'], ...list.map(o => [o.rank, o.nick, ...det(o.u), o.posts, o.likes, o.comments, o.score])]);
       break; }
