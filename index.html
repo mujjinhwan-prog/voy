@@ -437,11 +437,11 @@ body:has(.policy) .theme-fab{display:none}
 .nick-card .nbtn:disabled{opacity:.6}
 .nick-card p{font-size:12px;opacity:.85}
 .nick-card .nc-rule{opacity:.85;font-size:11px;margin-left:2px}
-.nick-card .nc-role{display:inline-block;margin-top:4px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.22);font-size:12.5px;font-weight:800}
-.nick-card .nc-dept{margin-top:7px;font-size:13px;opacity:.92}
+.nick-card .nc-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px}.nick-card .nc-role{display:inline-block;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.22);font-size:12.5px;font-weight:800}
+.nick-card .nc-dept{font-size:13px;opacity:.92}
 /* 피드가 아닌 화면(랭킹·내 정보 등)에서는 글쓰기 버튼을 작게, 하단 메뉴 바로 위로 */
 .fab.sm{width:46px;height:46px;bottom:calc(70px + env(safe-area-inset-bottom))}.fab.sm svg{width:21px;height:21px}
-.statgrid{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);text-align:center;padding-top:10px!important;padding-bottom:10px!important}.statgrid b{line-height:1.15}
 .statgrid b{display:block;font-size:24px;color:var(--main2);font-weight:900}
 .statgrid small{color:var(--muted);font-size:12.5px}
 .menu-row{display:flex;align-items:center;gap:14px;width:100%;text-align:left}
@@ -493,7 +493,7 @@ body:has(.policy) .theme-fab{display:none}
 .auth .err-msg{margin-top:4px;min-height:14px}
 .auth #asub{margin-top:2px}
 .auth .ver-tag{line-height:1.4}
-.my-sec h4{margin:0}.my-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.my-h h4 small{font-weight:500;color:var(--muted);font-size:12px;margin-left:4px}
+.my-sec h4{margin:0}.my-h h4 small.hub-sub{display:block;margin:3px 0 0}.my-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.my-h h4 small{font-weight:500;color:var(--muted);font-size:12px;margin-left:4px}
 .td-cnt{font-size:14px;color:var(--accent)}.td-stamp{font-size:12.5px;font-weight:900;color:#fff;background:linear-gradient(135deg,#ff922b,#e8590c);padding:4px 10px;border-radius:99px;transform:rotate(-3deg)}
 .td-bar{height:7px;border-radius:9px;background:var(--surface2);overflow:hidden;margin-bottom:10px}.td-bar i{display:block;height:100%;background:linear-gradient(90deg,#51cf66,#2f9e44);border-radius:9px;transition:width .35s}
 .td-carry{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px 11px;border-radius:12px;background:color-mix(in srgb,#ffd43b 22%,var(--surface));font-size:13px;margin-bottom:10px}.td-carry span{display:flex;gap:6px}
@@ -504,8 +504,14 @@ body:has(.policy) .theme-fab{display:none}
 .td-mv{display:flex;flex-direction:column}.td-mv button{border:0;background:none;color:var(--muted);font-size:9px;line-height:1;padding:2px 4px;cursor:pointer}.td-mv button:disabled{opacity:.25}
 .td-x{border:0;background:none;color:var(--muted);cursor:pointer;display:grid;padding:4px}
 .td-add{display:flex;gap:6px;margin-top:10px}.td-add input{flex:1}
-.td-hist{display:flex;align-items:center;gap:3px;margin-top:12px;flex-wrap:wrap}.td-hist small{color:var(--muted);font-size:11px;margin-right:4px}
-.td-day{width:20px;height:20px;border-radius:6px;background:var(--surface2);font-size:10px;display:grid;place-items:center;color:var(--muted)}
+.td-hist{margin-top:12px}.td-hist small{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}
+.td-strip{display:flex;gap:4px;overflow-x:auto;padding:3px 2px 4px;scrollbar-width:none}.td-strip::-webkit-scrollbar{display:none}
+.td-day{flex-shrink:0;position:relative;width:28px;height:28px;border-radius:8px;border:0;background:var(--surface2);font-size:11.5px;font-weight:700;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.td-day.fut{background:transparent;border:1.5px dashed var(--border)}.td-day i{position:absolute;bottom:2px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.td-day.sel{background:var(--accent)!important;color:var(--accent-ink,#fff)!important;border-color:var(--accent)}
+.td-other{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:10px;background:var(--surface2);font-size:12.5px;margin-bottom:10px}
+.td-none{color:var(--muted);font-size:13px;justify-content:center;border:0!important;padding:14px 0!important}
+.td-add input{font-size:13.5px}.td-add input::placeholder{font-size:13px}
 .td-day.part{background:color-mix(in srgb,#51cf66 25%,var(--surface2))}.td-day.ok{background:#2f9e44;color:#fff;font-weight:800}.td-day.today{outline:2px solid var(--accent);outline-offset:1px}
 .mc-wrap{text-align:center;position:relative;overflow:hidden;padding-top:26px!important}.mc-wrap h2{margin:6px 0 8px;font-size:22px;letter-spacing:.5px;color:#e8590c}.mc-wrap p{margin:0;line-height:1.6}
 .mc-emoji{font-size:58px;animation:mcPop .7s cubic-bezier(.2,1.6,.4,1)}
@@ -2408,32 +2414,37 @@ function todoPrevLeft() {   // 오늘 이전 가장 최근 날의 못 한 일
   const last = days[days.length - 1]; if (!last) return null;
   const left = d.todos[last].filter(x => !x.done); return left.length ? { day: last, left } : null;
 }
+const tdSel = () => S.tdDay || dayKey();   // 보고 있는 날 (기본: 오늘)
+const tdLabel = k => { const t = new Date(k + 'T00:00:00'); return `${t.getMonth() + 1}/${t.getDate()}(${'일월화수목금토'[t.getDay()]})`; };
 function todoRender() {
   const el = document.getElementById('myTodo'); if (!el) return;
-  const d = MY.load(), today = dayKey(), list = d.todos[today] || [], n = list.filter(x => x.done).length, all = list.length && n === list.length;
-  const prev = todoPrevLeft(), dt = new Date();
-  const hist = [...Array(14)].map((_, i) => { const t = new Date(); t.setDate(t.getDate() - 13 + i); const k = dayKey(t);
-    return `<span class="td-day ${d.done[k] ? 'ok' : (d.todos[k] || []).length ? 'part' : ''} ${k === today ? 'today' : ''}" title="${k}${d.done[k] ? ' · 미션 컴플릿' : ''}">${t.getDate()}</span>`; }).join('');
-  el.innerHTML = `<div class="my-h"><h4>✅ To do list !! <small>${dt.getMonth() + 1}/${dt.getDate()}(${'일월화수목금토'[dt.getDay()]})</small></h4>${all ? '<span class="td-stamp">🎉 오늘 완료</span>' : list.length ? `<b class="td-cnt">${n} / ${list.length}</b>` : ''}</div>
-    ${list.length ? `<div class="td-bar"><i style="width:${list.length ? n / list.length * 100 : 0}%"></i></div>` : ''}
+  const d = MY.load(), today = dayKey(), sel = tdSel(), isToday = sel === today, past = sel < today;
+  const list = d.todos[sel] || [], n = list.filter(x => x.done).length, all = list.length && n === list.length;
+  const prev = isToday ? todoPrevLeft() : null;
+  const strip = [...Array(21)].map((_, i) => { const t = new Date(); t.setDate(t.getDate() - 13 + i); const k = dayKey(t), cnt = (d.todos[k] || []).length;
+    return `<button class="td-day ${d.done[k] ? 'ok' : cnt ? 'part' : ''} ${k === today ? 'today' : ''} ${k === sel ? 'sel' : ''} ${k > today ? 'fut' : ''}" data-act="td-day" data-k="${k}" title="${tdLabel(k)}${cnt ? ` · ${cnt}개` : ''}${d.done[k] ? ' · 미션 컴플릿' : ''}">${new Date(k + 'T00:00:00').getDate()}${cnt && k > today ? '<i></i>' : ''}</button>`; }).join('');
+  el.innerHTML = `<div class="my-h"><h4>✅ To do list !! <small>${tdLabel(sel)}${isToday ? '' : past ? ' · 지난 날' : ' · 미리 계획'}</small></h4>${all ? `<span class="td-stamp">🎉 ${isToday ? '오늘' : ''} 완료</span>` : list.length ? `<b class="td-cnt">${n} / ${list.length}</b>` : ''}</div>
+    ${!isToday ? `<div class="td-other"><span>${past ? '📅 지난 날의 할 일이에요' : '🗓 미리 세우는 계획이에요'}</span><button class="btn sm" data-act="td-day" data-k="${today}">오늘로</button></div>` : ''}
+    ${list.length ? `<div class="td-bar"><i style="width:${n / list.length * 100}%"></i></div>` : ''}
     ${prev ? `<div class="td-carry">📌 ${+prev.day.slice(5, 7)}/${+prev.day.slice(8)}에 못 한 일 <b>${prev.left.length}개</b><span><button class="btn primary sm" data-act="td-carry" data-y="1">가져오기</button><button class="btn sm" data-act="td-carry" data-y="0">버리기</button></span></div>` : ''}
     <ul class="td-list">${list.map((x, i) => `<li class="${x.done ? 'done' : ''}" data-i="${i}"><button class="td-ck" data-act="td-ck" data-id="${x.id}" aria-label="체크">${x.done ? '✓' : ''}</button>
       <span class="td-t" data-act="td-ck" data-id="${x.id}">${esc(x.t)}</span><span class="td-mv"><button data-act="td-mv" data-id="${x.id}" data-d="-1" ${i ? '' : 'disabled'} aria-label="위로">▲</button><button data-act="td-mv" data-id="${x.id}" data-d="1" ${i < list.length - 1 ? '' : 'disabled'} aria-label="아래로">▼</button></span>
-      <button class="td-x" data-act="td-del" data-id="${x.id}" aria-label="삭제">${I('x', 14)}</button></li>`).join('')}</ul>
-    <div class="td-add"><input id="tdIn" maxlength="80" placeholder="오늘 꼭 해야 할 일을 적고 추가 클릭" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
-    <div class="td-hist"><small>최근 2주</small>${hist}</div>`;
+      <button class="td-x" data-act="td-del" data-id="${x.id}" aria-label="삭제">${I('x', 14)}</button></li>`).join('') || (!isToday ? `<li class="td-none">${past ? '이 날 적어 둔 할 일이 없어요' : '아래에 이 날 할 일을 적어 두세요'}</li>` : '')}</ul>
+    <div class="td-add"><input id="tdIn" maxlength="80" placeholder="${isToday ? "오늘 꼭 할일 '추가'" : `${tdLabel(sel)} 할일 '추가'`}" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
+    <div class="td-hist"><small>날짜를 누르면 그날 할 일 보기 · 앞으로 7일은 미리 계획</small><div class="td-strip">${strip}</div></div>`;
   const inp = document.getElementById('tdIn');
   inp.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); todoAdd(); } };
+  const cur = el.querySelector('.td-day.sel'); if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'center' });
 }
 function todoAdd() {
   const inp = document.getElementById('tdIn'), v = (inp.value || '').trim(); if (!v) return inp.focus();
-  const d = MY.load(), k = dayKey(); (d.todos[k] = d.todos[k] || []).push({ id: myId(), t: v, done: false, at: Date.now() });
+  const d = MY.load(), k = tdSel(); (d.todos[k] = d.todos[k] || []).push({ id: myId(), t: v, done: false, at: Date.now() });
   delete d.done[k]; MY.save(); todoRender(); document.getElementById('tdIn')?.focus();
 }
 function todoCheck(id) {
-  const d = MY.load(), k = dayKey(), l = d.todos[k] || [], x = l.find(y => y.id === id); if (!x) return;
+  const d = MY.load(), k = tdSel(), l = d.todos[k] || [], x = l.find(y => y.id === id); if (!x) return;
   x.done = !x.done; const all = l.length && l.every(y => y.done);
-  if (all && !d.done[k]) { d.done[k] = true; MY.save(); todoRender(); missionComplete(l.length); return; }
+  if (all && !d.done[k]) { d.done[k] = true; MY.save(); todoRender(); if (k === dayKey()) missionComplete(l.length); return; }
   if (!all) delete d.done[k]; MY.save(); todoRender();
 }
 function missionComplete(n) {
@@ -2453,7 +2464,7 @@ const boxUrlIn = t => { const m = String(t || '').match(/https?:\/\/[^\s<>"']+/i
 function boxRender() {
   const el = document.getElementById('myBox'); if (!el) return;
   const d = MY.load(), f = S.boxF = S.boxF || { q: '', t: '' };
-  el.innerHTML = `<div class="my-h"><h4>📦 Digital Hub <small>${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
+  el.innerHTML = `<div class="my-h"><h4>📦 Digital Hub <small class="hub-sub">${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
     <div class="box-tools"><div class="box-q">${I('search', 15)}<input id="boxQ" value="${esc(f.q)}" placeholder="제목·키워드 검색"></div>
     <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, `<i class="bxi">${v[0]}</i>${v[1]}`])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>`).join('')}</div></div>
     <ul class="box-list" id="boxList"></ul>`;
@@ -3048,8 +3059,7 @@ async function viewMe() {
     ${me.status === 'blocked' ? `<div class="blocked">관리자에 의해 글쓰기·댓글이 제한된 계정입니다.</div>` : ''}
     <div class="nick-card me-card"><small>${monthLabel(curMonth())} 이달의 닉네임 <span class="nc-rule">(매월 1회 변경 가능)</span></small>
       <div class="nrow"><b>${esc(me.nickname)}</b><button class="nbtn" data-act="nick" ${changed && !isAdminRole(me.role) ? 'disabled' : ''}>${I('pen', 13)} ${changed && !isAdminRole(me.role) ? '이번 달 변경 완료' : '닉네임 변경'}</button></div>
-      <div class="nc-role">${meRoleLabel(me)}</div>
-      ${[me.org_branch || me.dept, me.work_branch].filter(Boolean).length ? `<div class="nc-dept">${esc([...new Set([me.org_branch || me.dept, me.work_branch].filter(Boolean))].join(' · '))}</div>` : ''}</div>
+      <div class="nc-line"><span class="nc-role">${meRoleLabel(me)}</span>${[me.org_branch || me.dept, me.work_branch].filter(Boolean).length ? `<span class="nc-dept">${esc([...new Set([me.org_branch || me.dept, me.work_branch].filter(Boolean))].join(' · '))}</span>` : ''}</div></div>
     <div class="box statgrid" id="mystats"><div><b>-</b><small>이달 작성</small></div><div><b>-</b><small>이달 점수</small></div><div><b>-</b><small>누적 작성</small></div></div>
     <div class="box" id="meReview" hidden></div>
     <div class="box my-sec" id="myTodo"></div>
@@ -3341,7 +3351,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1100</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1128</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3372,7 +3382,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1100`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1128`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3468,7 +3478,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1100" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1128" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3493,7 +3503,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1100" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1128" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3593,9 +3603,10 @@ document.addEventListener('click', async e => {
       if (!(await confirmBox('<b>심사를 제출할까요?</b><br><br>' + lines.join('<br>') + '<br><br><small>마감 전까지는 다시 제출해서 바꿀 수 있어요.</small>', '제출하기'))) break;
       t.disabled = true; try { await API.reviewSubmit(t.dataset.rid, sc); toast('✅ 심사를 제출했어요. 감사합니다!'); go('#/review'); } catch (er) { toast(friendly(er), 'err'); t.disabled = false; } break; }
     case 'td-add': todoAdd(); break;
+    case 'td-day': S.tdDay = t.dataset.k === dayKey() ? null : t.dataset.k; todoRender(); break;
     case 'td-ck': todoCheck(t.dataset.id); break;
-    case 'td-del': { const d = MY.load(), k = dayKey(); d.todos[k] = (d.todos[k] || []).filter(x => x.id !== t.dataset.id); const l = d.todos[k]; if (!(l.length && l.every(x => x.done))) delete d.done[k]; MY.save(); todoRender(); break; }
-    case 'td-mv': { const d = MY.load(), l = d.todos[dayKey()] || [], i = l.findIndex(x => x.id === t.dataset.id), j = i + +t.dataset.d; if (i < 0 || j < 0 || j >= l.length) break; [l[i], l[j]] = [l[j], l[i]]; MY.save(); todoRender(); break; }
+    case 'td-del': { const d = MY.load(), k = tdSel(); d.todos[k] = (d.todos[k] || []).filter(x => x.id !== t.dataset.id); const l = d.todos[k]; if (!(l.length && l.every(x => x.done))) delete d.done[k]; MY.save(); todoRender(); break; }
+    case 'td-mv': { const d = MY.load(), l = d.todos[tdSel()] || [], i = l.findIndex(x => x.id === t.dataset.id), j = i + +t.dataset.d; if (i < 0 || j < 0 || j >= l.length) break; [l[i], l[j]] = [l[j], l[i]]; MY.save(); todoRender(); break; }
     case 'td-carry': { const d = MY.load(), today = dayKey(), p = todoPrevLeft(); d.asked[today] = true;
       if (p && t.dataset.y === '1') { const l = d.todos[today] = d.todos[today] || []; p.left.forEach(x => l.push({ id: myId(), t: x.t, done: false, at: Date.now() })); delete d.done[today]; toast(`${p.left.length}개를 오늘 할 일로 가져왔어요`); }
       MY.save(); todoRender(); break; }
