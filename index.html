@@ -470,12 +470,15 @@ body:has(.policy) .theme-fab{display:none}
 .boot-splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .35s ease}
 .boot-splash.out{opacity:0}
 .boot-splash.out img{transform:scale(1.06)!important;transition:transform .35s ease}
-.boot-splash img{width:min(60vw,60vh);height:min(60vw,60vh);width:min(60vw,60dvh);height:min(60vw,60dvh);border-radius:50%;background:#fff;padding:3%;box-sizing:border-box;object-fit:contain;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) both,bootBreath 2.4s ease-in-out 2.1s infinite}
+.boot-splash img{width:min(80vw,80vh);height:min(80vw,80vh);width:min(80vw,72dvh);height:min(80vw,72dvh);border-radius:50%;background:#fff;padding:3%;box-sizing:border-box;object-fit:contain;box-shadow:0 14px 44px rgba(0,0,0,.16);animation:bootZoom 2.1s cubic-bezier(.22,.8,.25,1.08) .55s both,bootBreath 2.4s ease-in-out 2.65s infinite}
+.boot-splash .bs-word{position:absolute;left:0;right:0;top:50%;margin-top:-30px;text-align:center;font-size:48px;font-weight:600;letter-spacing:1px;color:#8a8f94;line-height:60px;animation:bsWord 1.5s ease both;pointer-events:none}
+.boot-splash .bs-word sup{font-size:20px;vertical-align:24px;margin-left:2px}
+@keyframes bsWord{0%{opacity:1;transform:none}35%{opacity:1;transform:none}100%{opacity:0;transform:translateY(40px) scale(.9)}}
 .boot-splash p{position:absolute;left:0;right:0;bottom:max(3.5vh,14px);margin:0;text-align:center;color:var(--muted);font-size:14px;animation:bootFade .6s ease 1.5s both}
 @keyframes bootZoom{0%{transform:scale(.14);opacity:0;filter:blur(4px)}35%{opacity:1;filter:blur(0)}100%{transform:scale(1)}}
 @keyframes bootBreath{50%{transform:scale(1.04)}}
 @keyframes bootFade{from{opacity:0;transform:translateY(6px)}}
-@media (prefers-reduced-motion:reduce){.boot-splash img,.boot-splash p{animation:none}}
+@media (prefers-reduced-motion:reduce){.boot-splash img,.boot-splash p{animation:none}.boot-splash .bs-word{display:none}}
 .auth-hero .logo{width:62px;height:62px;font-size:30px;margin:0 auto 14px}
 .auth-hero .hero-ic{display:block;width:132px;height:132px;margin:0 auto 12px;border-radius:30px;box-shadow:0 6px 22px rgba(0,0,0,.10)}
 .auth-hero h1{font-size:24px;font-weight:900}
@@ -1157,9 +1160,11 @@ const API = {
   },
   /* 최근 사용 메뉴 기록 (관리자 콘솔 회원 관리 '최근 사용'에 표시) · 같은 메뉴는 1분에 한 번만 */
   _lastMenu: null,
-  async touchMenu(menu) {
+  async touchMenu(menu, hold) {
     if (!this.uid || !menu) return; const now = Date.now();
-    if (this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
+    if (!hold && this._holdUntil > now && /^(피드|글 보기)$/.test(menu)) return;   // 글 등록 직후 자동으로 넘어가는 화면은 덮어쓰지 않음
+    if (hold) this._holdUntil = now + 120e3;
+    if (!hold && this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
     this._lastMenu = { m: menu, t: now }; const iso = new Date(now).toISOString();
     try {
       if (LOCAL) { const u = Local.db.users.find(x => x.id === this.uid); if (u) { u.last_seen = iso; u.last_menu = menu; u.last_menu_at = iso; Local.save(); } }
@@ -2257,14 +2262,14 @@ function installGuide(title, steps, note) {
 
 /* 로고가 다 커진 뒤 살짝 사라지며 메인으로 */
 function splashOut() { const sp = document.querySelector('.boot-splash'); if (!sp) return Promise.resolve(); sp.classList.add('out'); return new Promise(r => setTimeout(r, 330)); }
-const SPLASH = '<div class="boot-splash"><img src="icons/voy-splash.png?v=1" alt="VOY™"><p>불러오는 중…</p></div>';
+const SPLASH = '<div class="boot-splash"><b class="bs-word">VOY<sup>™</sup></b><img src="icons/voy-splash.png?v=1" alt="VOY™"><p>불러오는 중…</p></div>';
 async function boot() {
   applyTheme();   // 화면 모드 버튼은 내 정보 안에만 (떠 있는 밤·낮 버튼 없음)
   root.innerHTML = SPLASH;
   try {
     if (!LOCAL && !window.supabase) throw new Error('Supabase 라이브러리를 불러오지 못했습니다.');
     let first = false; try { first = !sessionStorage.getItem('voy_splash'); sessionStorage.setItem('voy_splash', '1'); } catch (e) {}
-    const [me, boards, settings] = await Promise.all([API.init(), API.boards(), API.settings(), new Promise(r => setTimeout(r, first ? 2100 : 0))]);   // 앱을 처음 열 때는 로고가 다가오는 동작을 끝까지 보여줌
+    const [me, boards, settings] = await Promise.all([API.init(), API.boards(), API.settings(), new Promise(r => setTimeout(r, first ? 2800 : 0))]);   // 앱을 처음 열 때는 로고가 다가오는 동작을 끝까지 보여줌
     S.me = me; S.boards = boards; S.settings = settings;
     if (me) { const b2 = await API.boards(); S.boards = b2; }   // 로그인 정보가 생긴 뒤 지금 방(ETC/OTC)의 카테고리로
     QL.init(settings.quicklinks, API.room); QL.bind(); QL.checkAuto(refreshQL);
@@ -2446,7 +2451,7 @@ function todoRender() {
     <ul class="td-list">${list.map((x, i) => `<li class="${x.done ? 'done' : ''}" data-i="${i}"><button class="td-ck" data-act="td-ck" data-id="${x.id}" aria-label="체크">${x.done ? '✓' : ''}</button>
       <span class="td-t" data-act="td-ck" data-id="${x.id}">${esc(x.t)}</span><span class="td-mv"><button data-act="td-mv" data-id="${x.id}" data-d="-1" ${i ? '' : 'disabled'} aria-label="위로">▲</button><button data-act="td-mv" data-id="${x.id}" data-d="1" ${i < list.length - 1 ? '' : 'disabled'} aria-label="아래로">▼</button></span>
       <button class="td-x" data-act="td-del" data-id="${x.id}" aria-label="삭제">${I('x', 14)}</button></li>`).join('') || (!isToday ? `<li class="td-none">${past ? '이 날 적어 둔 할 일이 없어요' : '아래에 이 날 할 일을 적어 두세요'}</li>` : '')}</ul>
-    <div class="td-add"><input id="tdIn" maxlength="80" placeholder="${isToday ? "오늘 꼭 할일 '추가'" : `${tdLabel(sel)} 할일 '추가'`}" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
+    <div class="td-add"><input id="tdIn" maxlength="80" autocomplete="off" autocorrect="off" name="td_${Date.now()}" placeholder="${isToday ? "오늘 꼭 할일 '추가'" : `${tdLabel(sel)} 할일 '추가'`}" enterkeyhint="done"><button class="btn primary sm" data-act="td-add">추가</button></div>
     <div class="td-hist"><small>날짜를 누르면 그날 할 일 보기 · 앞으로 7일은 미리 계획</small><div class="td-strip">${strip}</div></div>`;
   const inp = document.getElementById('tdIn');
   inp.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); todoAdd(); } };
@@ -2481,7 +2486,7 @@ function boxRender() {
   const el = document.getElementById('myBox'); if (!el) return;
   const d = MY.load(), f = S.boxF = S.boxF || { q: '', t: '' };
   el.innerHTML = `<div class="my-h"><h4>📦 Digital Hub <small class="hub-sub">${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
-    <div class="box-tools"><div class="box-q">${I('search', 15)}<input id="boxQ" value="${esc(f.q)}" placeholder="제목·키워드 검색"></div>
+    <div class="box-tools"><div class="box-q">${I('search', 15)}<input id="boxQ" autocomplete="off" value="${esc(f.q)}" placeholder="제목·키워드 검색"></div>
     <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, `<i class="bxi">${v[0]}</i>${v[1]}`])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>${k === 'web' ? '<span class="bx-br"></span>' : ''}`).join('')}</div></div>
     <ul class="box-list" id="boxList"></ul>`;
   boxList();
@@ -2501,8 +2506,8 @@ function boxForm(item, pre) {
   const x = item || { type: pre && pre.url ? boxGuess(pre.url) : pre ? 'memo' : 'yt', title: (pre && pre.title) || '', url: (pre && pre.url) || '', text: (pre && pre.text) || '' };
   openModal(`<div class="modal-head"><h3>${item ? 'Digital Hub 수정' : pre ? '📥 공유받은 내용 저장' : '📦 Digital Hub에 추가'}</h3><button class="icon-x" data-close>${I('x')}</button></div>
     <div class="modal-body"><label class="lbl">종류</label><div class="bx-types">${Object.entries(BOX_T).map(([k, v]) => `<button type="button" data-bt="${k}" class="${x.type === k ? 'on' : ''}"><i class="bxi lg">${v[0]}</i>${v[1]}</button>`).join('')}</div>
-      <label class="lbl">제목·키워드 <span style="color:#e03131">*</span></label><input id="bxTitle" maxlength="60" value="${esc(x.title)}" placeholder="검색할 때 쓸 제목이나 키워드">
-      <div id="bxUrlW"><label class="lbl">주소</label><div class="bx-url"><input id="bxUrl" inputmode="url" value="${esc(x.url)}" placeholder="https://"><button type="button" class="btn sm" id="bxPaste">붙여넣기</button></div></div>
+      <label class="lbl">제목·키워드 <span style="color:#e03131">*</span></label><input id="bxTitle" maxlength="60" autocomplete="off" value="${esc(x.title)}" placeholder="검색할 때 쓸 제목이나 키워드">
+      <div id="bxUrlW"><label class="lbl">주소</label><div class="bx-url"><input id="bxUrl" inputmode="url" autocomplete="off" value="${esc(x.url)}" placeholder="https://"><button type="button" class="btn sm" id="bxPaste">붙여넣기</button></div></div>
       <div id="bxTextW"><label class="lbl">내용</label><textarea id="bxText" rows="5" maxlength="3000" placeholder="메모 내용">${esc(x.text)}</textarea></div></div>
     <div class="modal-foot"><button class="btn ghost" data-close>취소</button><button class="btn primary" id="bxSave">저장</button></div>`, {
     onMount: (m, close) => {
@@ -2940,6 +2945,7 @@ async function submitPost(btn) {
       openModal(`<div class="celebrate"><div class="big">🎉</div><b>히든 보이스 당첨!</b><p>${+post.month_key.slice(2)}월 이벤트 <strong>${win.rank}번째</strong> 주인공이 되셨어요.<br>영업기획팀에서 선물을 준비해 연락드릴게요!</p></div>
         <div class="modal-foot"><button class="btn primary block" data-close>확인</button></div>`);
     } else toast(W.id ? '수정되었어요' : '등록되었어요');
+    API.touchMenu(W.id ? '글 수정 (완료)' : '글쓰기 (등록)', true);
     S.write = null; history.replaceState(null, '', '#/post/' + post.id); route();
   } catch (e) { toast(friendly(e), 'err'); busy(btn, false); }
 }
@@ -3367,7 +3373,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1224</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1352</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3398,7 +3404,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1224`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1352`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3494,7 +3500,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1224" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1352" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3519,7 +3525,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1224" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1352" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3534,7 +3540,7 @@ async function renderAuth() {
       S.me = await API.signIn(document.getElementById('aid').value, pw);
       root.innerHTML = SPLASH;   // 로그인 성공 → VOY 로고가 크게 다가오는 화면을 끝까지 보여준 뒤 피드로
       try { sessionStorage.setItem('voy_splash', '1'); } catch (x) {}
-      API.touch(); await Promise.all([loadHidden(), API.boards().then(b => { S.boards = b; }).catch(() => {}), new Promise(r => setTimeout(r, 2100))]);   // 내 방(ETC/OTC)의 카테고리
+      API.touch(); await Promise.all([loadHidden(), API.boards().then(b => { S.boards = b; }).catch(() => {}), new Promise(r => setTimeout(r, 2800))]);   // 내 방(ETC/OTC)의 카테고리
       QL.init(S.settings.quicklinks, API.room); refreshQL(); QL.checkAuto(refreshQL);
       await splashOut(); location.hash = '#/feed'; route(); Badge.start(); Badge.seen(); refreshResearch();
       if (S.me.must_change_pw) pwModal(true, pw); else maybeShowPopups();
