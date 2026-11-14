@@ -536,6 +536,12 @@ body:has(.policy) .theme-fab{display:none}
 .bx-empty{display:block!important;text-align:center;color:var(--muted);font-size:13px;padding:22px 8px!important;line-height:1.7;border:0!important}
 .bx-types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}.bx-types button{display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--border);background:var(--surface2);border-radius:11px;padding:9px 2px 7px;font-size:11.5px;font-weight:800;color:var(--text);cursor:pointer}
 .bx-types button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.bx-pic{flex-shrink:0;font-size:11px;color:var(--muted);margin-right:2px}
+.bx-imgs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.bx-imgs img{width:72px;height:72px;object-fit:cover;border-radius:10px;cursor:zoom-in;border:1px solid var(--border)}
+.bx-imgs.big img{width:calc(33.3% - 4px);height:auto;aspect-ratio:1}
+.bx-up{display:flex;gap:8px;flex-wrap:wrap}.bx-th{position:relative;width:72px;height:72px}.bx-th img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:1px solid var(--border)}
+.bx-th button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:#222;color:#fff;font-size:11px;cursor:pointer}
+.bx-add{width:72px;height:72px;border-radius:10px;border:1.5px dashed var(--border);background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:20px;cursor:pointer;color:var(--muted)}.bx-add small{font-size:10.5px}
 .bx-url{display:flex;gap:6px}.bx-url input{flex:1}
 .bx-acts{display:flex;flex-wrap:wrap;gap:5px;padding:6px 22px 4px}.bx-acts .btn{height:28px;min-height:0;padding:0 10px;font-size:11.5px;border-radius:8px;flex:0 0 auto}
 .bx-view{margin:0;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:55vh;overflow-y:auto}
@@ -2424,6 +2430,21 @@ const MY = {
     return d; },
   save() { try { const { _k, ...o } = this.d; localStorage.setItem(this.key(), JSON.stringify(o)); } catch (e) { toast('기기 저장 공간이 부족해요 — 백업 후 정리해 주세요', 'err'); } }
 };
+/* Digital Hub 메모 사진 — 기기 안 IndexedDB에만 저장 (localStorage보다 큰 용량) */
+const MYIMG = {
+  _db: null,
+  db() { return this._db || (this._db = new Promise((res, rej) => { const r = indexedDB.open('voy_my_img', 1); r.onupgradeneeded = () => r.result.createObjectStore('img'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); })); },
+  async tx(mode, fn) { const db = await this.db(); return new Promise((res, rej) => { const t = db.transaction('img', mode), st = t.objectStore('img'); const out = fn(st); t.oncomplete = () => res(out instanceof IDBRequest ? out.result : out); t.onerror = () => rej(t.error); }); },
+  key(id) { return ((S.me && S.me.id) || 'guest') + ':' + id; },
+  put(id, data) { return this.tx('readwrite', st => st.put(data, this.key(id))); },
+  async get(id) { return this.tx('readonly', st => st.get(this.key(id))); },
+  del(id) { return this.tx('readwrite', st => st.delete(this.key(id))).catch(() => {}); },
+  async many(ids) { const o = {}; for (const id of ids || []) { try { o[id] = await this.get(id); } catch (e) {} } return o; }
+};
+async function boxImgsHTML(ids, cls) {
+  if (!ids || !ids.length) return ''; const m = await MYIMG.many(ids);
+  return `<div class="${cls || 'bx-imgs'}">${ids.filter(i => m[i]).map((i, k) => `<img src="${m[i]}" alt="" data-act="lightbox" data-src="${m[i]}" data-orig="${m[i]}" data-name="voy_memo_${k + 1}.jpg">`).join('')}</div>`;
+}
 const myId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const dayKey = (t = new Date()) => `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
 function myRenderAll() { todoRender(); boxRender(); bakRender(); }
@@ -2494,12 +2515,13 @@ function boxRender() {
 }
 function boxList() {
   const ul = document.getElementById('boxList'); if (!ul) return;
+  setTimeout(() => ul.querySelectorAll('.bx-mimg[data-imgs]').forEach(async el => { const ids = el.dataset.imgs.split(',').filter(Boolean); el.removeAttribute('data-imgs'); el.innerHTML = await boxImgsHTML(ids); }), 0);
   const d = MY.load(), f = S.boxF, q = f.q.trim().toLowerCase();
   const l = d.box.filter(x => (!f.t || x.type === f.t) && (!q || (x.title + ' ' + (x.type === 'memo' ? x.text || '' : '')).toLowerCase().includes(q))).sort((a, b) => b.at - a.at);
   ul.innerHTML = l.length ? l.map(x => { const t = BOX_T[x.type] || BOX_T.web, dd = new Date(x.at);
-    return `<li data-id="${x.id}"><button class="bx-main" data-act="box-open" data-id="${x.id}"><span class="bx-ic">${t[0]}</span><span class="bx-t">${esc(x.title)}</span><span class="bx-d">${dd.getMonth() + 1}/${dd.getDate()}</span></button>
+    return `<li data-id="${x.id}"><button class="bx-main" data-act="box-open" data-id="${x.id}"><span class="bx-ic">${t[0]}</span><span class="bx-t">${esc(x.title)}</span>${(x.imgs || []).length ? `<span class="bx-pic">📷${x.imgs.length}</span>` : ''}<span class="bx-d">${dd.getMonth() + 1}/${dd.getDate()}</span></button>
       <button class="bx-more" data-act="box-more" data-id="${x.id}" aria-label="더보기">⋯</button>
-      ${x.type === 'memo' && S.boxOpen === x.id ? `<div class="bx-memo">${linkify(x.text || '')}</div>` : ''}</li>`; }).join('')
+      ${x.type === 'memo' && S.boxOpen === x.id ? `<div class="bx-memo">${linkify(x.text || '')}<div class="bx-mimg" data-imgs="${(x.imgs || []).join(',')}"></div></div>` : ''}</li>`; }).join('')
     : `<li class="bx-empty">${d.box.length ? '찾는 항목이 없어요' : '유튜브·인스타·웹 주소나 메모를 저장해 보세요.<br><small>안드로이드: 유튜브·블로그 등에서 <b>공유 → VOY™</b>로 바로 저장돼요</small>'}</li>`;
 }
 function boxForm(item, pre) {
@@ -2508,7 +2530,8 @@ function boxForm(item, pre) {
     <div class="modal-body"><label class="lbl">종류</label><div class="bx-types">${Object.entries(BOX_T).map(([k, v]) => `<button type="button" data-bt="${k}" class="${x.type === k ? 'on' : ''}"><i class="bxi lg">${v[0]}</i>${v[1]}</button>`).join('')}</div>
       <label class="lbl">제목·키워드 <span style="color:#e03131">*</span></label><input id="bxTitle" maxlength="60" autocomplete="off" value="${esc(x.title)}" placeholder="검색할 때 쓸 제목이나 키워드">
       <div id="bxUrlW"><label class="lbl">주소</label><div class="bx-url"><input id="bxUrl" inputmode="url" autocomplete="off" value="${esc(x.url)}" placeholder="https://"><button type="button" class="btn sm" id="bxPaste">붙여넣기</button></div></div>
-      <div id="bxTextW"><label class="lbl">내용</label><textarea id="bxText" rows="5" maxlength="3000" placeholder="메모 내용">${esc(x.text)}</textarea></div></div>
+      <div id="bxTextW"><label class="lbl">내용</label><textarea id="bxText" rows="5" maxlength="3000" placeholder="메모 내용">${esc(x.text)}</textarea>
+        <label class="lbl">사진 <small class="muted">(최대 6장 · 이 기기에만 저장)</small></label><div class="bx-up" id="bxUp"></div><input type="file" id="bxFile" accept="image/*" multiple hidden></div></div>
     <div class="modal-foot"><button class="btn ghost" data-close>취소</button><button class="btn primary" id="bxSave">저장</button></div>`, {
     onMount: (m, close) => {
       let type = x.type; const sync = () => { m.querySelectorAll('[data-bt]').forEach(b => b.classList.toggle('on', b.dataset.bt === type)); m.querySelector('#bxUrlW').hidden = type === 'memo'; m.querySelector('#bxTextW').hidden = type !== 'memo'; };
@@ -2516,12 +2539,24 @@ function boxForm(item, pre) {
       const u = m.querySelector('#bxUrl'); u.oninput = () => { const v = u.value.trim(); if (v && type !== 'memo') { type = boxGuess(v); sync(); } };
       m.querySelector('#bxPaste').onclick = async () => { try { const t = await navigator.clipboard.readText(); const url = boxUrlIn(t) || t.trim(); u.value = url; u.oninput(); if (!m.querySelector('#bxTitle').value && url !== t.trim()) m.querySelector('#bxTitle').value = t.replace(url, '').trim().slice(0, 60); } catch (e) { toast('길게 눌러 직접 붙여넣어 주세요', 'err'); u.focus(); } };
       if (!x.title) setTimeout(() => m.querySelector('#bxTitle').focus(), 50);
-      m.querySelector('#bxSave').onclick = () => {
+      /* 메모 사진: 기존 사진(id) + 새로 고른 사진(dataURL) */
+      const imgs = (x.imgs || []).map(id => ({ id })), up = m.querySelector('#bxUp'), fi = m.querySelector('#bxFile');
+      const paint = async () => { const have = await MYIMG.many(imgs.filter(i => i.id && !i.src).map(i => i.id)); imgs.forEach(i => { if (!i.src && i.id) i.src = have[i.id]; });
+        up.innerHTML = imgs.map((i, k) => i.src ? `<span class="bx-th"><img src="${i.src}" alt=""><button type="button" data-rm="${k}" aria-label="사진 빼기">✕</button></span>` : '').join('') + (imgs.length < 6 ? `<button type="button" class="bx-add" id="bxAddImg">📷<small>사진 추가</small></button>` : '');
+        up.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { imgs.splice(+b.dataset.rm, 1); paint(); });
+        const ab = up.querySelector('#bxAddImg'); if (ab) ab.onclick = () => fi.click(); };
+      fi.onchange = async () => { const fs = [...fi.files].slice(0, 6 - imgs.length); fi.value = '';
+        for (const f of fs) { try { const c = await compressImage(f, 1280, .8); imgs.push({ src: await fileToDataURL(c), fresh: true }); } catch (e) { toast(friendly(e), 'err'); } } paint(); };
+      paint();
+      m.querySelector('#bxSave').onclick = async () => {
         const title = m.querySelector('#bxTitle').value.trim(), url = boxUrlIn(u.value) || u.value.trim(), text = m.querySelector('#bxText').value.trim();
         if (!title) { toast('제목·키워드를 입력해 주세요', 'err'); return m.querySelector('#bxTitle').focus(); }
         if (type !== 'memo' && !/^https?:\/\//i.test(url)) { toast('http로 시작하는 주소를 넣어 주세요', 'err'); return u.focus(); }
-        if (type === 'memo' && !text) { toast('메모 내용을 입력해 주세요', 'err'); return; }
-        const d = MY.load(), o = { type, title, url: type === 'memo' ? '' : url, text: type === 'memo' ? text : '' };
+        if (type === 'memo' && !text && !imgs.length) { toast('메모 내용이나 사진을 넣어 주세요', 'err'); return; }
+        const ids = [];
+        if (type === 'memo') { for (const i of imgs) { if (i.fresh) { const id = myId(); try { await MYIMG.put(id, i.src); ids.push(id); } catch (e) { toast('사진 저장 공간이 부족해요', 'err'); } } else if (i.id) ids.push(i.id); } }
+        (x.imgs || []).filter(id => !ids.includes(id)).forEach(id => MYIMG.del(id));   // 뺀 사진은 기기에서도 지움
+        const d = MY.load(), o = { type, title, url: type === 'memo' ? '' : url, text: type === 'memo' ? text : '', imgs: ids };
         if (item) Object.assign(d.box.find(y => y.id === item.id), o, { up: Date.now() }); else d.box.push({ id: myId(), at: Date.now(), ...o });
         MY.save(); close(); toast(item ? '수정했어요' : '📦 Digital Hub에 저장했어요'); if (document.getElementById('myBox')) boxRender(); else go('#/me');
       };
@@ -2549,8 +2584,9 @@ function bakRender() {
     <input type="file" id="bakFile" accept=".json,application/json" hidden>`;
   document.getElementById('bakFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) bakRestore(f); };
 }
-function bakDown() {
-  const d = MY.load(), { _k, ...o } = d, blob = new Blob([JSON.stringify({ app: 'VOY', kind: 'my-data', v: 1, saved_at: new Date().toISOString(), data: o }, null, 1)], { type: 'application/json' });
+async function bakDown() {
+  const d = MY.load(), { _k, ...o } = d, images = await MYIMG.many(d.box.flatMap(x => x.imgs || []));
+  const blob = new Blob([JSON.stringify({ app: 'VOY', kind: 'my-data', v: 1, saved_at: new Date().toISOString(), data: o, images }, null, 1)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `VOY_내데이터_${dayKey().replace(/-/g, '')}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   d.lastBak = Date.now(); MY.save(); bakRender(); toast('백업 파일을 받았어요 — 다운로드 폴더(또는 파일 앱)에 저장돼요');
 }
@@ -2561,6 +2597,7 @@ async function bakRestore(f) {
   const ids = new Set(d.box.map(x => x.id)); (o.box || []).forEach(x => { if (!ids.has(x.id)) { d.box.push(x); nb++; } });
   Object.entries(o.todos || {}).forEach(([k, l]) => { const cur = d.todos[k] = d.todos[k] || [], have = new Set(cur.map(x => x.id)); l.forEach(x => { if (!have.has(x.id)) { cur.push(x); nt++; } }); });
   Object.assign(d.done, o.done || {}); Object.assign(d.asked, o.asked || {});
+  for (const [id, src] of Object.entries(j.images || {})) { try { if (src && !(await MYIMG.get(id))) await MYIMG.put(id, src); } catch (e) {} }
   MY.save(); myRenderAll(); toast(`복원했어요 — Digital Hub ${nb}개 · 할 일 ${nt}개 추가 (이미 있던 항목은 그대로)`);
 }
 /* ---------------- Voice 심사 (지정된 심사자만) ---------------- */
@@ -3373,7 +3410,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1352</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1420</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3404,7 +3441,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1352`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1420`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3500,7 +3537,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1352" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1420" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3525,7 +3562,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1352" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1420" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3638,13 +3675,14 @@ document.addEventListener('click', async e => {
     case 'box-more': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break;
       openModal(`<div class="modal-head"><h3 style="display:flex;align-items:center;gap:8px"><i class="bxi lg">${(BOX_T[x.type] || BOX_T.web)[0]}</i>${esc(x.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
         <div class="bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">${x.type === 'memo' ? '내용 복사' : '복사'}</button>${x.type === 'memo' ? `<button class="btn" data-close data-act="box-copyall" data-id="${x.id}">전체 복사</button>` : ''}<button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>
-        <div class="modal-body" style="padding-top:8px"><p class="bx-view">${x.type === 'memo' ? linkify(x.text || '') : esc(x.url)}</p></div>`); break; }
+        <div class="modal-body" style="padding-top:8px"><p class="bx-view">${x.type === 'memo' ? linkify(x.text || '') : esc(x.url)}</p><div id="bxViewImgs"></div></div>`);
+      if ((x.imgs || []).length) boxImgsHTML(x.imgs, 'bx-imgs big').then(h => { const el = document.getElementById('bxViewImgs'); if (el) el.innerHTML = h; }); break; }
     case 'box-go': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) window.open(x.url, '_blank', 'noopener'); break; }
     case 'box-copy': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; try { await navigator.clipboard.writeText(x.type === 'memo' ? x.text : x.url); toast('복사했어요'); } catch (er) { prompt('복사하세요', x.type === 'memo' ? x.text : x.url); } break; }
     case 'box-copyall': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; const all = `${x.title}\n\n${x.text || ''}`; try { await navigator.clipboard.writeText(all); toast('제목과 내용을 모두 복사했어요'); } catch (er) { prompt('복사하세요', all); } break; }
     case 'box-edit': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) setTimeout(() => boxForm(x), 50); break; }
-    case 'box-del': { if (!(await confirmBox('이 항목을 삭제할까요?', '삭제', true))) break; const d = MY.load(); d.box = d.box.filter(x => x.id !== t.dataset.id); MY.save(); boxRender(); toast('삭제했어요'); break; }
-    case 'bak-down': bakDown(); break;
+    case 'box-del': { if (!(await confirmBox('이 항목을 삭제할까요?', '삭제', true))) break; const d = MY.load(), gone = d.box.find(x => x.id === t.dataset.id); (gone && gone.imgs || []).forEach(id => MYIMG.del(id)); d.box = d.box.filter(x => x.id !== t.dataset.id); MY.save(); boxRender(); toast('삭제했어요'); break; }
+    case 'bak-down': await bakDown(); break;
     case 'bak-up': document.getElementById('bakFile')?.click(); break;
     case 'push-later': try { localStorage.setItem('voy_push_prompt_off', String(Date.now())); } catch (er) {} document.getElementById('pushPrompt')?.remove(); break;
     case 'install': doInstall(); break;
