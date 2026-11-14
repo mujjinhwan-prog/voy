@@ -520,7 +520,8 @@ body:has(.policy) .theme-fab{display:none}
 @keyframes mcFly{0%{transform:rotate(var(--a)) translateY(0) scale(.4);opacity:1}100%{transform:rotate(var(--a)) translateY(-150px) rotate(220deg) scale(1);opacity:0}}
 .box-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
 .box-q{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:12px;padding:0 10px;background:var(--surface2)}.box-q input{border:0!important;background:none!important;flex:1;height:40px;outline:none;box-shadow:none!important}
-.box-chips{display:flex;gap:5px;overflow-x:auto}.box-chips button{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:4px 10px 4px 6px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer}.box-chips button:first-child{padding-left:10px}
+.box-chips{display:flex;gap:5px;flex-wrap:wrap}.bx-br{flex-basis:100%;height:0}
+@media(min-width:700px){.box-chips{flex-wrap:nowrap}.bx-br{display:none}}.box-chips button{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border);background:var(--surface);border-radius:99px;padding:4px 10px 4px 6px;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer}.box-chips button:first-child{padding-left:10px}
 .bxi{display:inline-block;width:20px;height:20px;flex-shrink:0;font-style:normal}.bxi.lg{width:28px;height:28px}.bxi svg,.bx-ic svg{display:block}
 .box-chips button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink,#fff)}
 .box-list{list-style:none;margin:0;padding:0;max-height:430px;overflow-y:auto}.box-list li{display:flex;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--border)}
@@ -2458,7 +2459,7 @@ const BOX_SVG = {
   ig: '<svg viewBox="0 0 24 24" width="100%" height="100%"><defs><linearGradient id="bxg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f58529"/><stop offset=".5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#8134af"/></linearGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#bxg)"/><path d="M8 9.2h1.6l1-1.6h2.8l1 1.6H16a1.4 1.4 0 0 1 1.4 1.4v4.6A1.4 1.4 0 0 1 16 16.6H8a1.4 1.4 0 0 1-1.4-1.4v-4.6A1.4 1.4 0 0 1 8 9.2Z" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="12.8" r="2.1" fill="none" stroke="#fff" stroke-width="1.5"/></svg>',
   web: '<svg viewBox="0 0 24 24" width="100%" height="100%"><circle cx="12" cy="12" r="10" fill="#228be6"/><g fill="none" stroke="#fff" stroke-width="1.4"><circle cx="12" cy="12" r="6.2"/><path d="M5.8 12h12.4M12 5.8c-2.2 2.1-2.2 10.3 0 12.4M12 5.8c2.2 2.1 2.2 10.3 0 12.4"/></g></svg>',
   memo: '<svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="3" y="2" width="18" height="20" rx="4" fill="#f59f00"/><path d="M7.5 8h9M7.5 12h9M7.5 16h5.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg>' };
-const BOX_T = { yt: [BOX_SVG.yt, '유튜브', '#e53935'], ig: [BOX_SVG.ig, '인스타', '#dd2a7b'], web: [BOX_SVG.web, '웹페이지', '#228be6'], memo: [BOX_SVG.memo, '메모', '#f59f00'] };
+const BOX_T = { yt: [BOX_SVG.yt, '유튜브', '#e53935'], web: [BOX_SVG.web, '웹페이지', '#228be6'], memo: [BOX_SVG.memo, '메모', '#f59f00'], ig: [BOX_SVG.ig, '인스타', '#dd2a7b'] };   // 표시 순서: 유튜브 · 웹페이지 · 메모 · 인스타
 const boxGuess = u => /youtu\.?be/i.test(u) ? 'yt' : /instagram\.com|instagr\.am/i.test(u) ? 'ig' : 'web';
 const boxUrlIn = t => { const m = String(t || '').match(/https?:\/\/[^\s<>"']+/i); return m ? m[0].replace(/[),.]+$/, '') : ''; };
 function boxRender() {
@@ -2466,7 +2467,7 @@ function boxRender() {
   const d = MY.load(), f = S.boxF = S.boxF || { q: '', t: '' };
   el.innerHTML = `<div class="my-h"><h4>📦 Digital Hub <small class="hub-sub">${d.box.length}개 · 이 기기에만 저장</small></h4><button class="btn primary sm" data-act="box-new">${I('plus', 14)} 추가</button></div>
     <div class="box-tools"><div class="box-q">${I('search', 15)}<input id="boxQ" value="${esc(f.q)}" placeholder="제목·키워드 검색"></div>
-    <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, `<i class="bxi">${v[0]}</i>${v[1]}`])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>`).join('')}</div></div>
+    <div class="box-chips">${[['', '전체'], ...Object.entries(BOX_T).map(([k, v]) => [k, `<i class="bxi">${v[0]}</i>${v[1]}`])].map(([k, l]) => `<button class="${f.t === k ? 'on' : ''}" data-act="box-f" data-t="${k}">${l}</button>${k === 'web' ? '<span class="bx-br"></span>' : ''}`).join('')}</div></div>
     <ul class="box-list" id="boxList"></ul>`;
   boxList();
   const q = document.getElementById('boxQ'); q.oninput = () => { f.q = q.value; boxList(); };
@@ -3351,7 +3352,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1128</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1157</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3382,7 +3383,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1128`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1157`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3478,7 +3479,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1128" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1157" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3503,7 +3504,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1128" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1157" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3616,9 +3617,10 @@ document.addEventListener('click', async e => {
     case 'box-more': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break;
       openModal(`<div class="modal-head"><h3 style="display:flex;align-items:center;gap:8px"><i class="bxi lg">${(BOX_T[x.type] || BOX_T.web)[0]}</i>${esc(x.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
         <div class="modal-body"><p class="hint" style="word-break:break-all;white-space:pre-wrap">${esc(x.type === 'memo' ? x.text : x.url)}</p></div>
-        <div class="modal-foot bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">복사</button><button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>`); break; }
+        <div class="modal-foot bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">${x.type === 'memo' ? '내용 복사' : '복사'}</button>${x.type === 'memo' ? `<button class="btn" data-close data-act="box-copyall" data-id="${x.id}">전체 복사</button>` : ''}<button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>`); break; }
     case 'box-go': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) window.open(x.url, '_blank', 'noopener'); break; }
     case 'box-copy': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; try { await navigator.clipboard.writeText(x.type === 'memo' ? x.text : x.url); toast('복사했어요'); } catch (er) { prompt('복사하세요', x.type === 'memo' ? x.text : x.url); } break; }
+    case 'box-copyall': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; const all = `${x.title}\n\n${x.text || ''}`; try { await navigator.clipboard.writeText(all); toast('제목과 내용을 모두 복사했어요'); } catch (er) { prompt('복사하세요', all); } break; }
     case 'box-edit': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) setTimeout(() => boxForm(x), 50); break; }
     case 'box-del': { if (!(await confirmBox('이 항목을 삭제할까요?', '삭제', true))) break; const d = MY.load(); d.box = d.box.filter(x => x.id !== t.dataset.id); MY.save(); boxRender(); toast('삭제했어요'); break; }
     case 'bak-down': bakDown(); break;
