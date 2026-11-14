@@ -183,6 +183,7 @@ select.mem-sel[data-mem-kind]{min-width:104px}
 .panel-head h2{font-size:18px;display:flex;align-items:center;gap:8px}
 .panel-head p{color:var(--muted);font-size:13px;margin-top:4px}
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.filters .dt-search.in-filters{flex:1;min-width:260px;max-width:none;margin:0}
 .filters select{width:auto;min-width:150px;font-weight:600;font-size:14px;background-color:var(--bg)}
 .filters .search{position:relative;flex:0 1 360px;min-width:220px}
 .filters .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
@@ -1968,7 +1969,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261114.1224</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261114.1323</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -2012,6 +2013,10 @@ function renderPage() {
   ({ posts: pagePosts, comments: pageComments, members: pageMembers, admins: pageAdmins, rank: pageRank, review: pageReview, events: pageEvents, popups: pagePopups, research: pageResearch, settings: pageSettings })[A.page](c);
   if (keep) { const n = document.querySelector(`[data-tf="${keep.t}"][data-k="${keep.k}"]`); if (n) { n.focus(); try { n.setSelectionRange(keep.pos, keep.pos); } catch (e) {} } }
 }
+/* 한 줄짜리 작은 통계 (회원 관리와 같은 모양) */
+const statsC = items => `<div class="mem-stats">${items.map(([l, v, u, ic]) => `<div class="ms">${I(ic, 17)}<span>${l}</span><b>${v}</b><small>${u}</small></div>`).join('')}</div>`;
+/* 통합 검색창을 월·카테고리 선택과 같은 줄로 옮김 */
+function inlineSearch(c) { const fl = c.querySelector('.filters'), sr = c.querySelector('.dt-search'); if (fl && sr) { sr.classList.add('in-filters'); fl.appendChild(sr); } }
 const stat = (label, val, unit, ic) => `<div class="stat"><div class="sl">${label}</div><div class="sv">${val}<small>${unit}</small></div><div class="si">${I(ic, 20)}</div></div>`;
 function bulkBar(kind) { return A.sel.size ? `<div class="bulk">${A.sel.size}건 선택됨 <button class="btn danger sm" data-act="bulk-del" data-kind="${kind}">${I('trash', 15)} 선택 삭제</button><button class="btn sm" data-act="sel-clear">선택 해제</button></div>` : ''; }
 function bindFilters(page) {
@@ -2097,12 +2102,12 @@ function pagePosts(c) {
   const period = A.posts.filter(p => !f.month || p.month_key === f.month);
   const rows = period.filter(p => !f.board || p.board_id === f.board);
   const t = dtHTML('posts', rows, supOnly(postCols()), { sel: true, empty: '게시글이 없습니다', extra: p => (p.body || '') + ' ' + (p.link_url || '') + ' ' + (p.link_title || ''), searchLabel: '글번호·닉네임·제목·본문' });
-  c.innerHTML = `<div class="cards3">${stat('전체 게시글', period.length, '건', 'doc')}${stat('작성 참여자', new Set(period.map(p => p.user_id).filter(Boolean)).size, '명', 'users')}${stat('최고 점수', period.reduce((m, p) => Math.max(m, scoreOf(p, w)), 0), '점', 'trend')}</div>
+  c.innerHTML = `${statsC([['전체 게시글', period.length, '건', 'doc'], ['작성 참여자', new Set(period.map(p => p.user_id).filter(Boolean)).size, '명', 'users'], ['최고 점수', period.reduce((m, p) => Math.max(m, scoreOf(p, w)), 0), '점', 'trend']])}
   <div class="panel"><div class="panel-head"><div><h2>게시글 목록</h2><p>전체 ${A.posts.length}건 · 검색창 하나로 모든 항목 검색 · 머리글을 누르면 정렬</p></div><button class="btn sm" data-act="csv" data-t="posts">${I('download', 15)} 엑셀(CSV)</button></div>
     <div class="filters"><select data-f="month">${monthOpts(f.month)}</select>
       <select data-f="board"><option value="">전체 카테고리</option>${A.boards.map(b => `<option value="${b.id}" ${f.board === b.id ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></div>
     ${bulkBar('posts')}${t.html}</div>`;
-  bindFilters('posts');
+  inlineSearch(c); bindFilters('posts');
 }
 function postModal(p, editMode) {
   const u = P_(p.user_id);
@@ -2146,10 +2151,10 @@ function pageComments(c) {
     { k: 'at', l: '작성일시', v: x => x.created_at, s: x => fmtDT(x.created_at), r: x => dtCell(x.created_at) },
     { k: 'act', l: '관리', nosort: true, ns: true, v: () => '', r: x => `<div class="acts"><button class="ib" data-act="edit-cmt" data-id="${x.id}">${I('edit', 16)}</button><button class="ib del" data-act="del-cmt" data-id="${x.id}">${I('trash', 16)}</button></div>` }
   ]), { sel: true, empty: '댓글이 없습니다' });
-  c.innerHTML = `<div class="cards3">${stat('전체 댓글', period.length, '건', 'msg')}${stat('댓글 작성자', new Set(period.map(x => x.user_id).filter(Boolean)).size, '명', 'users')}${stat('댓글 있는 게시글', new Set(period.map(x => x.post_id)).size, '건', 'doc')}</div>
+  c.innerHTML = `${statsC([['전체 댓글', period.length, '건', 'msg'], ['댓글 작성자', new Set(period.map(x => x.user_id).filter(Boolean)).size, '명', 'users'], ['댓글 있는 게시글', new Set(period.map(x => x.post_id)).size, '건', 'doc']])}
   <div class="panel"><div class="panel-head"><div><h2>댓글 목록</h2><p>전체 ${A.comments.length}건</p></div><button class="btn sm" data-act="csv" data-t="comments">${I('download', 15)} 엑셀(CSV)</button></div>
     <div class="filters"><select data-f="month">${monthOpts(f.month)}</select></div>${bulkBar('comments')}${t.html}</div>`;
-  bindFilters('comments');
+  inlineSearch(c); bindFilters('comments');
 }
 
 /* ---------------- 회원 관리 (일반 회원) ---------------- */
