@@ -436,6 +436,11 @@ body:has(.policy) .theme-fab{display:none}
 .nick-card .nbtn{background:rgba(255,255,255,.28);color:var(--grad-ink);border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:800;display:inline-flex;gap:4px;align-items:center;white-space:nowrap}
 .nick-card .nbtn:disabled{opacity:.6}
 .nick-card p{font-size:12px;opacity:.85}
+.nick-card .nc-rule{opacity:.85;font-size:11px;margin-left:2px}
+.nick-card .nc-role{display:inline-block;margin-top:4px;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,.22);font-size:12.5px;font-weight:800}
+.nick-card .nc-dept{margin-top:7px;font-size:13px;opacity:.92}
+/* 피드가 아닌 화면(랭킹·내 정보 등)에서는 글쓰기 버튼을 작게, 하단 메뉴 바로 위로 */
+.fab.sm{width:46px;height:46px;bottom:calc(70px + env(safe-area-inset-bottom))}.fab.sm svg{width:21px;height:21px}
 .statgrid{display:grid;grid-template-columns:repeat(3,1fr);text-align:center}
 .statgrid b{display:block;font-size:24px;color:var(--main2);font-weight:900}
 .statgrid small{color:var(--muted);font-size:12.5px}
@@ -2336,7 +2341,7 @@ function shell(inner, tab, fab = true) {
       <nav class="ql-strip" id="qlStrip" aria-label="바로가기">${QL.stripHTML()}</nav>
     </header>
     <div class="cols"><main id="main">${inner}</main><aside class="ql-rail" id="qlRail" aria-label="바로가기">${QL.railHTML()}</aside></div>
-    ${fab ? `<button class="fab" data-act="go" data-to="#/write" aria-label="글쓰기">${I('pen', 26)}</button>` : ''}
+    ${fab ? `<button class="fab ${tab === 'feed' ? '' : 'sm'}" data-act="go" data-to="#/write" aria-label="글쓰기">${I('pen', 26)}</button>` : ''}
     <nav class="bnav">
       <a href="#/feed" class="${tab === 'feed' ? 'on' : ''}">${I('home', 22)}피드</a>
       <a href="#/rank" class="${tab === 'rank' ? 'on' : ''}">${I('trophy', 22)}랭킹</a>
@@ -3031,22 +3036,26 @@ async function viewSurvey(id) {
 }
 
 /* ---------------- 내 정보 ---------------- */
+function meRoleLabel(me) {
+  const k = memberKind(me);
+  return k === 'admin' ? 'ETC·OTC 슈퍼관리자' : k === 'cross' ? 'ETC·OTC 관리자' : k === 'e_admin' ? 'ETC 서브관리자' : k === 'o_admin' ? 'OTC 서브관리자'
+    : me.role === 'admin' ? `${ORG_NAME[orgOf(me)]} 관리자` : `${ORG_NAME[orgOf(me)]} 회원`;
+}
 async function viewMe() {
   const me = S.me = await API.me().catch(() => S.me);
   const changed = me.nickname_month === curMonth(), pref = themePref();
   shell(`<div class="page">
     ${me.status === 'blocked' ? `<div class="blocked">관리자에 의해 글쓰기·댓글이 제한된 계정입니다.</div>` : ''}
-    <div class="box profile"><div class="avatar lg" style="background:${avColor(me.nickname)}">${esc(me.nickname[0])}</div><div><b>${esc(me.nickname)}</b><small>${esc(me.email || me.login_id)} · ${KIND_LABEL[memberKind(me)]}${roomsOf(me).length > 1 ? ' · ETC·OTC' : ' · ' + ORG_NAME[roomsOf(me)[0]]}</small><small>${esc([me.real_name, me.org_branch, me.work_branch, me.position].filter(Boolean).join(' · '))}</small></div></div>
-    <div class="nick-card"><small>${monthLabel(curMonth())} 이달의 닉네임</small>
+    <div class="nick-card me-card"><small>${monthLabel(curMonth())} 이달의 닉네임 <span class="nc-rule">(매월 1회 변경 가능)</span></small>
       <div class="nrow"><b>${esc(me.nickname)}</b><button class="nbtn" data-act="nick" ${changed && !isAdminRole(me.role) ? 'disabled' : ''}>${I('pen', 13)} ${changed && !isAdminRole(me.role) ? '이번 달 변경 완료' : '닉네임 변경'}</button></div>
-      <p>이달 닉네임을 1회 변경할 수 있습니다. (매월 1일 자동 초기화)</p></div>
+      <div class="nc-role">${meRoleLabel(me)}</div>
+      ${[me.org_branch || me.dept, me.work_branch].filter(Boolean).length ? `<div class="nc-dept">${esc([...new Set([me.org_branch || me.dept, me.work_branch].filter(Boolean))].join(' · '))}</div>` : ''}</div>
     <div class="box statgrid" id="mystats"><div><b>-</b><small>이달 작성</small></div><div><b>-</b><small>이달 점수</small></div><div><b>-</b><small>누적 작성</small></div></div>
     <div class="box" id="meReview" hidden></div>
     <div class="box my-sec" id="myTodo"></div>
     <div class="box my-sec" id="myBox"></div>
     <div class="box my-sec" id="myBak"></div>
     <div class="box"><button class="menu-row" data-act="go" data-to="#/myposts"><div class="mi">${I('doc', 20)}</div><div><b>내가 쓴 글</b><small>월별로 내 게시글과 반응을 확인하세요</small></div>${I('right')}</button></div>
-    <div class="box"><h4>닉네임 이력</h4><div id="nhist" class="muted" style="font-size:13px">불러오는 중…</div></div>
     <div class="box"><div class="set-row"><span>${I('palette', 19)} 화면 모드 (눈 보호)</span><div class="theme-seg">
       ${[['light', 'sun', '화이트'], ['dark', 'moon', '블랙']].map(([k, ic, t]) => `<button class="${pref === k ? 'on' : ''}" data-act="theme" data-v="${k}" aria-label="${t}" title="${t}">${I(ic, 16)}</button>`).join('')}</div></div></div>
     <div class="box" id="meInst">${meInstallHTML()}</div>
@@ -3064,10 +3073,9 @@ async function viewMe() {
   API.reviewMy().then(l => { const el = document.getElementById('meReview'); if (!el || !l.length) return; const open = l.filter(r => r.is_open && !r.submitted_at).length;
     el.hidden = false; el.innerHTML = `<button class="menu-row" data-act="go" data-to="#/review"><div class="mi">📝</div><div><b>Voice 심사${open ? ` <span class="rv-dot">${open}</span>` : ''}</b><small>${open ? '심사할 회차가 있어요' : '내가 맡은 심사 회차를 확인하세요'}</small></div>${I('right')}</button>`; }).catch(() => {});
   try {
-    const [mine, hist] = await Promise.all([API.listPosts({ mine: true, limit: 2000 }), API.nicknameHistory()]);
+    const mine = await API.listPosts({ mine: true, limit: 2000 });
     const m = mine.filter(p => p.month_key === curMonth());
     document.getElementById('mystats').innerHTML = `<div><b>${m.length}</b><small>이달 작성</small></div><div><b>${m.reduce((s, p) => s + scoreOf(p, S.settings.score), 0)}</b><small>이달 점수</small></div><div><b>${mine.length}</b><small>누적 작성</small></div>`;
-    document.getElementById('nhist').innerHTML = hist.length ? hist.slice(0, 12).map(h => `<div class="hist"><span>${esc(h.nickname)}</span><small>20${h.month_key.slice(0, 2)}-${h.month_key.slice(2)}</small></div>`).join('') : '이력이 없어요';
   } catch (e) { toast(friendly(e), 'err'); }
 }
 async function viewMyPosts() {
@@ -3333,7 +3341,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.0817</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1100</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3364,7 +3372,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.0817`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1100`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3460,7 +3468,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.0817" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1100" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3485,7 +3493,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.0817" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1100" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
