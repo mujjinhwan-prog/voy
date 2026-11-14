@@ -533,7 +533,9 @@ body:has(.policy) .theme-fab{display:none}
 .bx-empty{display:block!important;text-align:center;color:var(--muted);font-size:13px;padding:22px 8px!important;line-height:1.7;border:0!important}
 .bx-types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px}.bx-types button{display:flex;flex-direction:column;align-items:center;gap:5px;border:1.5px solid var(--border);background:var(--surface2);border-radius:11px;padding:9px 2px 7px;font-size:11.5px;font-weight:800;color:var(--text);cursor:pointer}
 .bx-types button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-.bx-url{display:flex;gap:6px}.bx-url input{flex:1}.bx-acts{flex-wrap:wrap}
+.bx-url{display:flex;gap:6px}.bx-url input{flex:1}
+.bx-acts{display:flex;flex-wrap:wrap;gap:5px;padding:6px 22px 4px}.bx-acts .btn{height:28px;min-height:0;padding:0 10px;font-size:11.5px;border-radius:8px;flex:0 0 auto}
+.bx-view{margin:0;font-size:14px;line-height:1.65;white-space:pre-wrap;word-break:break-word;max-height:55vh;overflow-y:auto}
 .rv-banner{cursor:pointer;border-color:color-mix(in srgb,#7c3aed 45%,transparent)!important;background:color-mix(in srgb,#7c3aed 8%,var(--surface))!important}
 .rv-banner .gi{background:color-mix(in srgb,#7c3aed 16%,transparent)!important;font-size:18px}
 .rv-banner b{color:#7c3aed}
@@ -3352,7 +3354,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1157</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261114.1208</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3383,7 +3385,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1157`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261114.1208`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3479,7 +3481,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261114.1157" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261114.1208" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3504,7 +3506,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261114.1157" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261114.1208" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3616,8 +3618,8 @@ document.addEventListener('click', async e => {
     case 'box-open': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; if (x.type === 'memo') { S.boxOpen = S.boxOpen === x.id ? null : x.id; boxList(); } else window.open(x.url, '_blank', 'noopener'); break; }
     case 'box-more': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break;
       openModal(`<div class="modal-head"><h3 style="display:flex;align-items:center;gap:8px"><i class="bxi lg">${(BOX_T[x.type] || BOX_T.web)[0]}</i>${esc(x.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
-        <div class="modal-body"><p class="hint" style="word-break:break-all;white-space:pre-wrap">${esc(x.type === 'memo' ? x.text : x.url)}</p></div>
-        <div class="modal-foot bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">${x.type === 'memo' ? '내용 복사' : '복사'}</button>${x.type === 'memo' ? `<button class="btn" data-close data-act="box-copyall" data-id="${x.id}">전체 복사</button>` : ''}<button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>`); break; }
+        <div class="bx-acts">${x.type !== 'memo' ? `<button class="btn" data-close data-act="box-go" data-id="${x.id}">열기</button>` : ''}<button class="btn" data-close data-act="box-copy" data-id="${x.id}">${x.type === 'memo' ? '내용 복사' : '복사'}</button>${x.type === 'memo' ? `<button class="btn" data-close data-act="box-copyall" data-id="${x.id}">전체 복사</button>` : ''}<button class="btn" data-close data-act="box-edit" data-id="${x.id}">수정</button><button class="btn danger" data-close data-act="box-del" data-id="${x.id}">삭제</button></div>
+        <div class="modal-body" style="padding-top:8px"><p class="bx-view">${x.type === 'memo' ? linkify(x.text || '') : esc(x.url)}</p></div>`); break; }
     case 'box-go': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (x) window.open(x.url, '_blank', 'noopener'); break; }
     case 'box-copy': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; try { await navigator.clipboard.writeText(x.type === 'memo' ? x.text : x.url); toast('복사했어요'); } catch (er) { prompt('복사하세요', x.type === 'memo' ? x.text : x.url); } break; }
     case 'box-copyall': { const x = MY.load().box.find(y => y.id === t.dataset.id); if (!x) break; const all = `${x.title}\n\n${x.text || ''}`; try { await navigator.clipboard.writeText(all); toast('제목과 내용을 모두 복사했어요'); } catch (er) { prompt('복사하세요', all); } break; }
