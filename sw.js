@@ -1,4 +1,4 @@
-/* v2611161 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611162 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
@@ -36,7 +36,7 @@ self.addEventListener('push', e => {
       body: d.body || '새 글을 확인해보세요',
       icon: 'icons/voy-192.png',
       badge: 'icons/badge-bell.png',          // 안드로이드 상단 상태표시줄의 종 모양
-      tag: 'voy-new-post', renotify: true,
+      tag: 'voy-post-' + ((d.url || '').match(/post\/(\d+)/)?.[1] || Date.now()),   // 글마다 다른 태그 → 알림이 쌓여 아이콘 숫자가 1→2→3 증가
       data: { url: d.url || './#/feed' }
     });
   })());
