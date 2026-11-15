@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>제약·바이오 주간 핵심 뉴스 · 유한양행 영업기획팀</title>
+<meta name="description" content="매주 정리하는 제약·바이오 핵심 뉴스 — 유한양행 영업기획팀">
+<!-- 링크 미리보기 (카카오톡·슬랙·페이스북 등) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="제약·바이오 주간 핵심 뉴스">
+<meta property="og:title" content="제약·바이오 주간 핵심 뉴스">
+<meta property="og:description" content="매주 정리하는 제약·바이오 핵심 뉴스 — 유한양행 영업기획팀">
+<meta property="og:image" content="https://notice.ourclinic.kr/soc/soc_og.png">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="800">
+<meta property="og:image:alt" content="유한양행 버드나무 로고">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://notice.ourclinic.kr/soc/soc_og.png">
+<link rel="apple-touch-icon" href="https://notice.ourclinic.kr/soc/soc_og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%93%B0%3C/text%3E%3C/svg%3E">
+<script>
+/* 저장된 테마를 그리기 전에 적용 (깜빡임 방지) */
+(function(){try{var t=localStorage.getItem("pbnews-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#16202A; --muted:#5B6872; --faint:#8A96A0;
+  --rule:#D9DFE4; --rule-soft:#E8ECEF;
+  --market:#C2410C; --market-bg:#FDEADF;
+  --rnd:#6D3FC4;    --rnd-bg:#EFE9FB;
+  --earn:#2754C5;   --earn-bg:#E8EEFB;
+  --policy:#0B7A6F; --policy-bg:#E2F3F1;
+  --etc:#5F6B78;    --etc-bg:#ECEFF2;
+  --top:#D7263D;    --top-bg:#FDE8EA;
+  --yh:#0B6E4F;     --yh-bg:#DFF3EA;
+  --link:#2754C5;
+  --ok:#17803D;
+  --font:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10161C; --surface:#18212A; --ink:#E6EBEF; --muted:#A3AEB8; --faint:#7C8893;
+    --rule:#2C3743; --rule-soft:#232D37;
+    --market:#F0A24B; --market-bg:#3A2A12; --rnd:#B596F0; --rnd-bg:#2A2142;
+    --earn:#7FA2F5; --earn-bg:#1D2A47; --policy:#4CC2B4; --policy-bg:#15322F;
+    --etc:#A9B3BD; --etc-bg:#252E37; --top:#FF5A6E; --top-bg:#3D1C22;
+    --yh:#5BCB9A; --yh-bg:#14332A; --link:#7FA2F5; --ok:#5BCB83;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10161C; --surface:#18212A; --ink:#E6EBEF; --muted:#A3AEB8; --faint:#7C8893;
+  --rule:#2C3743; --rule-soft:#232D37;
+  --market:#F0A24B; --market-bg:#3A2A12; --rnd:#B596F0; --rnd-bg:#2A2142;
+  --earn:#7FA2F5; --earn-bg:#1D2A47; --policy:#4CC2B4; --policy-bg:#15322F;
+  --etc:#A9B3BD; --etc-bg:#252E37; --top:#FF5A6E; --top-bg:#3D1C22;
+  --yh:#5BCB9A; --yh-bg:#14332A; --link:#7FA2F5; --ok:#5BCB83;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.6;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+a{color:inherit}
+.wrap{max-width:1360px;margin:0 auto;padding:28px 24px 64px}
+
+/* Top bar */
+.topbar{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.btn{border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:600 13px var(--font);padding:8px 14px;border-radius:9px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn svg{width:16px;height:16px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:9px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 13px var(--font);padding:7px 13px;cursor:pointer;border-right:1px solid var(--rule)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.weeksel{border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:600 13px var(--font);padding:7px 10px;border-radius:9px;cursor:pointer}
+
+/* Header */
+header.top{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;margin-bottom:22px}
+.eyebrow{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
+h1{font-size:clamp(24px,3.4vw,38px);line-height:1.15;margin:0;font-weight:700;letter-spacing:-0.02em}
+.lede{margin:10px 0 0;color:var(--muted);max-width:70ch}
+.updated{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:4px 12px}
+.updated::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.updated b{color:var(--ink);font-weight:600}
+.stats{display:flex;gap:28px;text-align:right}
+.stat b{display:block;font-size:28px;font-weight:700;line-height:1}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:0 0 16px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);background:var(--surface);color:var(--muted);font:500 13px var(--font);padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{color:var(--c);background:var(--cb);border-color:var(--c);font-weight:600}
+.chip.all{--c:var(--ink);--cb:var(--surface)}
+.chip.yhchip{--c:var(--yh);--cb:var(--yh-bg)}
+.c-market{--c:var(--market);--cb:var(--market-bg)} .c-rnd{--c:var(--rnd);--cb:var(--rnd-bg)}
+.c-earn{--c:var(--earn);--cb:var(--earn-bg)} .c-policy{--c:var(--policy);--cb:var(--policy-bg)} .c-etc{--c:var(--etc);--cb:var(--etc-bg)}
+.search{flex:1 1 200px;min-width:180px;max-width:320px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;font:14px var(--font)}
+.count{font-size:13px;color:var(--muted);margin-left:auto}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+
+/* Layout: PC index + cards */
+.layout{display:grid;grid-template-columns:270px 1fr;gap:22px;align-items:start}
+.toc{position:sticky;top:16px;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:16px 16px 10px}
+.toc h2{font-size:14px;margin:0 0 8px;font-weight:600}
+.toc ol{list-style:none;margin:0;padding:0;counter-reset:n}
+.toc li{counter-increment:n}
+.toc a{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:8px 0;border-top:1px solid var(--rule-soft);text-decoration:none;font-size:13px;line-height:1.4}
+.toc a::before{content:counter(n,decimal-leading-zero);font-weight:700;font-size:11.5px;color:var(--c,var(--muted));padding-top:1px}
+.toc a:hover .tt{text-decoration:underline}
+.toc .tk{display:block;font-size:11px;color:var(--faint);margin-bottom:1px}
+.toc li.hide{display:none}
+.toc li.yhl .tt::after{content:"유한";display:inline-block;margin-left:5px;font-size:10px;font-weight:700;color:var(--yh);background:var(--yh-bg);border-radius:4px;padding:0 4px;vertical-align:1px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{position:relative;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:18px 20px 16px;display:flex;flex-direction:column;transition:background-color .6s,box-shadow .6s;border-top:4px solid var(--c)}
+.card.flash{box-shadow:0 0 0 3px var(--cb)}
+.card.top{grid-column:1/-1;border:2px solid var(--top);border-top-width:4px;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:8px 28px}
+.card.top .main{min-width:0}
+.card.top .pts{align-self:center;margin:0;background:var(--top-bg);border-radius:12px;padding:14px 16px}
+.card.top .pts li{border-top-color:transparent}
+.khead{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.cat{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:5px;color:var(--c);background:var(--cb)}
+.kick{font-size:12px;font-weight:600;color:var(--muted)}
+.topb{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:5px;color:#fff;background:var(--top)}
+.yh{display:inline-block;font-size:11px;font-weight:700;color:var(--yh);background:var(--yh-bg);border-radius:4px;padding:1px 6px}
+.card h3{margin:0 0 8px;font-size:18px;line-height:1.38;font-weight:700;letter-spacing:-0.01em}
+.card.top h3{font-size:22px}
+.card h3 a{text-decoration:none}
+.card h3 a:hover{text-decoration:underline;text-underline-offset:3px}
+.sum{margin:0;font-size:14.5px;color:var(--ink);line-height:1.68}
+.more{display:none;border:1px solid var(--rule);background:var(--surface);color:var(--link);font:600 12px var(--font);padding:2px 10px;border-radius:999px;cursor:pointer;margin-left:8px}
+.sl{display:inline-flex;align-items:center}
+.pts{list-style:none;margin:12px 0 0;padding:0}
+.pts li{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;padding:7px 0 0;margin-top:7px;border-top:1px dashed var(--rule);font-size:13.5px;line-height:1.5}
+.pts li:first-child{margin-top:0}
+.pts b{color:var(--c);font-weight:700;white-space:nowrap}
+.card.top .pts b{color:var(--top)}
+.src{margin-top:auto;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:var(--faint)}
+.src a{color:var(--link);font-weight:600;text-decoration:none;white-space:nowrap}
+.src a:hover{text-decoration:underline}
+.card.top .src{grid-column:1/-1}
+.card.hide{display:none}
+.empty{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--rule);border-radius:14px}
+
+/* Footer */
+.footrow{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-top:26px}
+.foot{margin:0;font-size:12.5px;color:var(--faint);max-width:92ch}
+.foot a{color:var(--muted)}
+.visits{display:flex;gap:18px;flex-shrink:0;font-size:13px;color:var(--muted);letter-spacing:.02em;background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:6px 14px}
+.visits b{font-weight:700;color:var(--ink);margin-right:5px}
+.visits[hidden]{display:none}
+.endcap{margin-top:18px;font-size:12px;color:var(--faint);text-align:center}
+
+/* 중간 폭: 목차 숨김 */
+@media (max-width:1100px){
+  .layout{grid-template-columns:1fr}
+  .toc{display:none}
+}
+
+/* ===== Mobile: 한 화면에 뉴스 2건 ===== */
+@media (max-width:760px){
+  html{scroll-padding-top:10px}
+  .wrap{padding:12px 12px 40px}
+  .topbar{justify-content:space-between;margin-bottom:12px;gap:8px}
+  .topbar .seg button{padding:6px 10px;font-size:12px}
+  .weeksel{padding:6px 8px;font-size:12px}
+  #openPrint{display:none}
+  header.top{grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+  .eyebrow{font-size:12px;margin-bottom:4px}
+  h1{font-size:22px}
+  .lede{display:none}
+  .updated{margin-top:8px;font-size:12px;padding:3px 10px}
+  .stats{display:none}
+  .stat{flex:1;text-align:center;border-right:1px solid var(--rule-soft)}
+  .stat:last-child{border-right:0}
+  .stat b{font-size:18px;display:inline}
+  .stat span{font-size:11.5px;margin-left:4px}
+  .controls{margin:0 -12px 10px;padding:0 12px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px}
+  .controls::-webkit-scrollbar{display:none}
+  .chips{flex-wrap:nowrap}
+  .chip{padding:5px 11px;font-size:12.5px}
+  .search,.count{display:none}
+  .grid{grid-template-columns:1fr;gap:10px}
+  .card,.card.top{display:flex;padding:13px 15px 11px;border-radius:12px}
+  .card.top{border-width:2px;border-top-width:4px}
+  .khead{margin-bottom:5px;gap:5px}
+  .kick{font-size:11.5px}
+  .card h3,.card.top h3{font-size:16.5px;line-height:1.36;margin-bottom:5px}
+  .card h3 br{display:none}
+  .sum{font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .card.open .sum{display:block;-webkit-line-clamp:unset;overflow:visible}
+  .more.on{display:inline-block}
+  .pts{margin-top:8px}
+  .card.top .pts{margin-top:8px;padding:8px 12px}
+  .pts li{font-size:13px;line-height:1.45;padding-top:5px;margin-top:5px;grid-template-columns:1fr;gap:0}
+  .pts li b{white-space:normal}
+  .pts li span{display:inline}
+  .pts li{display:block}
+  .pts li b::after{content:" · "}
+  .src{padding-top:8px;font-size:12px}
+  .footrow{flex-direction:column;align-items:flex-start;gap:12px;margin-top:20px}
+}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+
+/* ===== Print (A4 세로) ===== */
+@page{size:A4 portrait;margin:12mm}
+@media print{
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
+    color-scheme:light;
+    --bg:#fff; --surface:#fff; --ink:#111; --muted:#555; --faint:#777; --rule:#bbb; --rule-soft:#ddd;
+    --market:#C2410C; --market-bg:#FDEADF; --rnd:#6D3FC4; --rnd-bg:#EFE9FB; --earn:#2754C5; --earn-bg:#E8EEFB;
+    --policy:#0B7A6F; --policy-bg:#E2F3F1; --top:#D7263D; --top-bg:#FDE8EA; --yh:#0B6E4F; --yh-bg:#DFF3EA; --link:#2754C5;
+  }
+  body{background:#fff;font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{padding:0;max-width:none}
+  .topbar,.controls,.toc,.more,.visits,.stats{display:none!important}
+  header.top{grid-template-columns:1fr;margin-bottom:6mm;border-bottom:2px solid #111;padding-bottom:3mm}
+  h1{font-size:18pt}
+  .lede{display:none}
+  .layout{display:block}
+  .grid{grid-template-columns:1fr 1fr;gap:4mm}
+  .card{break-inside:avoid;padding:3.5mm 4mm;border-radius:6px}
+  .card.hide{display:flex!important}
+  .card.top.hide{display:grid!important}
+  .card h3{font-size:11pt}
+  .card.top h3{font-size:13pt}
+  .sum{font-size:8.8pt;display:block!important;-webkit-line-clamp:unset!important}
+  .pts li{font-size:8.4pt}
+  .src{font-size:7.6pt}
+  .src a::after{content:" " attr(href);font-weight:400;color:#666;word-break:break-all;white-space:normal}
+  .src a{white-space:normal}
+  .footrow{margin-top:5mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <select class="weeksel" id="weekSel" aria-label="호수 선택"></select>
+  <div class="seg" id="themeSeg" role="group" aria-label="화면 테마">
+    <button type="button" data-v="light" aria-pressed="false">라이트</button>
+    <button type="button" data-v="dark" aria-pressed="false">다크</button>
+    <button type="button" data-v="system" aria-pressed="false">시스템</button>
+  </div>
+  <button type="button" class="btn primary" id="openPrint">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7"/></svg>
+    인쇄 · PDF
+  </button>
+</div>
+
+<header class="top">
+  <div>
+    <p class="eyebrow">유한양행 영업기획팀 · 주간 뉴스 브리핑</p>
+    <h1 id="pageTitle">제약·바이오 핵심 뉴스</h1>
+    <p class="lede">한 주 동안 나온 제약·바이오 기사 중 영업 현장에 영향이 큰 소식을 골라 요약했습니다. 제목을 누르면 기사 원문이 새 창으로 열립니다.</p>
+    <div class="updated"><span>발행 <b id="pubDate">–</b></span><span aria-hidden="true">·</span><span>매주 업데이트</span></div>
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<div class="controls" id="controls" role="group" aria-label="분야 필터">
+  <div class="chips" id="chips"></div>
+  <input class="search" id="q" type="search" placeholder="제품명, 회사, 키워드 검색" aria-label="제품명, 회사, 키워드 검색">
+  <span class="count" id="count"></span>
+</div>
+
+<div class="layout">
+  <nav class="toc" aria-labelledby="tocTitle">
+    <h2 id="tocTitle">이번 호 목차</h2>
+    <ol id="toc"></ol>
+  </nav>
+  <main class="grid" id="grid" aria-live="polite"></main>
+</div>
+
+<div class="footrow">
+  <p class="foot" id="foot"></p>
+  <div class="visits" id="visits" hidden aria-label="방문자 수">
+    <span id="vWrapToday" title="오늘 방문자 (한국시간 기준)"><b>V</b><span id="vToday">–</span></span>
+    <span id="vWrapTotal" title="누적 방문자"><b>T</b><span id="vTotal">–</span></span>
+  </div>
+</div>
+<p class="endcap">© YUHAN Sales Strategic Planning Team.</p>
+</div>
+
+<script>
+/* =====================================================================
+   주간 데이터 — 매주 새 호를 WEEKS 맨 앞에 추가하면 됩니다.
+   cat : market(시장·특허) / rnd(R&D·허가) / earn(실적·해외) / policy(정책·약가) / etc(기타)
+   top : true 이면 맨 위 '탑이슈' 카드로 크게 표시
+   yh  : true 이면 '유한양행' 배지 + '유한양행 관련' 필터에 포함
+   pts : [항목, 내용] 핵심 수치·포인트
+   ===================================================================== */
+const CAT = {market:"시장·특허", rnd:"R&D·허가", earn:"실적·해외", policy:"정책·약가", etc:"기타"};
+const MEDIA = [
+  [/monews\.co\.kr/,"메디칼업저버"],[/medipana\.com/,"메디파나뉴스"],[/dailypharm\.com/,"데일리팜"],
+  [/medifonews\.com/,"메디포뉴스"],[/medicaltimes\.com/,"메디칼타임즈"],[/dailymedi\.com/,"데일리메디"],
+  [/yakup\.com/,"약업신문"],[/hitnews\.co\.kr/,"히트뉴스"],[/docdocdoc\.co\.kr/,"청년의사"],[/kpanews\.co\.kr/,"약사공론"]
+];
+
+const WEEKS = [
+  {
+    id:"2026-11-w2", label:"11월 2주차", pub:"2026-11-16",
+    items:[
+      {top:true,cat:"market",kick:"항응고제 시장 탑이슈",
+       title:["릭시아나 물질특허 만료","25개사 64품목 선점 경쟁"],
+       sum:"물질특허가 만료된 다이이찌산쿄 항응고제 '릭시아나(에독사반)'를 두고 25개 제약사 후발의약품 64품목이 시장 선점 경쟁에 들어갔다. HK이노엔은 정제 크기 축소·병포장, 제뉴원사이언스는 염변경, 삼진제약은 자체 생산체계를 내세웠다. 기존 영업망과 CSO 인센티브 강화, 공급 안정성이 처방 확보의 관건으로 꼽힌다.",
+       pts:[["시장 규모","1,200억원대 처방시장, 64품목 동시 진입"],["급여 등재","토실산염 52품목 + 염변경 베실산염 12품목"]],
+       url:"https://www.monews.co.kr/news/articleView.html?idxno=415389"},
+
+      {cat:"rnd",yh:true,kick:"유한양행 R&D",
+       title:["유한양행 만성신장병 신약","'YH34180' 임상 1상 승인"],
+       sum:"유한양행이 자체 연구로 도출한 경구용 저분자 만성신장병 신약 'YH34180'의 임상 1상 계획을 식약처로부터 승인받았다. 염증을 줄이고 섬유화를 억제하는 기전으로, 마우스 모델에서 신장 기능 지표 개선과 섬유화 감소를 확인했고 기존 치료제와 병용 시 추가 효과도 보였다.",
+       pts:[["임상 설계","건강한 성인 남성 대상 First-in-Human 1상"],["평가 항목","안전성·내약성·PK/PD, 표준치료 병용 시 안전성"]],
+       url:"https://www.medipana.com/news/articleView.html?idxno=421804"},
+
+      {cat:"earn",yh:true,kick:"유한양행 해외사업",
+       title:["제약바이오 10곳 3분기 해외사업","유한양행은 로열티 성과"],
+       sum:"위탁생산·현지판매·완제품 수출·기술수출 등 해외사업 형태가 다양해지면서 주요 제약바이오 10곳의 3분기 실적 기여도와 수익성이 갈렸다. 삼성바이오로직스는 CDMO, 셀트리온은 바이오시밀러로 분기 매출 1조원을 견인했고, 유한양행은 기술수출 로열티로 성과를 냈다.",
+       pts:[["유한양행","기술수출 로열티로 해외 수익 창출"],["경쟁사","SK바팜·GC녹십자 美 현지판매, 대웅 완제품 수출"]],
+       url:"https://www.dailypharm.com/user/news/344310"},
+
+      {cat:"earn",yh:true,kick:"3분기 수익성 분석",
+       title:["제약 25개사 3분기 잠정실적","매출보다 '이익 구조'가 갈랐다"],
+       sum:"3분기 잠정실적을 공개한 주요 제약사와 계열사 25곳을 분석한 결과, 매출 성장률과 영업이익 증가율 사이에 큰 차이가 나타났다. 유한양행·대웅제약·GC녹십자·보령 등 대형사는 해외 판매 확대와 신약 관련 수익이 영업이익 성장에 힘을 보탰다.",
+       pts:[["이익 견인","유한양행·대웅·GC녹십자·보령, 해외판매·신약 수익"],["이익 위축","한국유나이티드·종근당바이오 영업이익 급감"]],
+       url:"https://www.medipana.com/news/articleView.html?idxno=421215"},
+
+      {cat:"rnd",kick:"비만치료제 R&D",
+       title:["한미약품, 에페 이어","차세대 비만신약 속도"],
+       sum:"한미약품이 국산 비만치료제 '에페' 상용화를 발판으로 삼중작용제 잔트루타이드(HM15275)와 HM17321 개발에 속도를 내고 있다. 잔트루타이드는 GLP-1/GIP/글루카곤에 동시에 작용하며 체중 25% 이상 감량과 근손실 최소화를 목표로 한다.",
+       pts:[["잔트루타이드","美 임상 2상 진행, 2027년 상반기 종료 예정"],["HM17321","제넨텍 라이선스, 근육 보존형 UCN2 유사체 임상 1상"]],
+       url:"https://www.monews.co.kr/news/articleView.html?idxno=415137"},
+
+      {cat:"rnd",kick:"FDA 허가",
+       title:["첫 FXIa 억제제 '선하보'","뇌졸중 재발 예방 승인"],
+       sum:"미국 FDA가 바이엘의 혈액응고인자 XIa 억제제 '선하보(아순덱시안)'를 뇌졸중 재발 예방 치료제로 승인했다. 지난 10월 중국에 이어 미국에서도 비심장색전성 허혈성 뇌졸중·고위험 일과성 허혈발작 환자에서 항혈소판제와 병용하는 용도로 허가됐다.",
+       pts:[["허혈성 뇌졸중","선하보군 6.2% vs 위약군 8.4%"],["추적 기간","중앙값 19개월, 심혈관 복합사건도 유의하게 감소"]],
+       url:"https://www.monews.co.kr/news/articleView.html?idxno=415272"},
+
+      {cat:"policy",kick:"위장약 처방 기준",
+       title:["P-CAB·PPI·H2RA 동시 처방","모두 효능군 중복 적용"],
+       sum:"식약처가 '의약품 적정사용을 위한 주의 정보'를 12일 공고했다. 앞으로 위식도역류질환 치료제 P-CAB, PPI, H2RA를 계열을 넘나들어 2개 이상 동시 처방하면 모두 효능군 중복에 해당한다. 마약성 진통제·수면제 등 33개 성분은 노인주의 목록에 새로 추가됐다.",
+       pts:[["효능군 중복","성분 6개 추가·43개 변경, 위장약 계열 간 중복 포함"],["노인주의","33개 성분 추가, 수유부주의 24개 추가"]],
+       url:"https://dailypharm.com/user/news/344549"},
+
+      {cat:"market",kick:"특허 만료",
+       title:["2027년 만료 특허 83개","위고비·듀비에·보신티 포함"],
+       sum:"식약처 의약품특허목록 분석 결과 2027년 존속기간 만료를 앞둔 특허가 83개로 집계됐다. 위고비·오젬픽·리벨서스 공통 특허는 2027년 2월 3일, 종근당 듀비에는 3월 21일, 보신티 관련 특허는 12월 20일 만료 예정이어서 후발약 개발 경쟁이 확대될 전망이다.",
+       pts:[["위고비 특허","2027년 2월 3일 존속기간 만료"],["주의점","172개 제품 중 79개는 2028년 이후 만료 특허도 보유"]],
+       url:"https://www.medipana.com/news/articleView.html?idxno=421221"},
+
+      {cat:"policy",kick:"약가 재평가",
+       title:["내년 4월 약가인하 앞두고","차수 변경·가산 신청 몰려"],
+       sum:"내년 4월 기등재 의약품 약가인하를 앞두고 재평가 차수 변경과 가산 신청이 예상보다 많이 접수됐다. 1차수에서 2차수로 바뀌면 첫 인하 시점을 2030년 10월로 3년 6개월 늦출 수 있고, 국산 원료 필수의약품 등 가산을 받으면 68% 수준 약가를 인정받는다.",
+       pts:[["인하 유예","2차수 변경 시 2030년 10월까지 3년 6개월 연기"],["심의 일정","12월 3일 약평위 상정 예정"]],
+       url:"https://www.dailypharm.com/user/news/344574"},
+
+      {cat:"policy",kick:"복합제 약가",
+       title:["ODT 급여 제한 안 한다","로수젯ODT 등재 수순"],
+       sum:"약평위가 처방 환자를 제한하는 구강붕해정(ODT) 일반원칙 개정은 추진하지 않기로 가닥을 잡았다. 일반 정제보다 약가가 충분히 낮으면 추가 재정 부담이 없다는 판단이다. 로수젯ODT는 개편된 45% 산정률과 단일제 합산 방식이 논의되며 약가 기대치가 낮아졌다.",
+       pts:[["결론","ODT 고가 인정은 어렵지만 급여 환자군 제한은 없음"],["시장 영향","등재 품목 많은 성분에서 ODT 진입 경쟁 이어질 전망"]],
+       url:"https://m.dailypharm.com/user/news/344361"}
+    ]
+  }
+];
+
+/* ---------- 공통 ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function media(u){for(const [re,n] of MEDIA) if(re.test(u)) return n; try{return new URL(u).hostname.replace(/^www\.|^m\./,"")}catch(e){return "기사"}}
+function fmtDate(s){const [y,m,d]=s.split("-");return `${y}.${m}.${d}`}
+
+const params=(()=>{try{return new URLSearchParams(location.search)}catch(e){return new Map()}})();
+const W = WEEKS.find(w=>w.id===params.get("w")) || WEEKS[0];
+W.items.forEach((it,i)=>{it.n=i+1; it.media=media(it.url);});
+/* 탑이슈를 맨 앞으로 */
+const ITEMS=[...W.items].sort((a,b)=>(b.top?1:0)-(a.top?1:0));
+
+/* ---------- 머리글 ---------- */
+document.title=`${W.label} 제약·바이오 핵심 뉴스 · 유한양행 영업기획팀`;
+document.getElementById("pageTitle").textContent=`${W.label} 제약·바이오 핵심 뉴스`;
+document.getElementById("pubDate").textContent=fmtDate(W.pub);
+(function(){
+  const yh=ITEMS.filter(i=>i.yh).length, ms=new Set(ITEMS.map(i=>i.media)).size;
+  document.getElementById("stats").innerHTML=
+    `<div class="stat"><b>${ITEMS.length}</b><span>핵심 뉴스</span></div><div class="stat"><b>${yh}</b><span>유한양행 관련</span></div><div class="stat"><b>${ms}</b><span>출처 매체</span></div>`;
+  const list=[...new Set(ITEMS.map(i=>i.media))].join("·");
+  document.getElementById("foot").innerHTML=`${esc(list)} 보도를 바탕으로 유한양행 영업기획팀이 ${esc(W.label)} 핵심 뉴스를 요약했습니다(${fmtDate(W.pub)} 발행). 수치와 일정은 기사 기준이며, 세부 내용은 각 카드의 원문 링크에서 확인하세요.`;
+})();
+
+/* ---------- 지난 호 선택 ---------- */
+(function(){
+  const sel=document.getElementById("weekSel");
+  sel.innerHTML=WEEKS.map(w=>`<option value="${w.id}"${w===W?" selected":""}>${esc(w.label)}${w===WEEKS[0]?" (최신)":""}</option>`).join("");
+  if(WEEKS.length<2) sel.style.display="none";
+  sel.addEventListener("change",()=>{location.search=sel.value===WEEKS[0].id?"":"?w="+encodeURIComponent(sel.value)});
+})();
+
+/* ---------- 테마 ---------- */
+(function(){
+  const root=document.documentElement;
+  const current=()=>root.getAttribute("data-theme")||"system";
+  function apply(v){
+    if(v==="system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme",v);
+    try{ v==="system"?localStorage.removeItem("pbnews-theme"):localStorage.setItem("pbnews-theme",v); }catch(e){}
+    document.querySelectorAll("#themeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+  }
+  document.querySelectorAll("#themeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===current()));
+  document.getElementById("themeSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b)apply(b.dataset.v)});
+  document.getElementById("openPrint").addEventListener("click",()=>window.print());
+})();
+
+/* ---------- 카드 · 목차 ---------- */
+const grid=document.getElementById("grid"), toc=document.getElementById("toc");
+function card(it){
+  const pts=it.pts.map(([k,v])=>`<li><b>${esc(k)}</b><span>${esc(v)}</span></li>`).join("");
+  const head=`<div class="khead">${it.top?`<span class="topb">탑이슈</span>`:""}<span class="cat">${CAT[it.cat]}</span><span class="kick">${esc(it.kick)}</span>${it.yh?`<span class="yh">유한양행</span>`:""}</div>
+    <h3><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">${it.title.map(esc).join(" <br>")}</a></h3>
+    <p class="sum">${esc(it.sum)}</p>`;
+  const src=`<div class="src"><span class="sl">${esc(it.media)}<button type="button" class="more" aria-expanded="false">더보기</button></span><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">기사 원문 ↗</a></div>`;
+  return it.top
+    ? `<article class="card top c-${it.cat}" id="n-${it.n}"><div class="main">${head}</div><ul class="pts">${pts}</ul>${src}</article>`
+    : `<article class="card c-${it.cat}" id="n-${it.n}">${head}<ul class="pts">${pts}</ul>${src}</article>`;
+}
+grid.innerHTML=ITEMS.map(card).join("")+`<div class="empty" id="empty" hidden>조건에 맞는 뉴스가 없습니다. 필터를 바꿔 보세요.</div>`;
+toc.innerHTML=ITEMS.map(it=>`<li class="c-${it.cat}${it.yh?" yhl":""}" data-n="${it.n}"><a href="#n-${it.n}"><span><span class="tk">${esc(it.kick)}</span><span class="tt">${esc(it.title.join(" "))}</span></span></a></li>`).join("");
+toc.addEventListener("click",e=>{
+  const a=e.target.closest("a"); if(!a) return; e.preventDefault();
+  const t=document.querySelector(a.getAttribute("href"));
+  t.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
+  t.classList.add("flash"); setTimeout(()=>t.classList.remove("flash"),1400);
+});
+
+/* 모바일: 요약이 3줄을 넘으면 '더보기' 표시 */
+function checkClamp(){
+  grid.querySelectorAll(".card").forEach(c=>{
+    const s=c.querySelector(".sum"), b=c.querySelector(".more");
+    if(c.classList.contains("open")){b.classList.add("on");return;}
+    b.classList.toggle("on", s.scrollHeight>s.clientHeight+2);
+  });
+}
+grid.addEventListener("click",e=>{
+  const b=e.target.closest(".more"); if(!b) return;
+  const c=b.closest(".card"), open=c.classList.toggle("open");
+  b.textContent=open?"접기":"더보기"; b.setAttribute("aria-expanded",open);
+});
+window.addEventListener("resize",checkClamp);
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(checkClamp);
+checkClamp();
+
+/* ---------- 필터 ---------- */
+const state={f:"all",q:""};
+(function(){
+  const used=Object.keys(CAT).filter(k=>ITEMS.some(i=>i.cat===k));
+  const cnt=k=>ITEMS.filter(i=>i.cat===k).length;
+  document.getElementById("chips").innerHTML=
+    `<button type="button" class="chip all" data-f="all" aria-pressed="true">전체 ${ITEMS.length}</button>`+
+    (ITEMS.some(i=>i.yh)?`<button type="button" class="chip yhchip" data-f="yh" aria-pressed="false">유한양행 관련 ${ITEMS.filter(i=>i.yh).length}</button>`:"")+
+    used.map(k=>`<button type="button" class="chip c-${k}" data-f="${k}" aria-pressed="false">${CAT[k]} ${cnt(k)}</button>`).join("");
+})();
+document.getElementById("chips").addEventListener("click",e=>{
+  const b=e.target.closest(".chip"); if(!b) return;
+  state.f=b.dataset.f;
+  document.querySelectorAll("#chips .chip").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  apply();
+});
+document.getElementById("q").addEventListener("input",e=>{state.q=e.target.value.trim().toLowerCase();apply()});
+function apply(){
+  let shown=0;
+  ITEMS.forEach(it=>{
+    const okF=state.f==="all"||(state.f==="yh"?it.yh:it.cat===state.f);
+    const hay=(it.kick+it.title.join(" ")+it.sum+it.pts.flat().join(" ")+it.media).toLowerCase();
+    const ok=okF&&(!state.q||hay.includes(state.q));
+    document.getElementById("n-"+it.n).classList.toggle("hide",!ok);
+    toc.querySelector(`li[data-n="${it.n}"]`).classList.toggle("hide",!ok);
+    if(ok) shown++;
+  });
+  document.getElementById("empty").hidden=shown>0;
+  document.getElementById("count").textContent=`${shown}건 표시`;
+  checkClamp();
+}
+apply();
+</script>
+<script type="module">
+/* =====================================================================
+   방문자 카운터 — 학술대회 캘린더와 같은 Firebase 프로젝트를 쓰고,
+   집계는 별도 컬렉션(news_daily / news_stats)에 저장합니다.
+   Firestore 보안 규칙에서 두 컬렉션의 읽기·쓰기를 허용해야 표시됩니다.
+   ===================================================================== */
+const COUNTER_MODE = "both";
+const firebaseConfig = {
+  apiKey: "AIzaSyCPbVlihJa0197bY7tTddXP8nu11QC6A-4",
+  authDomain: "notice-soc.firebaseapp.com",
+  projectId: "notice-soc",
+  storageBucket: "notice-soc.firebasestorage.app",
+  messagingSenderId: "385171750225",
+  appId: "1:385171750225:web:f984993a0e5a359d2e6770"
+};
+const DAILY_COL = "news_daily", STATS_COL = "news_stats";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+(async function(){
+  const box = document.getElementById("visits");
+  if(!firebaseConfig.projectId || !firebaseConfig.apiKey) return;
+  const both = COUNTER_MODE === "both";
+  if(!both) document.getElementById("vWrapTotal").remove();
+  const day = new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  const flagKey = "news-visit-" + day;
+  try{
+    const db = getFirestore(initializeApp(firebaseConfig));
+    const todayRef = doc(db, DAILY_COL, day);
+    const totalRef = doc(db, STATS_COL, "total");
+    let counted = false;
+    try{ counted = localStorage.getItem(flagKey) === "1"; }catch(e){}
+    if(!counted){
+      const batch = writeBatch(db);
+      batch.set(todayRef, {count: increment(1)}, {merge:true});
+      if(both) batch.set(totalRef, {count: increment(1)}, {merge:true});
+      await batch.commit();
+      try{ localStorage.setItem(flagKey, "1"); }catch(e){}
+    }
+    const fmtN = n => Number(n||0).toLocaleString("ko-KR");
+    const t = await getDoc(todayRef);
+    document.getElementById("vToday").textContent = fmtN(t.exists() ? t.data().count : 0);
+    if(both){
+      const a = await getDoc(totalRef);
+      document.getElementById("vTotal").textContent = fmtN(a.exists() ? a.data().count : 0);
+    }
+    box.hidden = false;
+  }catch(err){
+    console.warn("방문자 카운터를 불러오지 못했습니다:", err);
+  }
+})();
+</script>
+</body>
+</html>
