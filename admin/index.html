@@ -1994,7 +1994,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.1025</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.1825</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3245,7 +3245,7 @@ function pushDiagHTML() {
   if (D.err) return `<div class="panel"><div class="panel-head"><div><h2>${I('bell', 19)} 알림 발송 점검</h2><p class="dim">${esc(D.err)} — Supabase에서 <b>voy_patch_push_diag.sql</b>을 실행했는지 확인해 주세요.</p></div><button class="btn sm" data-act="pd-refresh">${I('refresh', 15)} 다시</button></div></div>`;
   const row = x => { let b = {}; try { b = JSON.parse(x.content || '{}'); } catch (e) {}
     const st = x.status_code, ok = st >= 200 && st < 300;
-    const what = !ok ? (st === 401 ? 'JWT 확인 켜짐' : st === 403 ? 'PUSH_SECRET 불일치' : st === 404 ? '함수 없음/글 없음' : x.error_msg || x.timed_out ? '연결 실패' : '함수 오류')
+    const what = !ok ? (b.error ? esc(b.error) : st === 401 ? 'JWT 확인 켜짐' : st === 403 ? 'PUSH_SECRET 불일치' : st === 404 ? '함수 없음/글 없음' : x.error_msg || x.timed_out ? '연결 실패' : `함수 오류 ${esc((x.content || '').slice(0, 120))}`)
       : b.targets !== undefined ? `대상 ${b.targets}대 · 성공 ${b.sent} · 만료 정리 ${b.removed || 0}${(b.failed || []).length ? ` · 실패 ${b.failed.length} (${esc(String(b.failed[0].code))})` : ''}` : `성공 ${b.sent ?? '-'} · 만료 정리 ${b.removed ?? '-'}`;
     return `<tr><td class="nowrap">${fmtDT(x.created)}</td><td class="num"><span class="tag-st ${ok ? 'active' : ''}">${st || (x.timed_out ? '시간초과' : '오류')}</span></td><td>${what}</td></tr>`; };
   return `<div class="panel"><div class="panel-head"><div><h2>${I('bell', 19)} 알림 발송 점검</h2>

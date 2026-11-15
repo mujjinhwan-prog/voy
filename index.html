@@ -3021,14 +3021,19 @@ async function viewRank() {
   const el = document.getElementById('vbody'); if (!el) return;
   const pub = list.length > 0, w = S.settings.score, admin = isAdminRole(S.me.role);
   const ad = voiceAnnounceDate(mk), adTxt = `${ad.getUTCDate()}일(${'일월화수목금토'[ad.getUTCDay()]})`, am = +nextMonth(mk).slice(2), tm = +mk.slice(2);
-  const st = pub ? 'pub' : voiceStage(mk);
+  /* 운영 일정은 '오늘 날짜' 기준으로만 표시 (발표 게시 여부와 무관)
+     지난달 발표일이 지났으면 이번 달 사이클(글게시 진행 중), 아니면 지난달 사이클(투표·심의) */
+  const nowK = new Date(Date.now() + KST_OFFSET), todayUTC = Date.UTC(nowK.getUTCFullYear(), nowK.getUTCMonth(), nowK.getUTCDate());
+  const sm = todayUTC > voiceAnnounceDate(target).getTime() ? curMonth() : target;
+  const sad = voiceAnnounceDate(sm), sadTxt = `${sad.getUTCDate()}일(${'일월화수목금토'[sad.getUTCDay()]})`, sam = +nextMonth(sm).slice(2), stm = +sm.slice(2);
+  const st = voiceStage(sm);
   const steps = [
-    { k: 'write', t: '글게시', when: `${tm}월 1일 ~ 말일`, d: '', ic: 'edit' },
-    { k: 'vote', t: '투표(추가)', when: `${am}월 1일 ~ 7일`, d: '지난달의 보석찾기 (투표 독려)<br>"우수 Tip에 투표해주세요"<br>게시판에서 투표 독려글 게시', ic: 'megaphone' },
-    { k: 'review', t: '본사심의', when: `${am}월 8일 ~ 10일`, d: '', ic: 'clipboard' },
-    { k: 'done', t: '최종 발표', when: `${am}월 ${adTxt}`, d: '11일이 주말이면 다음 첫 평일에 발표합니다.', ic: 'trophy' }
+    { k: 'write', t: '글게시', when: `${stm}월 1일 ~ 말일`, d: '', ic: 'edit' },
+    { k: 'vote', t: '투표(추가)', when: `${sam}월 1일 ~ 7일`, d: '지난달의 보석찾기 (투표 독려)<br>"우수 Tip에 투표해주세요"<br>게시판에서 투표 독려글 게시', ic: 'megaphone' },
+    { k: 'review', t: '본사심의', when: `${sam}월 8일 ~ 10일`, d: '', ic: 'clipboard' },
+    { k: 'done', t: '최종 발표', when: `${sam}월 ${sadTxt}`, d: '11일이 주말이면 다음 첫 평일에 발표합니다.', ic: 'trophy' }
   ];
-  const cur = st === 'pub' ? 'done' : st, stName = st === 'pub' ? '발표 완료' : (steps.find(x => x.k === cur) || {}).t || '';
+  const cur = st, stName = `${stm}월 Voice ${(steps.find(x => x.k === cur) || {}).t || ''}`;
   const winners = k => list.filter(a => a.category === k);
   const tile = c => { const ws = winners(c.k); return `<div class="v-tile v-${c.g} ${ws.length ? 'has' : ''}"><span class="v-e">${c.e}</span><b>${c.t}</b>
       ${ws.length ? `<div class="v-wins">${ws.map(a => `<span class="v-win" ${a.post_id ? `data-act="open" data-id="${a.post_id}" title="${esc(a.post_title || '')}"` : ''}>${esc(a.nickname || '')}${a.note ? `<small>${esc(a.note)}</small>` : ''}</span>`).join('')}</div>` : `<small>${pub ? '해당자 없음' : esc(c.d)}</small>`}</div>`; };
@@ -3045,9 +3050,9 @@ async function viewRank() {
     <section class="v-banner ${pub ? 'pub' : ''}"><span class="v-bi">${pub ? '🎉' : I('clock', 22)}</span><div>
       <b>${pub ? `${tm}월 이달의 Voice 발표!` : `${tm}월 Voice는 발표 전입니다`}</b>
       <p>${pub ? '축하합니다! 선정된 분들의 닉네임을 공개합니다. 닉네임을 누르면 선정된 글을 볼 수 있어요.' : '아래 일정에 따라 글게시, 투표, 본사심의가 순차적으로 진행되며, 최종 결과는 발표 단계와 관리자 최종 게시 이후에만 공개됩니다.'}</p></div></section>
-    <section class="v-card"><div class="v-head"><div><h4 style="margin:0">이달의 Voice 운영 일정</h4><small>${am}월 발표 예정일은 ${adTxt}입니다.</small></div><span class="v-stage">현재 단계: ${stName}</span></div>
-      <div class="v-steps">${steps.map(x => { const on = x.k === cur, done = steps.findIndex(y => y.k === x.k) < steps.findIndex(y => y.k === cur) || st === 'pub';
-        return `<div class="v-step ${on ? 'on' : ''} ${done ? 'done' : ''}"><span class="v-si">${I(x.ic, 18)}</span><div><b>${x.t}${on && st !== 'pub' ? ' <em>진행 중</em>' : ''}${done ? ' <em class="ok">완료</em>' : ''}</b><small>${x.when}</small>${x.d ? `<p>${x.d}</p>` : ''}</div></div>`; }).join('')}</div></section>
+    <section class="v-card"><div class="v-head"><div><h4 style="margin:0">이달의 Voice 운영 일정</h4><small>${stm}월 Voice · ${sam}월 ${sadTxt} 발표 예정</small></div><span class="v-stage">현재 단계: ${stName}</span></div>
+      <div class="v-steps">${steps.map(x => { const on = x.k === cur, done = steps.findIndex(y => y.k === x.k) < steps.findIndex(y => y.k === cur);
+        return `<div class="v-step ${on ? 'on' : ''} ${done ? 'done' : ''}"><span class="v-si">${I(x.ic, 18)}</span><div><b>${x.t}${on ? ' <em>진행 중</em>' : ''}${done ? ' <em class="ok">완료</em>' : ''}</b><small>${x.when}</small>${x.d ? `<p>${x.d}</p>` : ''}</div></div>`; }).join('')}</div></section>
     ${group('review')}${group('result')}${group('event')}
     <p class="v-anon">🔒 작성자 순위·점수는 공개하지 않으며, 발표 시 선정자의 <b>닉네임만</b> 공개합니다.</p>
     ${admin ? `<a class="btn block" href="${ADMIN_PAGE_URL}#/rank" style="margin-top:4px">${I('shield', 16)} 관리자 콘솔에서 실시간 순위·선정 관리</a>` : ''}`;
@@ -3372,9 +3377,10 @@ function pushVerdict(r) {
   if (r.timed_out || r.error) return { bad: 'srv', text: `알림 서버에 연결하지 못했어요 (${esc(r.error || '시간 초과')}) — 관리자 확인 필요` };
   const st = r.status; let b = {}; try { b = JSON.parse(r.body || '{}'); } catch (e) {}
   if (st === 401) return { bad: 'srv', text: '알림 함수(voy-push)의 <b>JWT 확인</b>이 켜져 있어요 — 관리자: Edge Functions → voy-push → Settings에서 끄기' };
-  if (st === 403) return { bad: 'srv', text: '알림 서버 비밀번호(<b>PUSH_SECRET</b>)가 맞지 않아요 — 관리자 확인 필요' };
+  if (st === 403) return { bad: 'srv', text: '알림 서버 비밀번호(<b>PUSH_SECRET</b>)가 맞지 않아요 — 관리자: Edge Function 시크릿 PUSH_SECRET과 app_secrets의 push_secret을 같게' };
   if (st === 404) return { bad: 'srv', text: '알림 함수(<b>voy-push</b>)를 찾을 수 없어요 — 관리자: 함수 이름·배포 확인' };
-  if (st >= 500 || st < 200 || st >= 300) return { bad: 'srv', text: `알림 함수 오류 (${st}) — 관리자: Edge Functions → voy-push → Logs 확인` };
+  if (st >= 500 || st < 200 || st >= 300) { const why = b.error || b.message || b.msg || (r.body || '').replace(/<[^>]+>/g, '').slice(0, 160);
+    return { bad: 'srv', text: `알림 함수 오류 (${st})${why ? ` — <b>${esc(why)}</b>` : ''}<br><small>관리자: Edge Functions → voy-push → Logs 확인</small>` }; }
   const f = (b.failed || [])[0];
   if (b.sent > 0) return { ok: true, text: `서버 → ${b.sent}대 기기로 전송 성공${b.failed && b.failed.length ? ` (실패 ${b.failed.length}대)` : ''}` };
   if (b.removed > 0) return { bad: 'dev', text: '이 기기의 알림 연결이 만료돼 지웠어요 — [연결 다시 하기]를 눌러 주세요' };
@@ -3448,7 +3454,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261115.1031</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261115.1911</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3482,7 +3488,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261115.1031`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261115.1911`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3578,7 +3584,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261115.1031" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261115.1911" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3603,7 +3609,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261115.1031" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261115.1911" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
