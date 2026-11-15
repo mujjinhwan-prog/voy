@@ -1714,7 +1714,7 @@ const API = {
 const QL_DEFAULTS = [
   /* url은 커뮤니티와 같은 도메인의 폴더 (예: 도메인/yhdbt/) — 저장소에 같은 이름의 폴더로 각 사이트 index.html을 올리면 됩니다 */
   { id: 'dbt',      name: 'DailyBreakTalk',        url: 'yhdbt/',    icon: 'dbt',      auto: true, on: true, updated_at: null },
-  { id: 'weekly',   name: 'WeeklyNews',            url: 'yhwn/',     icon: 'weekly',   auto: true, on: true, updated_at: null },
+  { id: 'weekly',   name: 'WeeklyNews',            url: 'wnews/',    icon: 'weekly',   auto: true, on: true, updated_at: null },
   { id: 'brp',      name: 'BRP insight',           url: 'brp/',      icon: 'brp',      auto: true, on: true, updated_at: null },
   { id: 'health',   name: '건강의 벗|USE',              url: 'yhfriend/', icon: 'health',   auto: true, on: true, updated_at: null },
   { id: 'soc',      name: '국내해외 학회행사', url: 'soc/',      icon: 'soc',      auto: true, on: true, updated_at: null },
@@ -1776,7 +1776,8 @@ function qlMerge(raw) {
   if (!(Array.isArray(raw) && raw.length)) return QL_DEFAULTS.map(l => ({ ...l }));
   const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
   out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name;
-    if (d && d.orgs && !Array.isArray(l.orgs)) l.orgs = d.orgs.slice(); });   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
+    if (d && d.orgs && !Array.isArray(l.orgs)) l.orgs = d.orgs.slice();
+    if (l.id === 'weekly' && /^\/?yhwn\/?(index\.html)?$/.test(String(l.url || '').trim())) l.url = 'wnews/'; });   // 주간 뉴스 폴더 이전: yhwn/ → wnews/   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
   QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
   return out;
 }
@@ -1994,7 +1995,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.1825</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261116.0828</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
