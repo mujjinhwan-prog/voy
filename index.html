@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <script>/* 설치 가능 신호를 놓치지 않도록 가장 먼저 받아 둠 */
 window.__bip=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bip=e;dispatchEvent(new Event('voy-installable'));});
-if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(function(){});</script>
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').then(function(r){try{r.update()}catch(e){}}).catch(function(){});</script>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=4">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=4">
 <meta name="application-name" content="VOY™">
@@ -3251,6 +3251,14 @@ async function pushIsOn() {
     return !!sub;
   } catch (e) { try { return localStorage.getItem(PUSH_FLAG) === '1'; } catch (x) { return false; } }
 }
+/* 서비스워커(알림 엔진) 버전 표시 — 새 sw.js가 폰에 적용됐는지 확인용 */
+function swVerAsk() {
+  try { const c = navigator.serviceWorker && navigator.serviceWorker.controller; if (c) c.postMessage({ type: 'ver' });
+    else { const el = document.getElementById('swVer'); if (el) el.textContent = '알림 엔진: 미연결 (앱을 완전히 닫았다 다시 열어 주세요)'; } } catch (e) {}
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
+  if (e.data && e.data.type === 'sw-ver') { const el = document.getElementById('swVer'); if (el) el.textContent = '알림 엔진 v' + e.data.v; }
+});
 function pushBoxHTML() {
   let hint = '다른 사람이 새 글을 올리면 휴대폰·PC에 🔔 알림이 와요. (내가 쓴 글은 나에게 알림이 오지 않아요)';
   let disabled = false;
@@ -3263,7 +3271,7 @@ function pushBoxHTML() {
   return `<div class="set-row"><span>${I('bell', 19)} <span><b style="color:var(--text);display:block;font-size:15px">새 글 알림</b><small class="muted" style="font-size:12.5px;line-height:1.45;display:block">${hint}</small></span></span>
     <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>
     ${help ? `<button type="button" class="pw-open" data-act="push-wiz"><span class="pw-ic">🩺</span><span><b>알림 점검·설정 도우미</b><small>알림이 안 오면 여기서 순서대로 확인하고 해결해요</small></span>${I('right', 18)}</button>` : ''}
-    <div id="pushNeed"></div>
+    <div id="pushNeed"></div><small id="swVer" class="muted" style="display:block;text-align:right;font-size:11px;opacity:.7"></small>
     <p class="hint" id="pushDiag" style="margin:6px 0 0;font-size:11.5px;opacity:.75"></p>`;
 }
 /* 알림 권한이 아직 없으면 '알림 허용' 안내를 크게 표시 */
@@ -3276,6 +3284,7 @@ function pushNeed() {
     : `<div class="push-need"><b>🔔 알림 허용이 필요해요</b><span>아직 이 기기에서 알림을 허용하지 않았어요. 아래 버튼을 누르고, 뜨는 창에서 <b>[허용]</b>을 눌러 주세요.</span><button type="button" class="btn primary block" data-act="push-on">알림 허용하기</button><button type="button" class="linkbtn" data-act="push-wiz">창이 안 뜨나요? 알림 점검·설정 도우미</button></div>`;
 }
 async function bindPushBox() {
+  swVerAsk();
   const sw = document.getElementById('pushSw'); if (!sw) return;
   try { sw.checked = localStorage.getItem(PUSH_FLAG) === '1' && Notification.permission === 'granted'; } catch (e) {}   // 바로 표시 → 아래에서 실제 상태 확인
   sw.checked = await pushIsOn();
@@ -3454,7 +3463,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261116.0003</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261116.0049</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3488,7 +3497,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261116.0003`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261116.0049`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3525,8 +3534,8 @@ async function pushTest() {
   if (!pushSupported()) return toast('이 환경에서는 알림을 받을 수 없어요', 'err');
   if (Notification.permission !== 'granted') { toast('먼저 알림 허용이 필요해요 — [알림 허용하기]를 눌러 주세요', 'err'); document.getElementById('pushNeed')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (Notification.permission === 'denied') pushHelp('denied'); return; }
   const reg = await swReg(); if (!reg) return toast('앱을 완전히 닫았다가 다시 열어 주세요', 'err');
-  await reg.showNotification('🔔 VOY™ 테스트 알림', { body: '이 알림이 보이면 이 기기의 알림 설정은 정상이에요.', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test' });
-  toast('테스트 알림을 보냈어요 — 알림창(휴대폰 맨 위 · PC 오른쪽 아래)을 확인해 주세요');
+  await reg.showNotification('🔔 VOY™ 테스트 알림', { body: '이 알림이 보이면 이 기기의 알림 설정은 정상이에요.', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test-' + Date.now() });
+  toast('테스트 알림을 보냈어요 — 알림창(휴대폰 맨 위 · PC 오른쪽 아래)을 확인해 주세요\n두 번 누르면 알림이 2개 쌓여요 (홈 화면 아이콘 숫자 확인용)');
 }
 async function disablePush() {
   try { localStorage.removeItem(PUSH_FLAG); } catch (e) {}
@@ -3590,7 +3599,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261116.0003" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261116.0049" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3615,7 +3624,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261116.0003" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261116.0049" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;

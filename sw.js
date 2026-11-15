@@ -1,6 +1,7 @@
-/* v2611162 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611163 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
+const SW_VER = '2611163';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
 async function setCount(n) { const c = await caches.open(META); await c.put('/__badge', new Response(String(n))); }
 async function applyBadge(n) {   // 숫자 표시만 담당 (지우기는 앱 화면이 열릴 때 페이지가 처리)
@@ -26,7 +27,7 @@ self.addEventListener('push', e => {
     wins.forEach(w => { try { w.postMessage({ type: 'voy-push', data: d }); } catch (er) {} });   // 앱 화면에 '알림 도착' 알림 (알림 점검 도우미용)
     const visible = wins.some(w => w.visibilityState === 'visible');
     if (d.test) {   // 알림 점검용 테스트: 앱을 보고 있어도 항상 표시
-      await self.registration.showNotification(d.title || '🔔 VOY™ 테스트', { body: d.body || '', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test', data: { url: d.url || './' } });
+      await self.registration.showNotification(d.title || '🔔 VOY™ 테스트', { body: d.body || '', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-test-' + Date.now(), data: { url: d.url || './' } });
       return;
     }
     const n = visible ? 0 : (await getCount()) + 1;
@@ -54,6 +55,7 @@ self.addEventListener('notificationclick', e => {
 });
 
 self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'ver') { try { e.source && e.source.postMessage({ type: 'sw-ver', v: SW_VER }); } catch (er) {} return; }
   // 화면(페이지)이 직접 아이콘 배지를 지우므로 여기서는 카운트만 초기화
   if (e.data && e.data.type === 'clear-badge') e.waitUntil((async () => {
     await setCount(0);
