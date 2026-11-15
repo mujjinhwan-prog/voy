@@ -1,4 +1,4 @@
-/* v2611121 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611161 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
@@ -55,5 +55,10 @@ self.addEventListener('notificationclick', e => {
 
 self.addEventListener('message', e => {
   // 화면(페이지)이 직접 아이콘 배지를 지우므로 여기서는 카운트만 초기화
-  if (e.data && e.data.type === 'clear-badge') e.waitUntil(setCount(0));
+  if (e.data && e.data.type === 'clear-badge') e.waitUntil((async () => {
+    await setCount(0);
+    // 안드로이드 홈 아이콘 숫자는 '알림창에 남은 알림 수' → 남은 VOY 알림을 모두 닫아 숫자 제거
+    try { (await self.registration.getNotifications()).forEach(n => n.close()); } catch (er) {}
+    try { if (self.navigator.clearAppBadge) await self.navigator.clearAppBadge(); } catch (er) {}
+  })());
 });
