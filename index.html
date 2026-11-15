@@ -577,6 +577,7 @@ body:has(.policy) .theme-fab{display:none}
 .pw-step.wait{opacity:.5}.pw-tx{flex:1;min-width:0}.pw-tx b{font-size:14.5px}.pw-tx p{margin:3px 0 0;font-size:13px;line-height:1.55;color:var(--text2)}
 .pw-act{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pw-fix{margin:8px 0 0;padding-left:18px;font-size:12.8px;line-height:1.6}.pw-fix li{margin:3px 0}
+.pw-verdict{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--surface2);font-size:12.8px;line-height:1.5}.pw-verdict.ok{background:var(--accent-soft);color:var(--accent);font-weight:700}.pw-verdict.bad{background:color-mix(in srgb,#e8590c 12%,var(--surface));color:#c2410c;font-weight:700}.pw-verdict small{font-weight:500;color:var(--text2)}
 .pw-done{margin-top:10px;padding:12px;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:14px;line-height:1.5}.pw-done small{font-weight:600;color:var(--text2)}
 .pw-more{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}.pw-more summary{cursor:pointer;font-weight:800;font-size:13px;color:var(--accent)}
 .pw-diag{font-size:11px!important;opacity:.7;margin-top:10px!important;word-break:break-all}
@@ -1577,6 +1578,8 @@ const API = {
     const j = sub.toJSON();
     must(await sb.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) }));
   },
+  async pushTestResult() { if (LOCAL) return { state: 'none' }; try { return must(await sb.rpc('push_test_result')); } catch (e) { return { state: 'unknown' }; } },
+  async adminPushDiag() { if (LOCAL) return { devices: 0, users: 0, configured: false, log: [], demo: true }; return must(await sb.rpc('admin_push_diag')); },
   async pushTestMe() {
     if (LOCAL) return { subs: 1, configured: false, demo: true };
     return must(await sb.rpc('push_test_me'));
@@ -3244,7 +3247,7 @@ async function pushIsOn() {
   } catch (e) { try { return localStorage.getItem(PUSH_FLAG) === '1'; } catch (x) { return false; } }
 }
 function pushBoxHTML() {
-  let hint = '새 글이 올라오면 휴대폰·PC에 🔔 알림이 오고, 설치한 VOY™ 아이콘에 배지가 표시돼요.';
+  let hint = '다른 사람이 새 글을 올리면 휴대폰·PC에 🔔 알림이 와요. (내가 쓴 글은 나에게 알림이 오지 않아요)';
   let disabled = false;
   if (LOCAL || !VAPID_PUBLIC_KEY) { hint = '관리자가 알림 서버를 연결하면 켤 수 있어요. (설치한 PC 앱은 지금도 실행 중일 때 아이콘 배지가 표시돼요)'; disabled = true; }
   else if (isIOS() && !isStandalone()) { hint = '아이폰은 홈 화면에 설치한 VOY™ 앱에서만 알림을 켤 수 있어요.'; disabled = true; }
@@ -3273,11 +3276,13 @@ async function bindPushBox() {
   sw.checked = await pushIsOn();
   pushNeed(); pushDiag();
   sw.onchange = async () => {
-    sw.disabled = true;
-    try { sw.checked ? await enablePush() : await disablePush(); }
+    const want = sw.checked; sw.disabled = true;
+    if (want) { sw.checked = false; pushDiag('켜는 중… (허용 창이 뜨면 [허용])'); }   // 실제로 켜질 때까지 스위치는 꺼진 모양 유지
+    try { want ? await enablePush() : await disablePush(); sw.checked = await pushIsOn(); }
     catch (e) { const m = pushErrText(e); toast(m, 'err'); pushDiag('켜기 실패: ' + m); sw.checked = await pushIsOn(); }
-    sw.disabled = false; pushDiag();
+    sw.disabled = false; if (!document.getElementById('pushDiag')?.textContent.startsWith('켜기 실패')) pushDiag();
     pushNeed();
+    if (want && !sw.checked) pushWizard();   // 켜지지 않았으면 도우미로 원인 바로 보여주기
   };
 }
 /* 실패 원인을 사람이 알아들을 수 있는 말로 */
@@ -3360,6 +3365,23 @@ const PW = { local: null, server: null, serverInfo: null, waiting: false };
 if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => {
   if (e.data && e.data.type === 'voy-push' && e.data.data && e.data.data.test && PW.waiting) { PW.arrived = true; pwRender(); }
 });
+/* 알림 서버(voy-push) 응답 해석 — 어디서 막혔는지 */
+function pushVerdict(r) {
+  if (!r || r.state === 'none' || r.state === 'unknown') return null;
+  if (r.state === 'pending') return { wait: true, text: '알림 서버 응답을 기다리는 중…' };
+  if (r.timed_out || r.error) return { bad: 'srv', text: `알림 서버에 연결하지 못했어요 (${esc(r.error || '시간 초과')}) — 관리자 확인 필요` };
+  const st = r.status; let b = {}; try { b = JSON.parse(r.body || '{}'); } catch (e) {}
+  if (st === 401) return { bad: 'srv', text: '알림 함수(voy-push)의 <b>JWT 확인</b>이 켜져 있어요 — 관리자: Edge Functions → voy-push → Settings에서 끄기' };
+  if (st === 403) return { bad: 'srv', text: '알림 서버 비밀번호(<b>PUSH_SECRET</b>)가 맞지 않아요 — 관리자 확인 필요' };
+  if (st === 404) return { bad: 'srv', text: '알림 함수(<b>voy-push</b>)를 찾을 수 없어요 — 관리자: 함수 이름·배포 확인' };
+  if (st >= 500 || st < 200 || st >= 300) return { bad: 'srv', text: `알림 함수 오류 (${st}) — 관리자: Edge Functions → voy-push → Logs 확인` };
+  const f = (b.failed || [])[0];
+  if (b.sent > 0) return { ok: true, text: `서버 → ${b.sent}대 기기로 전송 성공${b.failed && b.failed.length ? ` (실패 ${b.failed.length}대)` : ''}` };
+  if (b.removed > 0) return { bad: 'dev', text: '이 기기의 알림 연결이 만료돼 지웠어요 — [연결 다시 하기]를 눌러 주세요' };
+  if (f && (f.code === 401 || f.code === 403)) return { bad: 'srv', text: '알림 키(<b>VAPID</b>)가 앱과 서버에서 달라요 — 관리자: voy-push의 VAPID_PUBLIC_KEY 확인' };
+  if (f) return { bad: 'dev', text: `구글·애플 알림 서버가 거절했어요 (${f.code || '?'} ${esc(f.msg || '')}) — [연결 다시 하기] 후 다시 테스트` };
+  return { bad: 'dev', text: '서버에 등록된 이 기기 연결이 없어요 — [연결 다시 하기]를 눌러 주세요' };
+}
 function pwEnvTab() { const e = Inst.env(), ua = navigator.userAgent; return e.ios ? 'ios' : e.samsung ? 'sam' : e.android ? 'and' : /Edg\//.test(ua) ? 'edge' : 'pc'; }
 async function pwCheck() {
   const st = { app: isStandalone(), sup: pushSupported(), perm: pushSupported() ? Notification.permission : 'x', sub: false, flag: false };
@@ -3412,21 +3434,21 @@ async function pwRender() {
     if (ok !== true) stop = true; }
   else h += step(5, null, '기기 알림 표시 테스트', '');
   // ⑥ 서버 → 기기
-  if (!stop) { const I2 = PW.serverInfo || {}; let ok = PW.server === 'ok' || PW.arrived ? true : PW.server === 'fail' || PW.server === 'nosub' || PW.server === 'nocfg' ? false : null;
+  if (!stop) { const I2 = PW.serverInfo || {}; let ok = PW.server === 'ok' || PW.arrived ? true : PW.server === 'fail' || PW.server === 'nosub' || PW.server === 'nocfg' || (PW.server === 'sent' && PW.verdict && PW.verdict.bad) ? false : null;
     const failHow = `<ol class="pw-fix"><li><b>[연결 다시 하기]</b>를 누른 뒤 다시 테스트</li>
       ${Inst.env().mob ? `<li>${osWord} <b>설정 → 애플리케이션 → ${Inst.env().samsung ? '삼성 인터넷' : Inst.env().ios ? 'VOY™' : 'Chrome'} → 배터리 → '제한 없음'</b> (절전 때문에 알림이 늦거나 안 와요)</li><li><b>데이터 절약 모드</b>를 끄고, 와이파이 ↔ LTE 바꿔서 다시 테스트</li>` : `<li>회사 <b>VPN·보안 프로그램</b>이 알림 서버를 막을 수 있어요 → VPN을 끄거나 다른 네트워크(휴대폰 핫스팟)로 테스트</li><li>VOY™ 앱 창을 닫았다가 다시 열기 (브라우저가 완전히 종료돼 있으면 알림이 오지 않아요 — Chrome/Edge 설정의 <b>'백그라운드 앱 계속 실행'</b> 켜기)</li>`}
       <li>그래도 안 되면 <b>[점검 결과 복사]</b> → 영업기획팀에 붙여 보내 주세요</li></ol>`;
     const desc = ok === true ? '🎉 서버에서 보낸 알림이 도착했어요. 이제 새 글 알림을 받을 수 있어요!'
       : PW.server === 'nocfg' ? '알림 서버가 아직 연결되지 않았어요. 영업기획팀(관리자)에 알려 주세요.'
       : PW.server === 'nosub' ? 'VOY™ 서버에 이 기기가 등록되지 않았어요. [연결 다시 하기]를 눌러 주세요.' + failHow
-      : PW.server === 'fail' ? '서버 알림이 도착하지 않았어요. 아래 순서대로 해 보세요.' + failHow
-      : PW.server === 'sent' ? `서버에서 알림을 보냈어요 (등록된 기기 ${I2.subs || 0}대). <b>10~20초</b> 안에 "VOY™ 서버 테스트 알림"이 와야 해요.`
+      : PW.server === 'fail' ? `서버 알림이 도착하지 않았어요.${PW.verdict && !PW.verdict.wait ? `<div class="pw-verdict ${PW.verdict.ok ? 'ok' : 'bad'}">📡 ${PW.verdict.text}</div>` : ''} 아래 순서대로 해 보세요.` + failHow
+      : PW.server === 'sent' ? `서버에서 알림을 보냈어요 (등록된 기기 ${I2.subs || 0}대). <b>10~20초</b> 안에 "VOY™ 서버 테스트 알림"이 와야 해요.${PW.verdict ? `<div class="pw-verdict ${PW.verdict.ok ? 'ok' : PW.verdict.wait ? '' : 'bad'}">📡 ${PW.verdict.text}${PW.verdict.ok ? '<br><small>서버는 정상이에요. 알림이 안 보이면 이 기기의 절전·알림 설정 문제예요.</small>' : ''}</div>` : ''}`
       : '마지막으로 VOY™ 서버에서 이 기기로 진짜 알림을 보내 봐요. (실제 새 글 알림과 같은 경로)';
-    h += step(6, ok, '서버에서 보낸 알림이 오나요?', desc, ok === true ? '' : PW.server === 'sent' ? btn('pw-srv-ok', '👍 왔어요', true) + btn('pw-srv-no', '안 와요') : PW.server === 'nocfg' ? '' : (PW.server ? btn('pw-reconnect', '연결 다시 하기', true) + btn('pw-srv', '다시 테스트') + btn('pw-copy', '점검 결과 복사') : btn('pw-srv', '📡 서버 테스트 알림 받기', true)));
-    if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.</small></div>`;
+    h += step(6, ok, '서버에서 보낸 알림이 오나요?', desc, ok === true ? '' : PW.server === 'sent' && PW.verdict && PW.verdict.bad ? (PW.verdict.bad === 'dev' ? btn('pw-reconnect', '연결 다시 하기', true) : '') + btn('pw-srv', '다시 테스트') + btn('pw-copy', '점검 결과 복사') : PW.server === 'sent' ? btn('pw-srv-ok', '👍 왔어요', true) + btn('pw-srv-no', '안 와요') : PW.server === 'nocfg' ? '' : (PW.server ? btn('pw-reconnect', '연결 다시 하기', true) + btn('pw-srv', '다시 테스트') + btn('pw-copy', '점검 결과 복사') : btn('pw-srv', '📡 서버 테스트 알림 받기', true)));
+    if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261115.0733</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261115.1031</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3439,10 +3461,13 @@ async function pwAct(act, t) {
     else if (act === 'pw-local-ok') PW.local = 'ok';
     else if (act === 'pw-local-no') PW.local = 'fail';
     else if (act === 'pw-srv') { t.disabled = true; PW.arrived = false; const r = await API.pushTestMe(); PW.serverInfo = r;
-      PW.server = r.demo ? 'nocfg' : !r.configured ? 'nocfg' : !r.subs ? 'nosub' : 'sent'; PW.waiting = PW.server === 'sent'; }
+      PW.server = r.demo ? 'nocfg' : !r.configured ? 'nocfg' : !r.subs ? 'nosub' : 'sent'; PW.waiting = PW.server === 'sent'; PW.verdict = null;
+      if (PW.server === 'sent') { const t0 = Date.now(); (async function poll() {   // 서버 발송 결과 확인 (최대 25초)
+        await new Promise(r2 => setTimeout(r2, 2500)); const v = pushVerdict(await API.pushTestResult()); PW.verdict = v || PW.verdict;
+        if (document.getElementById('pwBody')) pwRender(); if ((!v || v.wait) && Date.now() - t0 < 25e3 && PW.server === 'sent') poll(); })(); } }
     else if (act === 'pw-srv-ok') { PW.server = 'ok'; PW.waiting = false; }
     else if (act === 'pw-srv-no') { PW.server = 'fail'; PW.waiting = false; }
-    else if (act === 'pw-copy') { const txt = (document.querySelector('.pw-diag') || {}).textContent || ''; try { await navigator.clipboard.writeText(txt + ' · 서버테스트 ' + (PW.server || '-')); toast('점검 결과를 복사했어요 — 영업기획팀에 붙여 보내 주세요'); } catch (e) { prompt('아래 내용을 복사해 보내 주세요', txt); } return; }
+    else if (act === 'pw-copy') { const txt = ((document.querySelector('.pw-diag') || {}).textContent || '') + (PW.verdict ? ' · 서버응답 ' + PW.verdict.text.replace(/<[^>]+>/g, '') : ''); try { await navigator.clipboard.writeText(txt + ' · 서버테스트 ' + (PW.server || '-')); toast('점검 결과를 복사했어요 — 영업기획팀에 붙여 보내 주세요'); } catch (e) { prompt('아래 내용을 복사해 보내 주세요', txt); } return; }
   } catch (er) { toast(pushErrText(er), 'err'); }
   await after();
 }
@@ -3457,7 +3482,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261115.0733`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261115.1031`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3553,7 +3578,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261115.0733" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261115.1031" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3578,7 +3603,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261115.0733" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261115.1031" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;

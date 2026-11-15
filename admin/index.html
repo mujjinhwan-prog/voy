@@ -1397,6 +1397,8 @@ const API = {
     const j = sub.toJSON();
     must(await sb.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) }));
   },
+  async pushTestResult() { if (LOCAL) return { state: 'none' }; try { return must(await sb.rpc('push_test_result')); } catch (e) { return { state: 'unknown' }; } },
+  async adminPushDiag() { if (LOCAL) return { devices: 0, users: 0, configured: false, log: [], demo: true }; return must(await sb.rpc('admin_push_diag')); },
   async pushTestMe() {
     if (LOCAL) return { subs: 1, configured: false, demo: true };
     return must(await sb.rpc('push_test_me'));
@@ -1992,7 +1994,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.0733</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261115.1025</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3235,10 +3237,30 @@ function qlCollect() {
     if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked;
     l.orgs = [...r.querySelectorAll('.qorg:checked')].map(x => x.value); });
 }
+/* 🔔 알림 발송 점검 (최고관리자) — 알림 켠 기기 수 · 최근 발송 결과 */
+function pushDiagHTML() {
+  if (A.me.role !== 'super') return '';
+  const D = A.pushDiag;
+  if (!D) { setTimeout(async () => { try { A.pushDiag = await API.adminPushDiag(); } catch (e) { A.pushDiag = { err: friendly(e) }; } if (A.page === 'settings') renderPage(); }, 0); return '<div class="panel"><div class="loading">알림 상태 확인 중…</div></div>'; }
+  if (D.err) return `<div class="panel"><div class="panel-head"><div><h2>${I('bell', 19)} 알림 발송 점검</h2><p class="dim">${esc(D.err)} — Supabase에서 <b>voy_patch_push_diag.sql</b>을 실행했는지 확인해 주세요.</p></div><button class="btn sm" data-act="pd-refresh">${I('refresh', 15)} 다시</button></div></div>`;
+  const row = x => { let b = {}; try { b = JSON.parse(x.content || '{}'); } catch (e) {}
+    const st = x.status_code, ok = st >= 200 && st < 300;
+    const what = !ok ? (st === 401 ? 'JWT 확인 켜짐' : st === 403 ? 'PUSH_SECRET 불일치' : st === 404 ? '함수 없음/글 없음' : x.error_msg || x.timed_out ? '연결 실패' : '함수 오류')
+      : b.targets !== undefined ? `대상 ${b.targets}대 · 성공 ${b.sent} · 만료 정리 ${b.removed || 0}${(b.failed || []).length ? ` · 실패 ${b.failed.length} (${esc(String(b.failed[0].code))})` : ''}` : `성공 ${b.sent ?? '-'} · 만료 정리 ${b.removed ?? '-'}`;
+    return `<tr><td class="nowrap">${fmtDT(x.created)}</td><td class="num"><span class="tag-st ${ok ? 'active' : ''}">${st || (x.timed_out ? '시간초과' : '오류')}</span></td><td>${what}</td></tr>`; };
+  return `<div class="panel"><div class="panel-head"><div><h2>${I('bell', 19)} 알림 발송 점검</h2>
+      <p>새 글이 올라오면 <b>글쓴이를 뺀</b> 알림 켠 회원(그 커뮤니티를 볼 수 있는 사람)의 기기로 보내요 · VOY™ 화면을 보고 있는 기기는 알림 대신 화면에 바로 보여요</p></div>
+      <button class="btn sm" data-act="pd-refresh">${I('refresh', 15)} 새로고침</button></div>
+    <div class="mem-stats"><div class="ms">${I('bell', 17)}<span>알림 켠 회원</span><b>${D.users}</b><small>명</small></div><div class="ms">${I('monitor', 17)}<span>연결된 기기</span><b>${D.devices}</b><small>대</small></div>
+      <div class="ms">${I('settings', 17)}<span>알림 서버 연결</span><b style="font-size:15px">${D.configured ? '✅ 정상' : '❌ 미설정'}</b><small>${esc(D.push_url || '')}</small></div></div>
+    <h3 class="rv-h">최근 발송 결과 <small>최근 6시간 · 새 글 알림 · 심사 요청 · 서버 테스트 포함</small></h3>
+    ${(D.log || []).length ? `<div class="table-wrap"><table class="dt"><thead><tr><th>시각</th><th class="num">응답</th><th>결과</th></tr></thead><tbody>${D.log.map(row).join('')}</tbody></table></div>` : '<div class="empty">최근 발송 기록이 없어요 — 다른 계정으로 새 글을 올려 본 뒤 [새로고침]</div>'}
+    <p class="hint" style="margin-top:8px">대상 0대 → 알림 켠 다른 회원이 없음 · 성공인데 안 옴 → 받는 기기의 절전·알림 설정 · 401/403/404 → voy-push 함수 설정 확인</p></div>`;
+}
 function pageSettings(c) {
   const s = A.settings;
   A.qlEdit = qlMerge(s.quicklinks);
-  c.innerHTML = `<div class="panel"><div class="panel-head"><div><h2>${I('link', 19)} 바로가기 메뉴 (커뮤니티 오른쪽 고정)</h2><p>사이트가 업데이트되면 아이콘 오른쪽 위에 빨간 점이 뜹니다. ① 자동감지: GitHub Pages 사이트의 마지막 배포 시각을 읽음 ② [업데이트 알림]: 관리자가 직접 표시. 회원이 아이콘을 누르면 그 회원에게선 점이 사라집니다.</p></div>
+  c.innerHTML = `${pushDiagHTML()}<div class="panel"><div class="panel-head"><div><h2>${I('link', 19)} 바로가기 메뉴 (커뮤니티 오른쪽 고정)</h2><p>사이트가 업데이트되면 아이콘 오른쪽 위에 빨간 점이 뜹니다. ① 자동감지: GitHub Pages 사이트의 마지막 배포 시각을 읽음 ② [업데이트 알림]: 관리자가 직접 표시. 회원이 아이콘을 누르면 그 회원에게선 점이 사라집니다.</p></div>
       <div style="display:flex;gap:8px"><button class="btn sm" data-act="ql-add">${I('plus', 15)} 메뉴 추가</button><button class="btn primary sm" data-act="ql-save">저장</button></div></div>
     <div class="ql-gallery" id="qlGallery">${A.qlEdit.filter(l => l.on !== false).map(l => QL.tile(l)).join('')}</div>
     <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>자동</span><span></span><span></span></div>
@@ -3311,6 +3333,7 @@ document.addEventListener('click', async e => {
       busy(t, true); try { await API.archiveUpdate(+t.dataset.id, o); A.posts = await API.allPosts(); arState().edit = null; toast('고쳤어요'); renderPage(); } catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
     case 'ar-del': { const p = A.posts.find(x => x.id === +t.dataset.id); if (!p || !(await confirmBox(`「${esc(p.title)}」 을(를) 삭제할까요?`, '삭제', true))) break;
       try { await API.deletePosts([p.id]); A.posts = await API.allPosts(); if (arState().edit === p.id) arState().edit = null; toast('삭제했어요'); renderPage(); } catch (er) { toast(friendly(er), 'err'); } break; }
+    case 'pd-refresh': A.pushDiag = null; renderPage(); break;
     case 'rv-new': { const V = rvState(); V.view = 'new'; V.draft = rvNewDraft(); renderPage(); break; }
     case 'rv-back': { const V = rvState(); V.view = 'list'; V.list = null; V.detail = null; renderPage(); break; }
     case 'rv-open': rvOpen(+t.dataset.id); break;
