@@ -296,6 +296,11 @@ body{min-height:100vh}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
 @media(min-width:700px){.chips:not(.wrap){flex-wrap:wrap;overflow:visible}}   /* PC: 카테고리 줄바꿈으로 모두 표시 · 모바일: 옆으로 밀어서 보기 */
 .chip.notice{font-weight:800}
+/* 모바일(좁은 화면): 피드 카테고리를 옆으로 밀지 않고 모두 보이게 — 글자 크기는 그대로, 위아래 높이·간격만 줄임 */
+@media(max-width:699px){.chips.fchips{flex-wrap:wrap;overflow:visible;gap:5px 5px;padding-bottom:0;margin-bottom:10px}
+  .chips.fchips .chip{padding:4px 9px;gap:4px;line-height:1.35}
+  .chips.fchips .chip:before{width:5px;height:5px}
+  .chips.fchips .chip svg{width:12px;height:12px}}
 .chips::-webkit-scrollbar{display:none}
 .chips.wrap{flex-wrap:wrap;overflow:visible}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:99px;border:1px solid color-mix(in srgb,var(--c,var(--muted)) 45%,transparent);background:color-mix(in srgb,var(--c,var(--muted)) 10%,transparent);color:var(--c,var(--text2));font-size:13px;font-weight:700;white-space:nowrap;transition:.15s}
@@ -1090,6 +1095,9 @@ const Local = (() => {
 /* =====================================================================
    API — 사용자/관리자 페이지 공용
    ===================================================================== */
+/* 게시판 표시 이름 정리 (DB에 예전 이름이 남아 있어도 새 이름으로 보이게) */
+const BOARD_RENAME = { 'MR Tool 추천': 'My MR Tool', '건의, 제안합니다': '건의&제안', '📦 이전 VOY': 'VOY ver.1', '이전 VOY': 'VOY ver.1' };
+function boardFix(list) { (list || []).forEach(b => { const n = String(b.name || '').trim(); if (BOARD_RENAME[n]) b.name = BOARD_RENAME[n]; }); return list; }
 const API = {
   uid: null, profile: null, isLocal: LOCAL,
   /* 지금 보고 있는 방(ETC/OTC) — 들어갈 수 있는 방이 둘인 사람(admin·통합 회원)만 바꿀 수 있음 */
@@ -1210,12 +1218,12 @@ const API = {
   },
   /* 다른 방의 카테고리 (admin이 ETC+OTC 동시 게시할 때) */
   async boardsOf(org) {
-    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === org).sort((a, b) => a.sort - b.sort);
-    return must(await sb.from('boards').select('*').eq('org', org).order('sort'));
+    if (LOCAL) return boardFix(Local.clone(Local.db.boards).filter(b => orgOf(b) === org).sort((a, b) => a.sort - b.sort));
+    return boardFix(must(await sb.from('boards').select('*').eq('org', org).order('sort')));
   },
   async boards() {
-    if (LOCAL) return Local.clone(Local.db.boards).filter(b => orgOf(b) === this.room).sort((a, b) => a.sort - b.sort);
-    return must(await sb.from('boards').select('*').eq('org', this.room).order('sort'));
+    if (LOCAL) return boardFix(Local.clone(Local.db.boards).filter(b => orgOf(b) === this.room).sort((a, b) => a.sort - b.sort));
+    return boardFix(must(await sb.from('boards').select('*').eq('org', this.room).order('sort')));
   },
 
   /* ---------- 게시글 ---------- */
@@ -1958,7 +1966,7 @@ function qlMerge(raw) {
   const out = raw.map(l => ({ ...l })), ids = new Set(out.map(l => l.id));
   out.forEach(l => { const d = QL_DEFAULTS.find(x => x.id === l.id); if (d && (QL_RENAMED[l.id] || []).includes(String(l.name || '').trim())) l.name = d.name;
     if (d && d.orgs && !Array.isArray(l.orgs)) l.orgs = d.orgs.slice();
-    if (l.id === 'weekly' && /^\/?yhwn\/?(index\.html)?$/.test(String(l.url || '').trim())) l.url = 'wnews/'; });   // 주간 뉴스 폴더 이전: yhwn/ → wnews/   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
+    if (/(^|[\/.])yhwn(\/|$|\/index\.html)/i.test(String(l.url || '').trim())) l.url = 'wnews/'; });   // 주간 뉴스 폴더 이전: yhwn/ → wnews/   // ETC/OTC 구분 전 저장된 메뉴 → 기본 구분 적용 (품목PM검색: ETC=yhpm, OTC=yhopm)
   QL_DEFAULTS.forEach(d => { if (ids.has(d.id)) return; const ri = out.findIndex(l => l.id === 'research'); if (ri >= 0) out.splice(ri, 0, { ...d }); else out.push({ ...d }); });
   return out;
 }
@@ -2698,8 +2706,10 @@ function viewFeed() {
       <select id="fmonth" aria-label="기간"><option value="">전체</option>${months.map(m => `<option value="${m}" ${f.month === m ? 'selected' : ''}>${+m.slice(2)}월${m === curMonth() ? '(현재)' : ''}</option>`).join('')}</select>
       <button class="icon-btn ${f.showPinned ? 'on' : ''}" data-act="toggle-pin" title="공지 보기/접기">${I('pin', 18)}</button>
     </div>
-    <div class="chips"><button class="chip all ${!f.board ? 'active' : ''}" data-act="board" data-id="">전체</button>
-      ${[...S.boards.filter(b => b.admin_only), ...S.boards.filter(b => !b.admin_only)].map(b => `<button class="chip ${b.admin_only ? 'notice' : ''} ${f.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="board" data-id="${b.id}">${b.admin_only ? I('pin', 13) + ' ' : ''}${esc(b.name)}</button>`).join('')}</div>
+    <div class="chips fchips"><button class="chip all ${!f.board ? 'active' : ''}" data-act="board" data-id="">전체</button>
+      ${(() => { const arch = b => /^arch_/.test(b.id) || /VOY ver\.1/.test(b.name);   // 순서: 일반 게시판 → 영업기획팀(공지) → VOY ver.1(이전 글)
+        return [...S.boards.filter(b => !b.admin_only && !arch(b)), ...S.boards.filter(b => b.admin_only && !arch(b)), ...S.boards.filter(arch)]
+          .map(b => `<button class="chip ${b.admin_only && !arch(b) ? 'notice' : ''} ${f.board === b.id ? 'active' : ''}" style="--c:${b.color}" data-act="board" data-id="${b.id}">${b.admin_only && !arch(b) ? I('pin', 13) + ' ' : ''}${esc(b.name)}</button>`).join(''); })()}</div>
     <div id="pinned"></div><div id="list"><div class="loading">불러오는 중…</div></div><div id="more"></div>
   </div>`, 'feed');
   const q = document.getElementById('fq'); let t;
@@ -3464,7 +3474,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261116.0828</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261116.1456</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3498,7 +3508,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261116.0828`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261116.1456`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3600,7 +3610,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261116.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261116.1456" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3625,7 +3635,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261116.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261116.1456" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
