@@ -1,8 +1,9 @@
-/* v2611171 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611172 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
-const SW_VER = '2611171';
+const SW_VER = '2611172';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
+async function getMode() { try { const c = await caches.open(META); const r = await c.match('/__mode'); return r ? await r.text() : 'sound'; } catch (e) { return 'sound'; } }   // 'quiet' = 소리·진동 없이
 async function setCount(n) { const c = await caches.open(META); await c.put('/__badge', new Response(String(n))); }
 async function applyBadge(n) {   // 숫자 표시만 담당 (지우기는 앱 화면이 열릴 때 페이지가 처리)
   try { if (n > 0 && self.navigator.setAppBadge) await self.navigator.setAppBadge(n); } catch (e) {}
@@ -33,8 +34,11 @@ self.addEventListener('push', e => {
     const n = visible ? 0 : (await getCount()) + 1;
     await setCount(n); await applyBadge(n);
     if (visible) return;   // 앱을 보고 있는 중이면 알림 생략
+    const quiet = (await getMode()) === 'quiet';
     await self.registration.showNotification(d.title || '🔔 VOY™ 새 글이 올라왔어요', {
       body: d.body || '새 글을 확인해보세요',
+      silent: quiet,                          // 조용히: 소리·진동 없이 알림창 + 아이콘 숫자만
+      ...(quiet ? {} : { vibrate: [180, 80, 180] }),
       icon: 'icons/voy-192.png',
       badge: 'icons/badge-bell.png',          // 안드로이드 상단 상태표시줄의 종 모양
       tag: 'voy-post-' + ((d.url || '').match(/post\/(\d+)/)?.[1] || Date.now()),   // 글마다 다른 태그 → 알림이 쌓여 아이콘 숫자가 1→2→3 증가

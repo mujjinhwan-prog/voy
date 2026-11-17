@@ -413,6 +413,8 @@ body:has(.policy) .theme-fab{display:none}
 .seg{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:4px;margin-bottom:12px}
 .seg button{flex:1;padding:8px;border-radius:99px;font-weight:700;font-size:14px;color:var(--muted)}
 .seg button.on{background:var(--accent);color:var(--accent-ink)}
+.pmode{display:flex;align-items:center;gap:10px;margin:10px 0 2px}.pmode>span{font-size:13px;font-weight:700;white-space:nowrap}.pmode .seg{flex:1;margin:0;padding:3px}.pmode .seg button{padding:6px;font-size:13px}
+.pmode-hint{display:block;font-size:11.5px;margin:2px 0 8px}
 .rule{font-size:12.5px;color:var(--muted);margin:0 4px 12px}
 .podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:8px;align-items:end;margin-bottom:14px}
 .pod{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 8px;text-align:center}
@@ -2211,14 +2213,16 @@ const Inst = {
     if (e.ios && e.fxios) return { title: '아이폰 Firefox에서 설치', steps: [`아래쪽 ${K('≡')} 메뉴 → ${K('공유')}`, `${K('홈 화면에 추가 ＋')}`, '<b>추가</b> 누르면 끝!'], arrow: 'bottom-right' };
     if (e.ios && e.ios26) return { title: '아이폰에 설치 (3번 터치)', steps: [`아래 오른쪽 ${K('···')} 버튼`, `${K('공유 ⬆︎')} → ${K('홈 화면에 추가 ＋')}`, `"웹 앱으로 열기" 켜진 채로 <b>추가</b>`], arrow: 'bottom-right', note: '탭 막대를 위/아래 레이아웃으로 쓰면 공유 ⬆︎ 버튼이 바로 보여요' };
     if (e.ios) return { title: '아이폰에 설치 (2번 터치)', steps: [`아래 가운데 ${K('공유 ⬆︎')} 버튼`, `${K('홈 화면에 추가 ＋')} → <b>추가</b>`], arrow: 'bottom' };
-    if (e.samsung) return { title: '삼성 인터넷에서 설치', steps: [`아래 오른쪽 ${K('≡')} 메뉴`, `${K('현재 페이지 추가')} → ${K('홈 화면')}`], arrow: 'bottom-right' };
-    if (e.firefox) return { title: 'Firefox에서 설치', steps: [`오른쪽 위 ${K('⋮')} 메뉴`, `${K('설치')} 또는 ${K('홈 화면에 추가')}`], arrow: 'top-right' };
+    if (e.samsung || e.firefox) return { title: '안드로이드는 Chrome에서 설치해 주세요', toChrome: true, arrow: null,   // 삼성 인터넷·Firefox → Chrome으로 안내 (알림·아이콘 숫자 안정)
+      steps: [`아래 ${K('Chrome으로 열기')} 버튼`, `Chrome 화면에서 ${K('VOY™ 앱 설치')} → ${K('설치')}`, '홈 화면의 <b>VOY™</b> 아이콘으로 열고 로그인'],
+      note: `${e.samsung ? '삼성 인터넷' : 'Firefox'}으로 설치하면 새 글 알림이 잘 오지 않고, VOY™ 아이콘에 숫자도 표시되지 않아요.` };
     if (e.android) return { title: '안드로이드에 설치', steps: [`오른쪽 위 ${K('⋮')} 메뉴`, `${K('앱 설치')} (또는 ${K('홈 화면에 추가')}) → <b>설치</b>`], arrow: 'top-right' };
     if (e.macSafari) return { title: 'Mac Safari에서 설치', steps: [`메뉴 막대 ${K('파일')} → ${K('Dock에 추가')}`, '<b>추가</b> → Dock의 VOY™로 열기'], arrow: null };
     return { title: 'PC에 설치', steps: [`주소창 오른쪽 끝 ${K('⊕ 설치')} 아이콘`, `없으면 ${K('⋮')}/${K('···')} → ${K('앱')} → <b>이 사이트를 앱으로 설치</b>`], arrow: 'top-right', note: '이미 설치했다면 바탕화면·시작 메뉴의 VOY™로 열어주세요' };
   },
   async run() {   // [설치] 버튼
     const e = this.env();
+    if (e.android && (e.samsung || e.firefox)) { this.sheet(false); return; }   // 안드로이드는 Chrome 설치만 안내
     if (window.__bip) {
       const ev = window.__bip; ev.prompt(); const r = await ev.userChoice.catch(() => null); window.__bip = null;
       this.close(); if (r && r.outcome === 'accepted') toast('설치 중이에요 — 잠시 뒤 VOY™ 아이콘이 생겨요');
@@ -2238,7 +2242,7 @@ const Inst = {
       <div class="inst-top"><img src="icons/voy-192.png?v=4" alt="VOY™"><div><b>VOY™ 앱 설치</b><small>${one ? '버튼 한 번이면 홈 화면·바탕화면에 아이콘이 생겨요' : esc(g.title)}</small></div></div>
       ${one ? `<button class="btn primary block inst-go">${I('download', 17)} 설치하기</button>`
         : `<ol class="inst-steps">${g.steps.map((s, i) => `<li><i>${i + 1}</i><span>${s}</span></li>`).join('')}</ol>${g.note ? `<p class="hint" style="margin:6px 0 0">${g.note}</p>` : ''}
-           ${e.inApp && (e.kakao || e.line || e.android) ? `<button class="btn primary block inst-ext" style="margin-top:10px">브라우저로 바로 열기</button>` : ''}`}
+           ${g.toChrome ? `<button class="btn primary block inst-ext" style="margin-top:10px">Chrome으로 열기</button>` : e.inApp && (e.kakao || e.line || e.android) ? `<button class="btn primary block inst-ext" style="margin-top:10px">브라우저로 바로 열기</button>` : ''}`}
       ${auto ? `<button class="inst-later">오늘은 그만 보기</button>` : ''}</div>`;
     document.body.appendChild(el);
     requestAnimationFrame(() => el.classList.add('on'));
@@ -2257,7 +2261,7 @@ const Inst = {
     const show = () => { if (!isStandalone() && !document.querySelector('.inst-sheet') && !document.querySelector('.modal-bg')) this.sheet(true); };
     if (window.__bip) return setTimeout(show, 600);
     window.addEventListener('voy-installable', () => setTimeout(show, 300), { once: true });
-    if (e.ios || e.inApp || e.firefox || e.macSafari) setTimeout(show, 1200);   // 자동 설치 창이 없는 브라우저 → 위치 안내
+    if (e.ios || e.inApp || e.firefox || e.samsung || e.macSafari) setTimeout(show, 1200);   // 자동 설치 창이 없는 브라우저 → 위치 안내
   }
 };
 function installCardHTML() {
@@ -2332,7 +2336,7 @@ function renderGate() {
   let steps;
   if (inApp) steps = [`오른쪽 위 <span class="k">⋮</span> 또는 <span class="k">···</span> → <b>다른 브라우저로 열기</b>`, '열린 화면에서 다시 로그인 → 아래 안내대로 설치'];
   else if (ios) steps = [...Inst.guide().steps, '홈 화면의 <b>VOY™</b> 아이콘을 눌러 열고, 한 번 더 로그인하면 끝!'];
-  else if (samsung) steps = [`하단 <span class="k">≡</span> 메뉴 → <span class="k">현재 페이지 추가</span> → <span class="k">홈 화면</span>`, '홈 화면의 <b>VOY™</b> 아이콘으로 열기'];
+  else if (samsung) steps = ['안드로이드는 <b>Chrome</b>에서 설치해 주세요 — 아래 버튼을 누르면 Chrome으로 열려요', `Chrome 화면에서 <span class="k">VOY™ 앱 설치</span> → <span class="k">설치</span>`, '홈 화면의 <b>VOY™</b> 아이콘으로 열기'];
   else if (android) steps = [`아래 <b>[VOY™ 앱 설치]</b> 버튼 (또는 Chrome <span class="k">⋮</span> → <span class="k">앱 설치</span>)`, '홈 화면의 <b>VOY™</b> 아이콘으로 열기'];
   else steps = [`아래 <b>[VOY™ 앱 설치]</b> 버튼 (또는 주소창 오른쪽 <span class="k">⊕ 설치</span>)`, '설치하면 주소창 없는 VOY™ 창이 바로 열려요', `이미 설치했다면 주소창 오른쪽 <span class="k">앱에서 열기</span> 또는 바탕화면·시작메뉴의 <b>VOY™</b>`];
   root.innerHTML = `<div class="auth"><div class="auth-card gate">
@@ -2341,7 +2345,7 @@ function renderGate() {
     ${appInstalledHere() ? `<div class="install ok" style="text-align:left;margin:4px 0 12px"><div><b><span class="chk">✓</span>이 기기에 VOY™ 앱이 설치되어 있어요</b><small>${android || ios ? '홈 화면' : '바탕화면·작업표시줄·시작 메뉴'}의 <b style="display:inline;font-size:inherit">VOY™ 아이콘</b>을 눌러 열어주세요. 브라우저 주소창이 보이는 화면에서는 게시판을 쓸 수 없어요.</small></div></div>` : ''}
     <p class="muted">익명 게시판 보호를 위해 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>에서만 볼 수 있어요.<br>휴대폰(삼성·아이폰)과 PC 모두 같은 방법입니다.</p>
     <div class="box" style="text-align:left;margin-top:16px"><ol class="steps">${steps.map(x => `<li><span>${x}</span></li>`).join('')}</ol></div>
-    <button class="btn primary block" id="gateInstall" style="margin-top:4px">${I('download', 17)} ${inApp ? '브라우저로 열어서 설치' : ios ? '설치 방법 보기 (버튼 위치 안내)' : 'VOY™ 앱 설치'}</button>
+    <button class="btn primary block" id="gateInstall" style="margin-top:4px">${I('download', 17)} ${inApp ? '브라우저로 열어서 설치' : ios ? '설치 방법 보기 (버튼 위치 안내)' : samsung ? 'Chrome으로 열어서 설치' : 'VOY™ 앱 설치'}</button>
     ${appInstalledHere() ? `<p class="hint" style="margin:10px 0 0;text-align:center">아이콘을 지웠거나, 아이콘을 눌러도 주소창이 보이면 위 버튼으로 다시 설치해 주세요.</p>` : ''}
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn block ghost" data-act="logout-gate">로그아웃</button>
@@ -3272,6 +3276,18 @@ function swVerAsk() {
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
   if (e.data && e.data.type === 'sw-ver') { const el = document.getElementById('swVer'); if (el) el.textContent = '알림 엔진 v' + e.data.v; }
 });
+/* 알림 방식 (이 기기만): sound = 소리·진동 / quiet = 소리·진동 없이 알림창과 아이콘 숫자만
+   서비스워커도 읽을 수 있게 캐시(voy-meta)에 함께 저장 */
+const PUSH_MODE_KEY = 'voy_push_mode';
+function pushModeGet() { try { return localStorage.getItem(PUSH_MODE_KEY) === 'quiet' ? 'quiet' : 'sound'; } catch (e) { return 'sound'; } }
+function pushModeHint(m) { return m === 'quiet' ? '소리·진동 없이 알림창과 VOY™ 아이콘 숫자로만 알려요.' : '새 글이 오면 휴대폰 설정에 맞춰 소리·진동과 함께 알려요.'; }
+async function pushModeSet(m) {
+  try { localStorage.setItem(PUSH_MODE_KEY, m); } catch (e) {}
+  try { const c = await caches.open('voy-meta'); await c.put('/__mode', new Response(m)); } catch (e) {}
+  document.querySelectorAll('#pushMode button').forEach(b => b.classList.toggle('on', b.dataset.v === m));
+  const h = document.getElementById('pushModeHint'); if (h) h.textContent = pushModeHint(m);
+  toast(m === 'quiet' ? '🔕 조용히 알림으로 바꿨어요 (이 기기)' : '🔔 소리·진동 알림으로 바꿨어요 (이 기기)');
+}
 function pushBoxHTML() {
   let hint = '다른 사람이 새 글을 올리면 휴대폰·PC에 🔔 알림이 와요. (내가 쓴 글은 나에게 알림이 오지 않아요)';
   let disabled = false;
@@ -3283,6 +3299,8 @@ function pushBoxHTML() {
   const help = !(LOCAL || !VAPID_PUBLIC_KEY);
   return `<div class="set-row"><span>${I('bell', 19)} <span><b style="color:var(--text);display:block;font-size:15px">새 글 알림</b><small class="muted" style="font-size:12.5px;line-height:1.45;display:block">${hint}</small></span></span>
     <label class="switch"><input type="checkbox" id="pushSw" ${disabled ? 'disabled' : ''}><span></span></label></div>
+    ${help ? `<div class="pmode"><span>알림 방식</span><div class="seg" id="pushMode">${[['sound', '🔔 소리·진동'], ['quiet', '🔕 조용히']].map(([v, l]) => `<button type="button" class="${pushModeGet() === v ? 'on' : ''}" data-act="push-mode" data-v="${v}">${l}</button>`).join('')}</div></div>
+    <small class="muted pmode-hint" id="pushModeHint">${pushModeHint(pushModeGet())}</small>` : ''}
     ${help ? `<button type="button" class="pw-open" data-act="push-wiz"><span class="pw-ic">🩺</span><span><b>알림 점검·설정 도우미</b><small>알림이 안 오면 여기서 순서대로 확인하고 해결해요</small></span>${I('right', 18)}</button>` : ''}
     <div id="pushNeed"></div><small id="swVer" class="muted" style="display:block;text-align:right;font-size:11px;opacity:.7"></small>
     <p class="hint" id="pushDiag" style="margin:6px 0 0;font-size:11.5px;opacity:.75"></p>`;
@@ -3352,12 +3370,11 @@ function pushHelp(reason) {
       `알림이 늦게 오면 ${k('애플리케이션')} → ${k('Chrome')} → ${k('배터리')} → ${k('제한 없음')}`,
       `VOY™ 앱을 최근 앱에서 완전히 닫고 다시 열어 스위치 켜기 → ${k('🔔 테스트 알림 보내기')}로 확인`]],
     sam: ['🌐 삼성 인터넷', [
-      `VOY™ 앱에서 ${k('새 글 알림')} 스위치를 켜고, 뜨는 창에서 ${k('허용')}`,
-      `창이 안 뜨면 ${k('삼성 인터넷')} 앱 → 아래 ${k('≡')} → ${k('설정')} → ${k('사이트 및 다운로드')} → ${k('사이트 알림')}`,
-      `맨 위 스위치(사이트 알림)를 켜고, 오른쪽 위 ${k('⋮')} → ${k('허용 또는 차단된 사이트')}에서 ${site}가 ${k('차단')}이면 ${k('허용')}으로 바꾸기 (또는 삭제 후 다시 요청)`,
-      `휴대폰 ${k('설정')} → ${k('애플리케이션')} → ${k('삼성 인터넷')} (그리고 ${k('VOY™')}) → ${k('알림')} → ${k('알림 허용')} 켜기`,
-      `알림이 늦게 오면 ${k('애플리케이션')} → ${k('삼성 인터넷')} → ${k('배터리')} → ${k('제한 없음')}`,
-      `VOY™ 앱을 최근 앱에서 완전히 닫고 다시 열어 스위치 켜기 → ${k('🔔 테스트 알림 보내기')}로 확인`]],
+      `<b>안드로이드는 Chrome으로 설치한 VOY™를 써 주세요.</b> 삼성 인터넷으로 설치하면 알림이 삼성 인터넷 이름으로 오거나 오지 않고, VOY™ 아이콘에 숫자도 안 떠요.`,
+      `홈 화면에서 지금 쓰는 ${k('VOY™')} 아이콘을 길게 눌러 ${k('삭제')} (홈 화면에서 제거)`,
+      `${k('Chrome')} 앱을 열고 주소창에 붙여넣기 → 이동<br>${copy(origin + location.pathname)}`,
+      `${k('VOY™ 앱 설치')} → ${k('설치')} (안 보이면 Chrome ${k('⋮')} → ${k('홈 화면에 추가')} → ${k('설치')})`,
+      `새로 생긴 ${k('VOY™')} 아이콘으로 열고 로그인 → 내 정보에서 ${k('새 글 알림')} 켜기 → ${k('허용')}`]],
     ios: ['🍎 아이폰', [
       `iOS ${k('16.4 이상')}이어야 해요 (${k('설정')} → ${k('일반')} → ${k('정보')} → iOS 버전)`,
       `<b>Safari</b>에서 ${k('공유 ⬆')} → ${k('홈 화면에 추가')}로 설치한 ${k('VOY™')} 아이콘으로 열기 (Chrome·카카오톡 안에서는 알림 불가)`,
@@ -3435,7 +3452,8 @@ async function pwRender() {
   h += step(1, st.app, '바로가기 앱(VOY™ 아이콘)으로 열었나요?', st.app ? '앱 화면에서 열려 있어요.' : '브라우저 주소창 화면에서는 알림을 받을 수 없어요. 홈 화면·바탕화면의 <b>VOY™ 아이콘</b>으로 열어 주세요.');
   if (!st.app) stop = true;
   // ② 지원
-  if (!stop) { h += step(2, st.sup, '이 기기·브라우저가 알림을 지원하나요?', st.sup ? `${esc(pushEnvName())} — 지원돼요.` :
+  if (!stop && Inst.env().samsung) { h += step(2, false, '안드로이드는 Chrome으로 설치한 VOY™가 필요해요', '지금은 <b>삼성 인터넷</b>으로 열려 있어요. 삼성 인터넷에서는 알림이 잘 오지 않고 VOY™ 아이콘에 숫자도 안 떠요. 아이콘을 지우고 <b>Chrome</b>으로 다시 설치해 주세요.', btn('push-help', 'Chrome으로 다시 설치하는 방법', true)); stop = true; }
+  else if (!stop) { h += step(2, st.sup, '이 기기·브라우저가 알림을 지원하나요?', st.sup ? `${esc(pushEnvName())} — 지원돼요.` :
       Inst.env().ios ? '아이폰은 <b>iOS 16.4 이상</b> + <b>Safari로 홈 화면에 추가한 VOY™</b>에서만 알림이 와요. 설정 → 일반 → 소프트웨어 업데이트 후, Safari에서 다시 설치해 주세요.'
       : (LOCAL || !VAPID_PUBLIC_KEY) ? '알림 서버가 아직 연결되지 않았어요 (관리자 설정 필요).' : '이 브라우저는 알림을 지원하지 않아요. <b>Chrome·Edge·삼성 인터넷</b>으로 다시 설치해 주세요.'); if (!st.sup) stop = true; }
   else h += step(2, null, '이 기기·브라우저 지원 확인', '');
@@ -3476,7 +3494,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261117.1557</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261117.1654</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3510,7 +3528,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261117.1557`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261117.1654`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3600,18 +3618,18 @@ function landingHTML() {
   const k = t => `<b class="lk">${t}</b>`;
   const tabs = [
     ['pc', '💻 PC', [`위 ${k('VOY™ 앱 설치')} 버튼 → 창이 뜨면 ${k('설치')}`, `버튼이 안 되면 주소창 오른쪽 ${k('⊕ 앱 설치')} 아이콘 (또는 Chrome ${k('⋮')} → ${k('전송, 저장 및 공유')} → ${k('페이지를 앱으로 설치')}<br>또는 Edge ${k('⋯')} → ${k('앱')} → ${k('이 사이트를 앱으로 설치')})`, `바탕화면·작업표시줄의 ${k('VOY™')} 아이콘으로 열고 로그인`], 'Chrome 또는 Edge에서 설치해 주세요.'],
-    ['and', '🤖 안드로이드', [`위 ${k('VOY™ 앱 설치')} 버튼 → ${k('설치')}`, `버튼이 안 되면 · Chrome: ${k('⋮')} → ${k('홈 화면에 추가')} → ${k('설치')} · 삼성 인터넷: 주소창의 ${k('⤓')} 아이콘 → ${k('설치')}`, `홈 화면의 ${k('VOY™')} 아이콘으로 열고 로그인`], '카카오톡·밴드 등 앱 안에서 열었다면 먼저 Chrome(또는 삼성 인터넷)으로 열어 주세요. 아이콘을 눌렀는데 주소창이 보이면 지우고 다시 설치해 주세요.'],
+    ['and', '🤖 안드로이드', [`위 ${k('VOY™ 앱 설치')} 버튼 → ${k('설치')}`, `버튼이 안 되면 Chrome ${k('⋮')} → ${k('홈 화면에 추가')} → ${k('설치')}`, `홈 화면의 ${k('VOY™')} 아이콘으로 열고 로그인`], '안드로이드는 <b>Chrome</b>에서만 설치해 주세요 (삼성 인터넷으로 설치하면 알림·아이콘 숫자가 제대로 안 돼요). 카카오톡·밴드 안에서 열었다면 먼저 Chrome으로 열어 주세요.'],
     ['ios', '🍎 아이폰', [`${k('Safari')}로 이 주소를 엽니다`, `아래 ${k('공유 ⬆')} → ${k('홈 화면에 추가')} (iOS 26은 ${k('웹 앱으로 열기')} 켜기) → ${k('추가')}`, `홈 화면의 ${k('VOY™')} 아이콘으로 열고 로그인`], '아이폰은 Safari에서만 설치할 수 있어요.']];
   return `<div class="auth"><div class="auth-card land">
     <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=4" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
     <div class="land-lock">${I('lock', 18)}<div><b>VOY™는<br>바로가기(웹앱)로만 이용할 수 있어요</b><span>익명 보호를 위해 브라우저 주소창 화면에서는 로그인할 수 없어요. 아래 방법으로 설치한 뒤 <b>VOY™ 아이콘</b>으로 열어 주세요.</span></div></div>
     ${inst ? `<div class="install ok" style="margin:0 0 10px"><img src="icons/voy-192.png?v=4" alt=""><div><b>VOY™ 앱을 설치해주세요</b><small>이미 설치했다면 ${e.mob ? '홈 화면' : '바탕화면·작업표시줄'}의 <b style="display:inline;font-size:inherit">VOY™ 아이콘</b>을 눌러 열어 주세요.</small><button type="button" class="re" data-act="reinstall">아이콘이 없나요? 다시 설치하기</button></div></div>` : ''}
-    <button class="btn primary block land-btn" data-act="install">${I('download', 20)} VOY™ 앱 설치</button>
+    <button class="btn primary block land-btn" data-act="install">${I('download', 20)} ${e.android && (e.samsung || e.firefox) ? 'Chrome으로 열어서 설치' : 'VOY™ 앱 설치'}</button>
     <div class="box land-how"><div class="land-tabs" role="tablist">${tabs.map(([id, t]) => `<button type="button" role="tab" class="${id === def ? 'on' : ''}" data-ltab="${id}">${t}</button>`).join('')}</div>
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261117.1557" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261117.1654" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3636,7 +3654,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261117.1557" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261117.1654" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
@@ -3718,6 +3736,7 @@ document.addEventListener('click', async e => {
       break;
     case 'push-help': pushHelp(pushSupported() ? Notification.permission : ''); break;
     case 'push-wiz': pushWizard(); break;
+    case 'push-mode': pushModeSet(t.dataset.v); break;
     case 'pw-allow': case 'pw-connect': case 'pw-reconnect': case 'pw-local': case 'pw-local-ok': case 'pw-local-no': case 'pw-srv': case 'pw-srv-ok': case 'pw-srv-no': case 'pw-copy': await pwAct(act, t); break;
     case 'push-test': try { await pushTest(); } catch (er) { toast(pushErrText(er), 'err'); } break;
     case 'browser-login': S.browserLogin = true; renderAuth(); toast('관리자 확인용 로그인입니다. 일반 회원은 로그인 후 앱 설치 안내가 나와요'); break;
