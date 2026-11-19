@@ -319,6 +319,7 @@ body{min-height:100vh}
 .badge-row{display:flex;align-items:center;gap:6px;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;margin-bottom:12px}
 .badge-row.pin{background:var(--point2-soft);border:1px solid color-mix(in srgb,var(--point2) 35%,transparent);color:var(--point2)}
 .badge-row.win{background:var(--gold-soft);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);color:var(--gold)}
+@media(max-width:699px){.badge-row.win .win-t>span{display:block;line-height:1.45}}   /* 모바일: '11월 이벤트 당첨!' 다음 줄에 'n번째 히든 보이스 주인공!' */
 .post-head{display:flex;gap:12px}
 .post-main{flex:1;min-width:0}
 .meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:13px}
@@ -2435,7 +2436,7 @@ function cardHTML(p) {
   const host = p.link_url ? (() => { try { return new URL(p.link_url).host; } catch (e) { return p.link_url; } })() : '';
   return `<article class="card ${p.is_pinned ? 'pinned' : ''} ${win ? 'winner' : ''}" data-act="open" data-id="${p.id}">
     ${p.is_pinned ? `<div class="badge-row pin">${I('pin', 15)} 공지</div>` : ''}
-    ${win ? `<div class="badge-row win">${I('gift', 15)} 🎉 ${+p.month_key.slice(2)}월 이벤트 당첨! ${win.rank}번째 히든 보이스 주인공!</div>` : ''}
+    ${win ? `<div class="badge-row win">${I('gift', 15)} <span class="win-t"><span>🎉 ${+p.month_key.slice(2)}월 이벤트 당첨!</span> <span>${win.rank}번째 히든 보이스 주인공!</span></span></div>` : ''}
     <div class="post-head">
       <div class="avatar" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
       <div class="post-main">
@@ -2787,7 +2788,7 @@ async function viewPost(id) {
       ${(mine || admin) ? `<div class="own-act">${mine ? `<button class="btn sm" data-act="go" data-to="#/edit/${p.id}">${I('edit', 15)}수정</button>` : ''}<button class="btn sm" data-act="del-post" data-id="${p.id}">${I('trash', 15)}삭제</button></div>` : ''}</div>
     <article class="card ${p.is_pinned ? 'pinned' : ''} ${win ? 'winner' : ''}">
       ${p.is_pinned ? `<div class="badge-row pin">${I('pin', 15)} 공지</div>` : ''}
-      ${win ? `<div class="badge-row win">${I('gift', 15)} 🎉 ${+p.month_key.slice(2)}월 이벤트 당첨! ${win.rank}번째 히든 보이스 주인공!</div>` : ''}
+      ${win ? `<div class="badge-row win">${I('gift', 15)} <span class="win-t"><span>🎉 ${+p.month_key.slice(2)}월 이벤트 당첨!</span> <span>${win.rank}번째 히든 보이스 주인공!</span></span></div>` : ''}
       <div class="meta"><div class="avatar xs" style="background:${avColor(p.author_nickname)}">${esc((p.author_nickname || '?')[0])}</div>
         ${postNo(p) ? `<span class="no">${postNo(p)}</span>` : ''}<b class="nick">${esc(p.author_nickname || '탈퇴회원')}</b>${p.author_role === 'archive' ? '<span class="arch-b">📦 이전 VOY</span>' : ''}${deptHTML(p)}
         <span class="spacer"></span><span class="muted" style="font-size:12px">${fmtDate(p.created_at, p.author_role !== 'archive')}</span></div>
@@ -3500,7 +3501,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261117.1717</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261119.1102</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3534,7 +3535,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261117.1717`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261119.1102`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3668,7 +3669,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261117.1717" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261119.1102" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3693,7 +3694,7 @@ async function renderAuth() {
       <div class="err-msg" id="aerr"></div>
       <button class="btn primary block" id="asub">로그인</button>
       <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261117.1717" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261119.1102" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
