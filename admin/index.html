@@ -262,7 +262,7 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .preview-body{white-space:pre-wrap;word-break:break-all;line-height:1.7;font-size:14px;max-height:50vh;overflow:auto;background:var(--surface2);border-radius:12px;padding:14px}
 .slot{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
 .slot:last-child{border-bottom:0}
-.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 92px 70px 70px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 92px 60px 60px 60px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
 .ql-row.head{font-size:12px;color:var(--muted);font-weight:700;padding-top:0}
 .ql-row .ql-prev{line-height:0;position:relative;width:52px}
 .ql-row small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
@@ -994,6 +994,7 @@ const API = {
   async touchMenu(menu, hold) {
     if (!this.uid || !menu) return; const now = Date.now();
     if (!hold && this._holdUntil > now && /^(피드|글 보기)$/.test(menu)) return;   // 글 등록 직후 자동으로 넘어가는 화면은 덮어쓰지 않음
+    if (menu === '피드' && this._skipFeedOnce && now - this._skipFeedOnce < 5e3) { this._skipFeedOnce = 0; return; }   // 바로가기 닫기 → 자동 복귀는 기록 안 함
     if (hold) this._holdUntil = now + 120e3;
     if (!hold && this._lastMenu && this._lastMenu.m === menu && now - this._lastMenu.t < 60e3) return;
     this._lastMenu = { m: menu, t: now }; const iso = new Date(now).toISOString();
@@ -1406,6 +1407,10 @@ const API = {
     if (LOCAL) return { subs: 1, configured: false, demo: true };
     return must(await sb.rpc('push_test_me'));
   },
+  async myPushSubs() {   // 내 계정에 연결된 알림 기기 목록 (RLS: 본인 것만 조회됨)
+    if (LOCAL) return [];
+    return must(await sb.from('push_subscriptions').select('endpoint,ua,created_at').order('created_at', { ascending: false }));
+  },
   async deletePushSub(endpoint) { if (!LOCAL) await sb.rpc('delete_push_subscription', { p_endpoint: endpoint }); },
   async latestPosts(n) {
     if (LOCAL) return Local.db.posts.filter(p => orgOf(p) === this.room).sort((a, b) => b.id - a.id).slice(0, n || 30).map(p => ({ id: p.id, mine: p.user_id === this.uid }));
@@ -1725,6 +1730,7 @@ const QL_DEFAULTS = [
   { id: 'opm',      name: '품목PM검색',              url: 'yhopm/',    icon: 'pm_otc',   auto: true, on: true, orgs: ['otc'], updated_at: null },   // OTC 품목 PM 검색
   { id: 'chronic',  name: '비대면진료|타깃병의원',   url: 'chronic/',  icon: 'chronic',  auto: true, on: true, updated_at: null },   // 비대면 진료 타깃 병의원 (심평원 API · Vercel 중계)
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
+  { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1761,6 +1767,8 @@ const QL_ICONS = {
     '<path d="M15 21h16M15 31h16M15 41h16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' +
     '<circle cx="44" cy="22" r="7.5" fill="#fff"/><text x="44" y="25.6" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="10" fill="#E8590C">7</text>' +
     '<circle cx="45" cy="42" r="9.5" fill="#E8590C" stroke="#fff" stroke-width="2.6"/><text x="45" y="46.4" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="12" fill="#fff">45</text>' },
+  workspace: { name: 'Yuhan Workspace (네모 4칸)', c: ['#8E7CFF', '#5B4CE0'], g:
+    '<rect x="16" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="16" y="34" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="34" width="14" height="14" rx="4" fill="#fff"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -1848,6 +1856,10 @@ const QL = {
       if (!l.url) { toast(`${String(l.name).replace(/\|/g, ' ')}은(는) 준비 중입니다`); return; }
       if (l.url.startsWith('#')) { closeSiteViewer(); location.hash = l.url; return; }   // 커뮤니티 안 메뉴 (예: #/research)
       this.markSeen(l.id); document.querySelectorAll(`[data-ql="${CSS.escape(l.id)}"] .ql-dot`).forEach(d => d.remove());
+      if (l.ext) {   // 새 창으로 열기 (회사 포털처럼 로그인이 필요하거나 앱 안 화면을 막는 사이트)
+        try { if (typeof API !== 'undefined' && API.touchMenu && !/\/admin\//.test(location.pathname)) API.touchMenu('바로가기 · ' + String(l.name).replace(/\|/g, ' ')); } catch (er) {}
+        window.open(this.resolve(l.url), '_blank', 'noopener'); return;
+      }
       openSiteViewer(String(l.name).replace(/\|/g, ' '), this.resolve(l.url), l.icon);
     });
   }
@@ -1879,7 +1891,8 @@ function openSiteViewer(name, url, icon) {
     if (b.dataset.sv === 'close') {
       closeSiteViewer();
       try { if (history.state && history.state.sv) history.replaceState(null, ''); } catch (er) {}
-      if (!/\/admin\//.test(location.pathname)) { if (location.hash !== '#/feed') location.hash = '#/feed'; else if (typeof route === 'function') route(); }
+      if (!/\/admin\//.test(location.pathname)) { try { if (typeof API !== 'undefined') API._skipFeedOnce = Date.now(); } catch (er) {}   // 바로가기를 닫고 피드로 돌아갈 때 '최근 사용'을 피드로 덮어쓰지 않음
+        if (location.hash !== '#/feed') location.hash = '#/feed'; else if (typeof route === 'function') route(); }
     }
     if (b.dataset.sv === 'reload') { try { fr.contentWindow.location.reload(); } catch (er) { fr.src = url; } }
   });
@@ -1998,7 +2011,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261116.1456</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261120.1131</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3232,13 +3245,14 @@ function qlRows() { return A.qlEdit.map((l, i) => l.removed ? '' : `<div class="
     <div class="ql-orgs" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700">${['etc', 'otc'].map(o => `<label style="display:flex;align-items:center;gap:5px"><input type="checkbox" class="ck qorg" value="${o}" ${orgsOf(l).includes(o) ? 'checked' : ''}> ${ORG_NAME[o]}</label>`).join('')}</div>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qo" ${l.on !== false ? 'checked' : ''}><span></span></label>표시</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qa" ${l.auto ? 'checked' : ''}><span></span></label>자동감지</label>
+    <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)" title="켜면 앱 안이 아니라 새 창(브라우저)으로 엽니다 — 로그인이 필요한 회사 사이트 등"><label class="switch"><input type="checkbox" class="qx" ${l.ext ? 'checked' : ''}><span></span></label>새 창</label>
     <button class="btn sm" data-act="ql-bump" data-i="${i}" title="지금 업데이트했다고 표시 → 모든 회원에게 빨간 점">${I('bell', 14)} 업데이트 알림</button>
     <div class="acts"><button class="ib" data-act="ql-up" data-i="${i}" title="위로">↑</button><button class="ib del" data-act="ql-del" data-i="${i}" title="삭제">${I('trash', 15)}</button></div></div>`).join(''); }
 function qlCollect() {
   document.querySelectorAll('.ql-row[data-i]').forEach(r => { const l = A.qlEdit[+r.dataset.i]; if (!l) return;
     l.icon = r.querySelector('.qi').value; l.name = r.querySelector('.qn').value.trim(); l.url = r.querySelector('.qu').value.trim();
     if (l.url && !/^https?:\/\//i.test(l.url) && /\.[a-z]{2,}(\/|$)/i.test(l.url.split('/')[0])) l.url = 'https://' + l.url;   // 도메인 형태만 https 붙임, 폴더명은 그대로
-    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked;
+    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked; l.ext = !!(r.querySelector('.qx') && r.querySelector('.qx').checked);
     l.orgs = [...r.querySelectorAll('.qorg:checked')].map(x => x.value); });
 }
 /* 🔔 알림 발송 점검 (최고관리자) — 알림 켠 기기 수 · 최근 발송 결과 */
@@ -3267,7 +3281,7 @@ function pageSettings(c) {
   c.innerHTML = `${pushDiagHTML()}<div class="panel"><div class="panel-head"><div><h2>${I('link', 19)} 바로가기 메뉴 (커뮤니티 오른쪽 고정)</h2><p>사이트가 업데이트되면 아이콘 오른쪽 위에 빨간 점이 뜹니다. ① 자동감지: GitHub Pages 사이트의 마지막 배포 시각을 읽음 ② [업데이트 알림]: 관리자가 직접 표시. 회원이 아이콘을 누르면 그 회원에게선 점이 사라집니다.</p></div>
       <div style="display:flex;gap:8px"><button class="btn sm" data-act="ql-add">${I('plus', 15)} 메뉴 추가</button><button class="btn primary sm" data-act="ql-save">저장</button></div></div>
     <div class="ql-gallery" id="qlGallery">${A.qlEdit.filter(l => l.on !== false).map(l => QL.tile(l)).join('')}</div>
-    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>자동</span><span></span><span></span></div>
+    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>자동</span><span>새 창</span><span></span><span></span></div>
     <div id="qlRows">${qlRows()}</div></div>
   <div class="panel"><div class="panel-head"><div><h2>${I('lock', 19)} 앱 전용 모드</h2><p>켜면 브라우저에서는 로그인 화면만 보이고, 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>(설치한 앱)에서만 열립니다. 브라우저로 로그인하면 앱 설치·열기 안내 화면이 나옵니다. (휴대폰 삼성·아이폰, PC 공통)</p></div>
     <label class="switch"><input type="checkbox" id="appOnly" ${A.settings.app_only === false ? '' : 'checked'}><span></span></label></div></div>
