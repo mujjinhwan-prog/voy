@@ -129,6 +129,10 @@ html.sv-open,html.sv-open body{overflow:hidden}
 .sv-ext{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.72);color:#fff;font-size:12px;padding:8px 12px;border-radius:10px;z-index:2;pointer-events:none}
 .pop-media.clickable{cursor:pointer}
 
+.id-wrap{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}.id-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.id-wrap input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important;outline:none}
+.id-suffix{display:flex;align-items:center;padding:0 12px;font-weight:700;color:var(--muted);background:color-mix(in srgb,var(--muted) 9%,transparent);border-left:1px solid var(--border);white-space:nowrap;font-size:14px}.id-suffix[hidden]{display:none}
+.ms-btn{display:flex;align-items:center;justify-content:center;gap:8px}
 .pw-wrap{position:relative;display:block}.pw-wrap input{padding-right:46px!important;width:100%}
 .pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer;border-radius:10px}
 .pw-eye:hover{color:var(--accent);background:var(--surface2)}
@@ -262,7 +266,7 @@ td.txt span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:now
 .preview-body{white-space:pre-wrap;word-break:break-all;line-height:1.7;font-size:14px;max-height:50vh;overflow:auto;background:var(--surface2);border-radius:12px;padding:14px}
 .slot{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
 .slot:last-child{border-bottom:0}
-.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 92px 60px 60px 60px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.ql-row{display:grid;grid-template-columns:64px 150px 1.1fr 1.6fr 92px 56px 56px 56px 56px 120px 40px;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
 .ql-row.head{font-size:12px;color:var(--muted);font-weight:700;padding-top:0}
 .ql-row .ql-prev{line-height:0;position:relative;width:52px}
 .ql-row small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
@@ -624,6 +628,7 @@ const SUPABASE_URL      = 'https://jiaccvnamqoshnxbyoud.supabase.co';   // 예: 
 const SUPABASE_ANON_KEY = 'sb_publishable_etPefDosp2zFZaUoqlFHNQ_n2gQQIyp';   // Project Settings → API → anon public key
 const EMAIL_DOMAIN      = 'voy-community.app';   // 관리자 아이디 → 내부 이메일 변환용 (변경 금지)
 const COMPANY_DOMAIN    = 'yuhan.co.kr';         // 회원 로그인 이메일 도메인 (아이디만 입력하면 자동으로 붙임)
+const MS_LOGIN          = false;                 // Microsoft 365(Entra ID) 로그인 — IT팀 연동 정보를 Supabase에 넣은 뒤 true 로 바꾸면 'ID만 입력 → Microsoft 화면에서 비밀번호' 방식으로 전환
 const VAPID_PUBLIC_KEY  = 'BCx_otMAyo-qPMuhjsDqlNmKpnXpuVOTpkZ_dn8N7_9RmOte9UroOHWa5Zan3XqRUUQwzh9cYm5wdaNJoe_v2lY';   // 새 글 알림(웹 푸시) 공개키 — 설정 가이드 참고
 const USER_PAGE_URL     = '../';      // 관리자 페이지 → 커뮤니티로 가는 경로
 const ADMIN_PAGE_URL    = 'admin/';   // 커뮤니티 → 관리자 콘솔 경로
@@ -936,6 +941,18 @@ const API = {
 
   /* ---------- 인증 ---------- */
   /* 로그인: 회사 이메일(@yuhan.co.kr) 또는 관리자 아이디. '@' 없이 입력하면 회사 이메일 → 관리자 아이디 순으로 시도 */
+  /* Microsoft 회사 계정 로그인: VOY에서 ID만 받고 → Microsoft 화면(이메일 미리 채움)에서 회사 비밀번호 → VOY로 복귀 */
+  async signInMicrosoft(input) {
+    const s = String(input || '').trim().toLowerCase();
+    if (!s) throw new Error('회사 이메일 아이디를 입력해주세요.');
+    const email = s.includes('@') ? s : `${s}@${COMPANY_DOMAIN}`;
+    if (LOCAL) throw new Error('데모 모드에서는 Microsoft 로그인을 쓸 수 없어요.');
+    const { error } = await sb.auth.signInWithOAuth({ provider: 'azure', options: {
+      scopes: 'openid profile email User.Read',
+      redirectTo: location.origin + location.pathname,
+      queryParams: { login_hint: email, domain_hint: COMPANY_DOMAIN } } });
+    if (error) throw error;
+  },
   async signIn(input, pw, opt = {}) {
     const s = String(input).trim().toLowerCase();
     if (!s || !pw) throw new Error('이메일과 비밀번호를 입력해주세요.');
@@ -1844,8 +1861,9 @@ const QL = {
     onDone && onDone();
   },
   tile(l, cls) {
-    return `<a class="ql-tile ${cls || ''} ${l.url ? '' : 'soon'}" href="#" role="button" data-ql="${esc(l.id)}" title="${esc(String(l.name).replace(/\|/g, ' '))}${l.url ? '' : ' (준비 중)'}">
-      <span class="ql-ic">${qlIconSVG(l.icon, cls === 'mini' ? 46 : 45)}${this.isNew(l) ? '<i class="ql-dot" aria-label="업데이트"></i>' : ''}${l.url ? '' : '<em class="ql-soon">준비중</em>'}</span>
+    const soon = !l.url || l.prep;   // 주소가 없거나 관리자가 '준비중'으로 켜 둔 메뉴
+    return `<a class="ql-tile ${cls || ''} ${soon ? 'soon' : ''}" href="#" role="button" data-ql="${esc(l.id)}" title="${esc(String(l.name).replace(/\|/g, ' '))}${soon ? ' (준비 중)' : ''}">
+      <span class="ql-ic">${qlIconSVG(l.icon, cls === 'mini' ? 46 : 45)}${!soon && this.isNew(l) ? '<i class="ql-dot" aria-label="업데이트"></i>' : ''}${soon ? '<em class="ql-soon">준비중</em>' : ''}</span>
       <span class="ql-name">${qlName(l.name)}</span></a>`;
   },
   railHTML() { return `<div class="ql-rail-in"><div class="ql-head">바로가기</div><div class="ql-grid">${this.list.map(l => this.tile(l)).join('')}</div></div>`; },
@@ -1856,7 +1874,7 @@ const QL = {
       const a = e.target.closest('[data-ql]'); if (!a) return;
       const l = this.list.find(x => x.id === a.dataset.ql); if (!l) return;
       e.preventDefault();
-      if (!l.url) { toast(`${String(l.name).replace(/\|/g, ' ')}은(는) 준비 중입니다`); return; }
+      if (!l.url || l.prep) { toast(`${String(l.name).replace(/\|/g, ' ')}\n프로그램 준비 중입니다`); return; }
       if (l.url.startsWith('#')) { closeSiteViewer(); location.hash = l.url; return; }   // 커뮤니티 안 메뉴 (예: #/research)
       this.markSeen(l.id); document.querySelectorAll(`[data-ql="${CSS.escape(l.id)}"] .ql-dot`).forEach(d => d.remove());
       if (l.ext) {   // 새 창으로 열기 (회사 포털처럼 로그인이 필요하거나 앱 안 화면을 막는 사이트)
@@ -2014,7 +2032,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261120.1149</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261120.1507</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3247,6 +3265,7 @@ function qlRows() { return A.qlEdit.map((l, i) => l.removed ? '' : `<div class="
     <div><input class="qu" value="${esc(l.url)}" placeholder="폴더명/ (예: yhdbt/) · #/research = 커뮤니티 설문 · 비우면 '준비중'"><small>최근 업데이트: ${l.updated_at ? fmtDate(l.updated_at, true) : '수동 알림 없음'}${QL.auto[l.id] && QL.auto[l.id].lm ? ` · 사이트 자동감지 ${fmtDate(new Date(QL.auto[l.id].lm).toISOString(), true)}` : ''}</small></div>
     <div class="ql-orgs" style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700">${['etc', 'otc'].map(o => `<label style="display:flex;align-items:center;gap:5px"><input type="checkbox" class="ck qorg" value="${o}" ${orgsOf(l).includes(o) ? 'checked' : ''}> ${ORG_NAME[o]}</label>`).join('')}</div>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qo" ${l.on !== false ? 'checked' : ''}><span></span></label>표시</label>
+    <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)" title="켜면 메뉴는 보이지만 누르면 '프로그램 준비 중입니다'만 뜹니다 (주소는 그대로 보관)"><label class="switch"><input type="checkbox" class="qp" ${l.prep ? 'checked' : ''}><span></span></label>준비중</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)"><label class="switch"><input type="checkbox" class="qa" ${l.auto ? 'checked' : ''}><span></span></label>자동감지</label>
     <label style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted)" title="켜면 앱 안이 아니라 새 창(브라우저)으로 엽니다 — 로그인이 필요한 회사 사이트 등"><label class="switch"><input type="checkbox" class="qx" ${l.ext ? 'checked' : ''}><span></span></label>새 창</label>
     <button class="btn sm" data-act="ql-bump" data-i="${i}" title="지금 업데이트했다고 표시 → 모든 회원에게 빨간 점">${I('bell', 14)} 업데이트 알림</button>
@@ -3255,7 +3274,7 @@ function qlCollect() {
   document.querySelectorAll('.ql-row[data-i]').forEach(r => { const l = A.qlEdit[+r.dataset.i]; if (!l) return;
     l.icon = r.querySelector('.qi').value; l.name = r.querySelector('.qn').value.trim(); l.url = r.querySelector('.qu').value.trim();
     if (l.url && !/^https?:\/\//i.test(l.url) && /\.[a-z]{2,}(\/|$)/i.test(l.url.split('/')[0])) l.url = 'https://' + l.url;   // 도메인 형태만 https 붙임, 폴더명은 그대로
-    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked; l.ext = !!(r.querySelector('.qx') && r.querySelector('.qx').checked);
+    if (l.url && !/^https?:\/\//i.test(l.url) && !l.url.startsWith('#')) l.url = l.url.replace(/^\/+/, '').replace(/\/?$/, '/'); l.on = r.querySelector('.qo').checked; l.auto = r.querySelector('.qa').checked; l.prep = !!(r.querySelector('.qp') && r.querySelector('.qp').checked); l.ext = !!(r.querySelector('.qx') && r.querySelector('.qx').checked);
     l.orgs = [...r.querySelectorAll('.qorg:checked')].map(x => x.value); });
 }
 /* 🔔 알림 발송 점검 (최고관리자) — 알림 켠 기기 수 · 최근 발송 결과 */
@@ -3284,7 +3303,7 @@ function pageSettings(c) {
   c.innerHTML = `${pushDiagHTML()}<div class="panel"><div class="panel-head"><div><h2>${I('link', 19)} 바로가기 메뉴 (커뮤니티 오른쪽 고정)</h2><p>사이트가 업데이트되면 아이콘 오른쪽 위에 빨간 점이 뜹니다. ① 자동감지: GitHub Pages 사이트의 마지막 배포 시각을 읽음 ② [업데이트 알림]: 관리자가 직접 표시. 회원이 아이콘을 누르면 그 회원에게선 점이 사라집니다.</p></div>
       <div style="display:flex;gap:8px"><button class="btn sm" data-act="ql-add">${I('plus', 15)} 메뉴 추가</button><button class="btn primary sm" data-act="ql-save">저장</button></div></div>
     <div class="ql-gallery" id="qlGallery">${A.qlEdit.filter(l => l.on !== false).map(l => QL.tile(l)).join('')}</div>
-    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>자동</span><span>새 창</span><span></span><span></span></div>
+    <div class="ql-row head"><span>아이콘</span><span>아이콘 모양</span><span>이름</span><span>링크 주소</span><span>보일 커뮤니티</span><span>표시</span><span>준비중</span><span>자동</span><span>새 창</span><span></span><span></span></div>
     <div id="qlRows">${qlRows()}</div></div>
   <div class="panel"><div class="panel-head"><div><h2>${I('lock', 19)} 앱 전용 모드</h2><p>켜면 브라우저에서는 로그인 화면만 보이고, 게시판은 <b>주소창이 없는 VOY™ 앱 창</b>(설치한 앱)에서만 열립니다. 브라우저로 로그인하면 앱 설치·열기 안내 화면이 나옵니다. (휴대폰 삼성·아이폰, PC 공통)</p></div>
     <label class="switch"><input type="checkbox" id="appOnly" ${A.settings.app_only === false ? '' : 'checked'}><span></span></label></div></div>
