@@ -31,10 +31,10 @@
   --shadow:none}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
-header{padding:18px 16px 8px;max-width:1280px;margin:0 auto}
+header{padding:18px 16px 8px;max-width:1540px;margin:0 auto}
 h1{font-size:20px;margin:0 0 4px}
 .sub{color:var(--sub);font-size:13px}
-.wrap{max-width:1280px;margin:0 auto;padding:0 16px 32px}
+.wrap{max-width:1540px;margin:0 auto;padding:0 16px 32px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:var(--shadow)}
 h1{color:var(--pri)}
 h1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -141,7 +141,7 @@ input[type=range]{width:100%}
 .msg{font-size:12px;color:var(--sub);margin-top:6px;min-height:18px}
 .msg.err{color:var(--err)}
 hr{border:0;border-top:1px solid var(--line);margin:14px 0}
-#map{height:min(80vh,860px);min-height:560px;border-radius:10px}
+#map{height:min(96vh,1030px);min-height:672px;border-radius:10px}
 .rtabs{display:none;gap:6px;overflow-x:auto;padding:2px 0 2px;scrollbar-width:thin}
 .rtabs.on{display:flex}
 .rtab{border:1px solid var(--line2);background:var(--card);color:var(--ink);border-radius:18px;padding:6px 12px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;flex:none}
@@ -237,7 +237,11 @@ details summary{cursor:pointer;font-weight:700;font-size:13px}
   .kpi .l{font-size:11px}
   .theme{padding:2px}
   .theme button{width:32px;height:30px}
-  .wrap{padding:0 12px 96px}
+  .wrap{padding:0 12px 96px;display:flex;flex-direction:column;gap:12px}
+  .wrap>.main,.wrap>.main>section,.wrap .maprow{display:contents}
+  .wrap .kpis{margin:0}
+  #rTabs{order:1}#secMap{order:2}#secFilter{order:3}.wrap>.kpis{order:4}#secBars{order:5}#secPartner{order:6}#secList{order:7}
+  .wrap>*{min-width:0}
   .card{padding:12px}
   .kpis{gap:8px;margin:10px 0}
   .kpi .v{font-size:20px}
@@ -498,7 +502,7 @@ details summary{cursor:pointer;font-weight:700;font-size:13px}
         <summary>설정</summary>
         <label>브이월드 인증키 (지도)</label><input type="text" id="vkey" placeholder="Vercel에 VWORLD_KEY를 넣었으면 비워두세요">
         <div class="note">브이월드에서 발급받은 키입니다. 비워두면 서버 설정(VWORLD_KEY)을 쓰고, 둘 다 없으면 OpenStreetMap을 씁니다.</div>
-        <label>중계 API 주소</label><input type="text" id="apiBase" placeholder="비워두면 자동 (Vercel 중계 API)">
+        <label>중계 API 주소</label><input type="text" id="apiBase" placeholder="/api/hira">
         <div class="note">이 페이지와 같은 Vercel 프로젝트면 비워두세요.</div>
         <button class="btn full" id="btnCache">상세정보 캐시 비우기</button>
         <button class="btn full" id="btnSample">샘플 데이터로 미리보기</button>
@@ -511,9 +515,9 @@ details summary{cursor:pointer;font-weight:700;font-size:13px}
 
     <section class="row" style="align-content:start">
       <div class="rtabs" id="rTabs" role="tablist" aria-label="시군구 보기"></div>
-      <div class="row two" style="grid-template-columns:minmax(0,3fr) minmax(0,1fr)">
+      <div class="row two maprow" style="grid-template-columns:minmax(0,4fr) minmax(0,1fr)">
         <div class="card" id="secMap"><div class="sec-title">지도</div><div id="map"></div></div>
-        <div class="card"><div class="sec-title listhd"><span>시군구별 의원 수 (등급 구성)</span><button type="button" class="q2" id="barsBack" style="display:none"></button></div><div class="bars" id="bars"></div>
+        <div class="card" id="secBars"><div class="sec-title listhd"><span>시군구별 의원 수 (등급 구성)</span><button type="button" class="q2" id="barsBack" style="display:none"></button></div><div class="bars" id="bars"></div>
           <div class="note"><span class="g gA">A</span> <span class="g gB">B</span> <span class="g gC">C</span> <span class="g gN">미조회</span> · 막대를 누르면 해당 시군구로 필터<br>지도에서 <b style="color:var(--acc)">주황 테두리</b>는 비대면 진료 거래처입니다.</div></div>
       </div>
       <div class="card" id="secPartner">
@@ -553,8 +557,8 @@ details summary{cursor:pointer;font-weight:700;font-size:13px}
 </div>
 
 <nav class="tabbar" aria-label="화면 이동">
-  <a href="#secFilter"><span>🔎</span>조건</a>
   <a href="#secMap"><span>🗺️</span>지도</a>
+  <a href="#secFilter"><span>🔎</span>조건</a>
   <a href="#secPartner"><span>🤝</span>거래처</a>
   <a href="#secList"><span>📋</span>목록</a>
   <a href="#" data-help="top"><span>📘</span>설명</a>
@@ -659,9 +663,7 @@ try{ ["chronic_t5","chronic_det"].forEach(k => localStorage.removeItem(k)); }cat
 let DET = store.get("chronic_det2", {});  // ykiho → {h:{night,sat,sun}|null, im:내과·가정 전문의 수|null}
 
 /* ───────── API ───────── */
-// VOY 바로가기(/chronic) 등 Vercel 밖에서 열면 Vercel의 중계 API를 그대로 사용
-const API_DEFAULT = /vercel\.app$/.test(location.hostname) ? "/api/hira" : "https://chronic-flame.vercel.app/api/hira";
-const apiBase = () => ($("apiBase").value.trim() || API_DEFAULT);
+const apiBase = () => ($("apiBase").value.trim() || "/api/hira");
 async function api(params){
   const r = await fetch(apiBase() + "?" + new URLSearchParams(params));
   let j; try{ j = await r.json(); }catch(e){ throw new Error(`중계 API 응답 오류 (HTTP ${r.status})`); }
