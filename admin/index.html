@@ -1731,6 +1731,7 @@ const QL_DEFAULTS = [
   { id: 'chronic',  name: '비대면진료|타깃병의원',   url: 'chronic/',  icon: 'chronic',  auto: true, on: true, updated_at: null },   // 비대면 진료 타깃 병의원 (심평원 API · Vercel 중계)
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
+  { id: 'yuleca', name: 'YULECA',          url: 'https://yuleca.co.kr/', icon: 'yuleca', auto: false, ext: true, on: true, updated_at: null },   // 유한 러닝 아카데미 — 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1769,6 +1770,8 @@ const QL_ICONS = {
     '<circle cx="45" cy="42" r="9.5" fill="#E8590C" stroke="#fff" stroke-width="2.6"/><text x="45" y="46.4" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" font-size="12" fill="#fff">45</text>' },
   workspace: { name: 'Yuhan Workspace (네모 4칸)', c: ['#8E7CFF', '#5B4CE0'], g:
     '<rect x="16" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="16" y="34" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="34" width="14" height="14" rx="4" fill="#fff"/>' },
+  yuleca: { name: 'YULECA (학사모)', c: ['#6FDCCF', '#22A394'], g:
+    '<path d="M32 15 9 26l23 11 23-11L32 15Z" fill="#fff"/><path d="M19 31.5v9.5c0 3.6 5.8 6.5 13 6.5s13-2.9 13-6.5v-9.5L32 38l-13-6.5Z" fill="#fff" opacity=".92"/><path d="M50 28v11" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="50" cy="42" r="3" fill="#fff"/><path d="M32 22.5 22 27" stroke="#2BAE9F" stroke-width="2.2" stroke-linecap="round"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -2011,7 +2014,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261120.1131</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261120.1149</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
