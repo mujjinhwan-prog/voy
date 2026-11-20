@@ -140,6 +140,10 @@ html.sv-open,html.sv-open body{overflow:hidden}
 .sv-ext{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));background:rgba(0,0,0,.72);color:#fff;font-size:12px;padding:8px 12px;border-radius:10px;z-index:2;pointer-events:none}
 .pop-media.clickable{cursor:pointer}
 
+.id-wrap{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}.id-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.id-wrap input{flex:1;min-width:0;border:0!important;box-shadow:none!important;background:transparent!important;border-radius:0!important;outline:none}
+.id-suffix{display:flex;align-items:center;padding:0 12px;font-weight:700;color:var(--muted);background:color-mix(in srgb,var(--muted) 9%,transparent);border-left:1px solid var(--border);white-space:nowrap;font-size:14px}.id-suffix[hidden]{display:none}
+.ms-btn{display:flex;align-items:center;justify-content:center;gap:8px}
 .pw-wrap{position:relative;display:block}.pw-wrap input{padding-right:46px!important;width:100%}
 .pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer;border-radius:10px}
 .pw-eye:hover{color:var(--accent);background:var(--surface2)}
@@ -816,6 +820,7 @@ const SUPABASE_URL      = 'https://jiaccvnamqoshnxbyoud.supabase.co';   // 예: 
 const SUPABASE_ANON_KEY = 'sb_publishable_etPefDosp2zFZaUoqlFHNQ_n2gQQIyp';   // Project Settings → API → anon public key
 const EMAIL_DOMAIN      = 'voy-community.app';   // 관리자 아이디 → 내부 이메일 변환용 (변경 금지)
 const COMPANY_DOMAIN    = 'yuhan.co.kr';         // 회원 로그인 이메일 도메인 (아이디만 입력하면 자동으로 붙임)
+const MS_LOGIN          = false;                 // Microsoft 365(Entra ID) 로그인 — IT팀 연동 정보를 Supabase에 넣은 뒤 true 로 바꾸면 'ID만 입력 → Microsoft 화면에서 비밀번호' 방식으로 전환
 const VAPID_PUBLIC_KEY  = 'BCx_otMAyo-qPMuhjsDqlNmKpnXpuVOTpkZ_dn8N7_9RmOte9UroOHWa5Zan3XqRUUQwzh9cYm5wdaNJoe_v2lY';   // 새 글 알림(웹 푸시) 공개키 — 설정 가이드 참고
 const USER_PAGE_URL     = '../';      // 관리자 페이지 → 커뮤니티로 가는 경로
 const ADMIN_PAGE_URL    = 'admin/';   // 커뮤니티 → 관리자 콘솔 경로
@@ -1128,6 +1133,18 @@ const API = {
 
   /* ---------- 인증 ---------- */
   /* 로그인: 회사 이메일(@yuhan.co.kr) 또는 관리자 아이디. '@' 없이 입력하면 회사 이메일 → 관리자 아이디 순으로 시도 */
+  /* Microsoft 회사 계정 로그인: VOY에서 ID만 받고 → Microsoft 화면(이메일 미리 채움)에서 회사 비밀번호 → VOY로 복귀 */
+  async signInMicrosoft(input) {
+    const s = String(input || '').trim().toLowerCase();
+    if (!s) throw new Error('회사 이메일 아이디를 입력해주세요.');
+    const email = s.includes('@') ? s : `${s}@${COMPANY_DOMAIN}`;
+    if (LOCAL) throw new Error('데모 모드에서는 Microsoft 로그인을 쓸 수 없어요.');
+    const { error } = await sb.auth.signInWithOAuth({ provider: 'azure', options: {
+      scopes: 'openid profile email User.Read',
+      redirectTo: location.origin + location.pathname,
+      queryParams: { login_hint: email, domain_hint: COMPANY_DOMAIN } } });
+    if (error) throw error;
+  },
   async signIn(input, pw, opt = {}) {
     const s = String(input).trim().toLowerCase();
     if (!s || !pw) throw new Error('이메일과 비밀번호를 입력해주세요.');
@@ -3513,7 +3530,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261120.1149</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261120.1427</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3547,7 +3564,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261120.1149`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261120.1427`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3681,7 +3698,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261120.1149" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261120.1427" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3694,27 +3711,35 @@ async function renderAuth() {
     });
     Inst.auto(); return;
   }
+  const ms = MS_LOGIN && !S.pwLogin;   // Microsoft 로그인 모드 (전환 기간에는 '기존 비밀번호로 로그인'으로 바꿀 수 있음)
   root.innerHTML = `<div class="auth"><div class="auth-card">
     <div class="auth-hero"><img class="hero-ic" src="icons/voy-512.png?v=4" alt="VOY™ Voice of YUHAN"><p>현장의 목소리를 거침없이<br>YH의 영업 참고서 <b>"VOY"</b> - 익명 커뮤니티</p></div>
     <div id="instSlot" style="margin:-2px 0 10px">${installCardHTML()}</div>
     <form class="box" id="authform" autocomplete="on">
       <label class="lbl" style="margin-top:0">ID (회사 이메일)</label>
-      <input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="name@${COMPANY_DOMAIN}" required>
-      <p class="hint">@${COMPANY_DOMAIN} 앞부분만 입력해도 됩니다.</p>
-      <label class="lbl">비밀번호</label><span class="pw-wrap"><input id="apw" type="password" autocomplete="current-password" required data-eye="1"><button type="button" class="pw-eye" id="apwEye" tabindex="-1" aria-label="비밀번호 보기" title="비밀번호 보기">${I('eye', 19)}</button></span>
-      <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>(사번은 사번 숫자 전체 <b>8자리</b>입니다.)</p>
+      <div class="id-wrap"><input id="aid" type="text" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="아이디" required><span class="id-suffix" id="aidSuf">@${COMPANY_DOMAIN}</span></div>
+      <p class="hint">회사 이메일에서 <b>@${COMPANY_DOMAIN} 앞부분</b>만 입력하세요.</p>
+      <div id="pwBlock" ${ms ? 'hidden' : ''}>
+        <label class="lbl">비밀번호</label><span class="pw-wrap"><input id="apw" type="password" autocomplete="current-password" ${ms ? '' : 'required'} data-eye="1"><button type="button" class="pw-eye" id="apwEye" tabindex="-1" aria-label="비밀번호 보기" title="비밀번호 보기">${I('eye', 19)}</button></span>
+        <p class="hint">처음 로그인하는 경우 초기 비밀번호는 <b>사번</b>입니다.<br>(사번은 사번 숫자 전체 <b>8자리</b>입니다.)</p>
+      </div>
       <div class="err-msg" id="aerr"></div>
-      <button class="btn primary block" id="asub">로그인</button>
-      <p class="hint" style="text-align:center;margin-top:8px">로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-      <p class="ver-tag" title="v261120.1149" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
+      <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
+      ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
+      <p class="ver-tag" title="v261120.1427" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
   Inst.auto();
+  const aid = document.getElementById('aid'), suf = document.getElementById('aidSuf');
+  aid.addEventListener('input', () => { suf.hidden = aid.value.includes('@'); });   // 전체 이메일을 직접 쓰면 뒤의 @yuhan.co.kr 표시를 숨김
+  const am = document.getElementById('authMode'); if (am) am.onclick = () => { S.pwLogin = !S.pwLogin; renderAuth(); };
   const ae = document.getElementById('apwEye'), ap = document.getElementById('apw');
   ae.onclick = () => { const show = ap.type === 'password'; ap.type = show ? 'text' : 'password'; ae.innerHTML = I(show ? 'eyeoff' : 'eye', 19); ae.title = show ? '비밀번호 숨기기' : '비밀번호 보기'; ap.focus(); };
   document.getElementById('authform').onsubmit = async e => {
     e.preventDefault(); const btn = document.getElementById('asub'), err = document.getElementById('aerr'); err.textContent = '';
+    if (ms) { try { busy(btn, true); await API.signInMicrosoft(aid.value); } catch (er) { err.textContent = friendly(er); busy(btn, false); } return; }   // Microsoft 화면으로 이동
     const pw = document.getElementById('apw').value;
     try {
       busy(btn, true);
