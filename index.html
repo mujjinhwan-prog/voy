@@ -524,7 +524,9 @@ body:has(.policy) .theme-fab{display:none}
 .td-add{display:flex;gap:6px;margin-top:10px}.td-add input{flex:1}
 .td-hist{margin-top:12px}.td-hist small{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}
 .td-strip{display:flex;gap:4px;overflow-x:auto;padding:3px 2px 4px;scrollbar-width:none}.td-strip::-webkit-scrollbar{display:none}
-.td-day{flex-shrink:0;position:relative;width:28px;height:28px;border-radius:8px;border:0;background:var(--surface2);font-size:11.5px;font-weight:700;display:grid;place-items:center;color:var(--muted);cursor:pointer}
+.td-day{flex-shrink:0;position:relative;min-width:44px;height:42px;padding:3px 4px 4px;border-radius:9px;border:0;background:var(--surface2);font-size:11.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:var(--muted);cursor:pointer;line-height:1.1}
+.td-m{font-size:9px;font-weight:600;opacity:.75}.td-dn{display:flex;align-items:baseline;gap:1px;white-space:nowrap}.td-dn b{font-size:13px;font-weight:800}.td-dn em{font-style:normal;font-size:10px;font-weight:700}
+.td-dn em.sun{color:#e03131}.td-dn em.sat{color:#1c7ed6}.td-day.sel .td-dn em,.td-day.ok .td-dn em{color:inherit}.td-day.sel .td-m,.td-day.ok .td-m{color:#fff;opacity:.85}
 .td-day.fut{background:transparent;border:1.5px dashed var(--border)}.td-day i{position:absolute;bottom:2px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
 .td-day.sel{background:var(--accent)!important;color:var(--accent-ink,#fff)!important;border-color:var(--accent)}
 .td-other{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:10px;background:var(--surface2);font-size:12.5px;margin-bottom:10px}
@@ -2538,7 +2540,7 @@ function todoRender() {
   const list = d.todos[sel] || [], n = list.filter(x => x.done).length, all = list.length && n === list.length;
   const prev = isToday ? todoPrevLeft() : null;
   const strip = [...Array(21)].map((_, i) => { const t = new Date(); t.setDate(t.getDate() - 13 + i); const k = dayKey(t), cnt = (d.todos[k] || []).length;
-    return `<button class="td-day ${d.done[k] ? 'ok' : cnt ? 'part' : ''} ${k === today ? 'today' : ''} ${k === sel ? 'sel' : ''} ${k > today ? 'fut' : ''}" data-act="td-day" data-k="${k}" title="${tdLabel(k)}${cnt ? ` · ${cnt}개` : ''}${d.done[k] ? ' · 미션 컴플릿' : ''}">${new Date(k + 'T00:00:00').getDate()}${cnt && k > today ? '<i></i>' : ''}</button>`; }).join('');
+    return `<button class="td-day ${d.done[k] ? 'ok' : cnt ? 'part' : ''} ${k === today ? 'today' : ''} ${k === sel ? 'sel' : ''} ${k > today ? 'fut' : ''}" data-act="td-day" data-k="${k}" title="${tdLabel(k)}${cnt ? ` · ${cnt}개` : ''}${d.done[k] ? ' · 미션 컴플릿' : ''}">${(() => { const dt = new Date(k + 'T00:00:00'), w = dt.getDay(); return `<small class="td-m">${dt.getMonth() + 1}월</small><span class="td-dn"><b>${dt.getDate()}</b><em class="${w === 0 ? 'sun' : w === 6 ? 'sat' : ''}">(${'일월화수목금토'[w]})</em></span>`; })()}${cnt && k > today ? '<i></i>' : ''}</button>`; }).join('');
   el.innerHTML = `<div class="my-h"><h4>✅ To do list !! <small>${tdLabel(sel)}${isToday ? '' : past ? ' · 지난 날' : ' · 미리 계획'}</small></h4>${all ? `<span class="td-stamp">🎉 ${isToday ? '오늘' : ''} 완료</span>` : list.length ? `<b class="td-cnt">${n} / ${list.length}</b>` : ''}</div>
     ${!isToday ? `<div class="td-other"><span>${past ? '📅 지난 날의 할 일이에요' : '🗓 미리 세우는 계획이에요'}</span><button class="btn sm" data-act="td-day" data-k="${today}">오늘로</button></div>` : ''}
     ${list.length ? `<div class="td-bar"><i style="width:${n / list.length * 100}%"></i></div>` : ''}
@@ -3542,7 +3544,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261121.1829</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261122.0658</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3576,7 +3578,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261121.1829`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261122.0658`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3710,7 +3712,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261121.1829" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261122.0658" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3739,7 +3741,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261121.1829" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261122.0658" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
