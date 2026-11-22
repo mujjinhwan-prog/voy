@@ -361,11 +361,15 @@ td.tt span{cursor:pointer}
 .rs-winners{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .rs-win{border:1.5px solid var(--point);border-radius:14px;padding:12px;text-align:center}.rs-win b{display:block;font-size:16px}.rs-win small{display:block;margin-top:4px;color:var(--muted);font-size:12px}
 .rs-resps{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px}
-.rs-o{width:28px;height:28px;border-radius:50%;border:2px solid var(--accent);background:var(--surface);color:var(--accent);font-weight:900;font-size:13px;cursor:pointer;display:grid;place-items:center;padding:0;line-height:1}.rs-o:hover{background:var(--accent);color:#fff}
+.rs-o{border:0;cursor:pointer;font-family:inherit;min-width:28px;text-align:center}.rs-o:hover,.rs-o:focus{background:var(--accent-soft);color:var(--accent);outline:none}
+.rs-hide{font-size:12px;color:var(--surface);user-select:text}.rs-hide::selection{background:var(--accent-soft);color:var(--text)}
 .rs-resp .rs-who{flex:1;min-width:0;font-size:12.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}.rs-resp small{white-space:nowrap;font-size:11px}.rs-resp.anon .rs-who{color:var(--muted)}
 .rsa-guide{background:var(--surface2);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13px}.rsa-guide summary{font-weight:800;cursor:pointer}.rsa-guide ol{margin:8px 0 2px;padding-left:18px;line-height:1.6}
-.rsa-q{padding:10px 0;border-bottom:1px solid var(--border)}.rsa-qt{font-size:14px;margin-bottom:8px}.rsa-cs{display:flex;flex-wrap:wrap;gap:6px}
-.rsa-c{display:flex;align-items:center;gap:6px;white-space:nowrap;flex:0 0 auto;border:1.5px solid var(--border);border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer}.rsa-c:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700}
+.rsa-q{padding:8px 0;border-bottom:1px solid var(--border);min-width:0}.rsa-qt{font-size:13.5px;margin-bottom:6px;font-weight:600}.rsa-cs{display:flex;flex-direction:column;gap:4px}
+.rsa-c input{margin-top:3px;flex:none;width:auto!important;height:auto;padding:0}.rsa-c span{flex:1;min-width:0}
+.modal.rsa-modal{max-width:min(1280px,96vw);max-height:96vh;overflow-x:hidden}
+@media(min-width:1000px){.rsa-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}.rsa-modal .rsa-c{padding:5px 10px;font-size:12.5px}.rsa-modal .modal-body{padding-top:8px;padding-bottom:6px}.rsa-modal textarea{min-height:44px}}
+.rsa-c{display:flex;align-items:flex-start;gap:7px;line-height:1.45;border:1.5px solid var(--border);border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer}.rsa-c:has(input:checked){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700}
 .rsa-q textarea{width:100%}
 .rs-resp{display:flex;justify-content:space-between;min-width:0;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);cursor:pointer;color:var(--text)}
 .rs-resp:hover{border-color:var(--accent)}.rs-resp small{color:var(--muted);font-size:11.5px}
@@ -2049,7 +2053,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261122.0756</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261122.1100</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3132,8 +3136,8 @@ function researchResults(c, sv) {
       <button class="btn sm" data-act="rs-edit" data-id="${sv.id}">${I('edit', 15)} 수정</button><button class="btn sm" data-act="rs-csv" data-id="${sv.id}">${I('download', 15)} 엑셀(CSV)</button>
       <button class="btn sm primary" data-act="rs-print" data-id="${sv.id}">${I('printer', 15)} 인쇄 (A4)</button></div>
     <div class="panel"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${stBadge(sv)}${sv.is_published ? '<span class="perm">회원 노출 중</span>' : '<span class="perm" style="background:var(--surface2);color:var(--muted)">비노출</span>'}
-      <button type="button" class="rs-o" data-act="rs-anon" data-id="${sv.id}" title="익명 응답 직접 입력 (오프라인 설문지 등)" aria-label="익명 응답 직접 입력">O</button>
-      ${(() => { const k = resp.filter(r => rsWho(r).via === 'admin').length; return k ? `<span class="hint" style="margin:0">익명 입력 <b>${k}</b>건 포함</span>` : ''; })()}</div>
+      <button type="button" class="perm rs-o" data-act="rs-anon" data-id="${sv.id}" aria-label="익명 응답 직접 입력">O</button>
+      ${(() => { const k = resp.filter(r => rsWho(r).via === 'admin').length; return k ? `<span class="rs-hide">익명 입력 ${k}건 포함</span>` : ''; })()}</div>
       <h2 style="font-size:22px;margin:10px 0 4px">${esc(sv.title)}</h2>${sv.description ? `<p class="hint" style="margin:0">${esc(sv.description)}</p>` : ''}
       <p class="hint">기간 ${sv.start_at ? fmtDT(sv.start_at) : '미지정'} ~ ${sv.end_at ? fmtDT(sv.end_at) : '미지정'} · 대상 <b>${esc(tgt.label)}</b> ${tgt.count}명${sv.target_count != null ? ' (직접 지정)' : ''}</p></div>
     <div class="cards3">${stat('전체 설문조사 인원', shown, '명', 'users')}${stat('참여율', rate, `% (대상 ${tgt.count}명)`, 'trend')}${stat('문항', (sv.questions || []).length, '개', 'clipboard')}</div>
@@ -3168,7 +3172,7 @@ function surveyTarget(sv, opts) {
 function rsAnonForm(sv) {
   let saved = 0;
   const qs = sv.questions || [];
-  const body = () => qs.map((q, i) => `<div class="rsa-q" data-q="${esc(q.id)}"><div class="rsa-qt"><b class="rs-qn">${String(i + 1).padStart(2, '0')}</b> ${esc(q.text)}${q.required ? ' <span style="color:var(--danger)">*</span>' : ''}</div>
+  const body = () => qs.map((q, i) => `<div class="rsa-q" data-q="${esc(q.id)}"><div class="rsa-qt"><b class="rs-qn">${String(i + 1).padStart(2, '0')}</b> ${esc(q.text.replace(/\s*\*+\s*$/, ''))}${q.required ? ' <span style="color:var(--danger)">*</span>' : ''}</div>
     ${q.type === 'choice' ? `<div class="rsa-cs">${q.choices.map((c, ci) => `<label class="rsa-c"><input type="radio" name="rsa_${esc(q.id)}" value="${ci}"><span>${esc(c)}</span></label>`).join('')}</div>`
       : `<textarea rows="2" maxlength="2000" placeholder="응답 내용 (없으면 비워 두세요)"></textarea>`}</div>`).join('');
   openModal(`<div class="modal-head"><h3>○ 익명 응답 입력 — ${esc(sv.title)}</h3><button class="icon-x" data-close>${I('x')}</button></div>
@@ -3179,9 +3183,10 @@ function rsAnonForm(sv) {
         <li><b>반영:</b> 저장 즉시 문항별 건수·비율, 전체 설문조사 인원, 참여율, 엑셀(CSV), A4 인쇄에 모두 합산됩니다.</li>
         <li><b>익명:</b> 응답자 정보 없이 "익명 입력"으로 저장되며, 당첨자 추첨 대상에는 포함되지 않습니다.</li>
         <li><b>잘못 입력했다면:</b> 아래 '원본 응답'에서 "익명 입력" 항목을 눌러 [이 응답 삭제] 후 다시 입력하세요.</li></ol></details>
-      <div id="rsaBody">${body()}</div></div>
+      <div id="rsaBody" class="rsa-grid">${body()}</div></div>
     <div class="modal-foot" style="justify-content:space-between"><span class="hint" id="rsaCnt" style="margin:0">이번에 입력: 0건</span><span style="display:flex;gap:8px"><button class="btn" id="rsaNext">저장하고 다음 입력</button><button class="btn primary" id="rsaDone">저장하고 닫기</button></span></div>`, {
     wide: true, sticky: true, onMount(m, close) {
+      m.classList.add('rsa-modal');
       const collect = () => { const ans = {}; let miss = null;
         qs.forEach((q, i) => { const el = m.querySelector(`.rsa-q[data-q="${CSS.escape(q.id)}"]`);
           if (q.type === 'choice') { const c = el.querySelector('input:checked'); if (c) ans[q.id] = +c.value; else if (q.required && miss == null) miss = i; }
