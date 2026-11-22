@@ -1649,6 +1649,14 @@ const API = {
       const rows = must(await q); out = out.concat(rows); if (rows.length < 1000) break; from += 1000; }
     return out;
   },
+  async adminNotifySurvey(sid) {   // 📣 설문 알림 다시 보내기
+    if (LOCAL) return;
+    must(await sb.rpc('admin_notify_survey', { sid: +sid }));
+  },
+  notifyDueSurveys() {   // 예약 시작된 설문 알림 확인 (앱 열 때, 실패해도 무시)
+    if (LOCAL || !sb) return;
+    try { sb.rpc('notify_due_surveys').then(() => {}, () => {}); } catch (e) {}
+  },
   async adminAddAnonResponse(sid, answers) {   // ○ 버튼: 관리자가 익명 응답을 직접 입력 (결과에 합산)
     sid = +sid;
     if (LOCAL) { const db = Local.db; db.surveyResponses.push({ id: Math.max(0, ...db.surveyResponses.map(r => r.id)) + 1, survey_id: sid, user_id: null, via: 'admin', answers, submitted_at: new Date().toISOString() }); Local.save(); return; }
@@ -2053,7 +2061,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261122.1100</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261122.1619</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -3133,7 +3141,7 @@ function researchResults(c, sv) {
   const PER_R = 15, rev = resp.slice().reverse(), pages = Math.max(1, Math.ceil(rev.length / PER_R)); if (X.page > pages) X.page = pages;
   const view = rev.slice((X.page - 1) * PER_R, X.page * PER_R);
   c.innerHTML = `<div class="rs-top"><button class="btn sm" data-act="rs-back">${I('left', 15)} 설문 목록으로</button><span style="flex:1"></span>
-      <button class="btn sm" data-act="rs-edit" data-id="${sv.id}">${I('edit', 15)} 수정</button><button class="btn sm" data-act="rs-csv" data-id="${sv.id}">${I('download', 15)} 엑셀(CSV)</button>
+      <button class="btn sm" data-act="rs-notify" data-id="${sv.id}" title="대상 회원에게 푸시 알림(메시지·아이콘 숫자)을 보냅니다">📣 알림 보내기</button><button class="btn sm" data-act="rs-edit" data-id="${sv.id}">${I('edit', 15)} 수정</button><button class="btn sm" data-act="rs-csv" data-id="${sv.id}">${I('download', 15)} 엑셀(CSV)</button>
       <button class="btn sm primary" data-act="rs-print" data-id="${sv.id}">${I('printer', 15)} 인쇄 (A4)</button></div>
     <div class="panel"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${stBadge(sv)}${sv.is_published ? '<span class="perm">회원 노출 중</span>' : '<span class="perm" style="background:var(--surface2);color:var(--muted)">비노출</span>'}
       <button type="button" class="perm rs-o" data-act="rs-anon" data-id="${sv.id}" aria-label="익명 응답 직접 입력">O</button>
@@ -3519,6 +3527,9 @@ document.addEventListener('click', async e => {
     case 'rs-view': A.rsView = +id; A.rsCtx = null; renderPage(); window.scrollTo(0, 0); break;
     case 'rs-back': A.rsView = null; renderPage(); break;
     case 'rs-print': { const sv = A.surveys.find(x => x.id === +id); if (sv) rsPrint(sv); break; }
+    case 'rs-notify': { const sv = A.surveys.find(x => x.id === +id); if (!sv) break;
+      if (!(await confirmBox(`'${sv.title}' 설문 알림을 대상 회원에게 보낼까요?\n(설문이 시작될 때는 자동으로 1번 발송돼요. 이 버튼은 다시 알릴 때 쓰세요)`, '보내기'))) break;
+      try { await API.adminNotifySurvey(sv.id); toast('설문 알림을 보냈어요'); } catch (er) { toast(friendly(er), 'err'); } break; }
     case 'rs-anon': { const sv = A.surveys.find(x => x.id === +id); if (sv) rsAnonForm(sv); break; }
     case 'rs-adj-save': case 'rs-adj-clear': { const sv = A.surveys.find(x => x.id === +id); if (!sv) break;
       const v = act === 'rs-adj-clear' ? '' : document.getElementById('rs_adj').value.trim();
