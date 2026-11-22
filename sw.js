@@ -1,7 +1,7 @@
-/* v2611172 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
+/* v2611221 · VOY™ 서비스워커 — 앱 설치 + 새 글 알림(웹 푸시) + 아이콘 배지
    데이터는 캐시하지 않고 항상 최신으로 불러옵니다. */
 const META = 'voy-meta';
-const SW_VER = '2611172';
+const SW_VER = '2611221';
 async function getCount() { const c = await caches.open(META); const r = await c.match('/__badge'); return r ? +(await r.text()) || 0 : 0; }
 async function getMode() { try { const c = await caches.open(META); const r = await c.match('/__mode'); return r ? await r.text() : 'sound'; } catch (e) { return 'sound'; } }   // 'quiet' = 소리·진동 없이
 async function setCount(n) { const c = await caches.open(META); await c.put('/__badge', new Response(String(n))); }
@@ -41,7 +41,8 @@ self.addEventListener('push', e => {
       ...(quiet ? {} : { vibrate: [180, 80, 180] }),
       icon: 'icons/voy-192.png',
       badge: 'icons/badge-bell.png',          // 안드로이드 상단 상태표시줄의 종 모양
-      tag: 'voy-post-' + ((d.url || '').match(/post\/(\d+)/)?.[1] || Date.now()),   // 글마다 다른 태그 → 알림이 쌓여 아이콘 숫자가 1→2→3 증가
+      tag: (d.url || '').match(/research\/(\d+)/) ? 'voy-survey-' + d.url.match(/research\/(\d+)/)[1]   // 설문 알림: 참여할 때까지 유지 (앱을 열어도 안 닫힘)
+        : 'voy-post-' + ((d.url || '').match(/post\/(\d+)/)?.[1] || Date.now()),   // 글마다 다른 태그 → 알림이 쌓여 아이콘 숫자가 1→2→3 증가
       data: { url: d.url || './#/feed' }
     });
   })());
@@ -61,10 +62,15 @@ self.addEventListener('notificationclick', e => {
 self.addEventListener('message', e => {
   if (e.data && e.data.type === 'ver') { try { e.source && e.source.postMessage({ type: 'sw-ver', v: SW_VER }); } catch (er) {} return; }
   // 화면(페이지)이 직접 아이콘 배지를 지우므로 여기서는 카운트만 초기화
+  // 참여 안 한 설문 수 갱신 (아이콘 숫자 = 새 글 + 설문)
+  if (e.data && e.data.type === 'survey-count') e.waitUntil((async () => {
+    const k = +e.data.keep || 0, c = await getCount(); if (c < k) { await setCount(k); await applyBadge(k); }
+  })());
   if (e.data && e.data.type === 'clear-badge') e.waitUntil((async () => {
-    await setCount(0);
+    const keep = +e.data.keep || 0;   // 참여 안 한 설문 수는 남김
+    await setCount(keep);
     // 안드로이드 홈 아이콘 숫자는 '알림창에 남은 알림 수' → 남은 VOY 알림을 모두 닫아 숫자 제거
     try { (await self.registration.getNotifications()).forEach(n => { if (/^voy-post-/.test(n.tag || '')) n.close(); }); } catch (er) {}   // 새 글 알림만 닫음 (테스트 알림 유지)
-    try { if (self.navigator.clearAppBadge) await self.navigator.clearAppBadge(); } catch (er) {}
+    try { if (keep > 0) await applyBadge(keep); else if (self.navigator.clearAppBadge) await self.navigator.clearAppBadge(); } catch (er) {}
   })());
 });

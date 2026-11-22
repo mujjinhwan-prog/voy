@@ -3151,6 +3151,7 @@ async function refreshResearch() {
     S.surveys = list.filter(x => x.is_published); S.mySurveys = new Set(mine);
     const todo = S.surveys.filter(x => surveyStatus(x) === 'open' && !S.mySurveys.has(x.id));
     QL.flags.research = todo.length > 0; refreshQL();
+    Badge.setSurveys(todo.map(x => x.id));   // 참여 안 한 진행 중 설문 수 → 아이콘 숫자에 포함
     const b = document.getElementById('rsBanner'); if (b) b.outerHTML = researchBannerHTML();
   } catch (e) { S.surveys = S.surveys || []; S.mySurveys = S.mySurveys || new Set(); }
 }
@@ -3477,6 +3478,7 @@ function pushHelp(reason) {
 const PW = { local: null, server: null, serverInfo: null, waiting: false };
 if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', e => {
   if (e.data && e.data.type === 'voy-push' && e.data.data && e.data.data.test && PW.waiting) { PW.arrived = true; pwRender(); }
+  if (e.data && e.data.type === 'voy-push' && e.data.data && /research/.test(e.data.data.url || '') && S.me) refreshResearch();   // 새 설문 시작 알림 → 배너·아이콘 숫자 즉시 갱신
 });
 /* 알림 서버(voy-push) 응답 해석 — 어디서 막혔는지 */
 function pushVerdict(r) {
@@ -3563,7 +3565,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261122.1619</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261122.1659</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3597,7 +3599,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261122.1619`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261122.1659`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3691,18 +3693,43 @@ const Badge = {
   last() { try { return +localStorage.getItem(this.key) || 0; } catch (e) { return 0; } },
   async seen() {
     try { const top = (await API.latestPosts(1))[0]; if (top) localStorage.setItem(this.key, String(Math.max(top.id, this.last()))); } catch (e) {}
-    if (navigator.clearAppBadge) navigator.clearAppBadge().catch(() => {});
-    navigator.serviceWorker?.controller?.postMessage({ type: 'clear-badge' });
+    this.apply();   // 새 글 숫자는 지우고, 참여 안 한 설문 수만 남김
+    navigator.serviceWorker?.controller?.postMessage({ type: 'clear-badge', keep: this.surveys.length });
     /* 안드로이드: 아이콘 숫자 = 알림창에 남아 있는 알림 수 → 앱을 열면 VOY 알림을 모두 닫아 숫자도 지움 */
     try { const r = await navigator.serviceWorker?.getRegistration?.();
       if (r && r.getNotifications) (await r.getNotifications()).forEach(n => { try { if (/^voy-post-/.test(n.tag || '')) n.close(); } catch (e) {} });   // 새 글 알림만 닫음 — 테스트 알림은 그대로 둠
+    } catch (e) {}
+  },
+  surveys: [],
+  /* 아이콘 숫자 = (안 읽은 새 글) + (참여 안 한 진행 중 설문) */
+  apply(posts = 0) {
+    const n = posts + this.surveys.length;
+    try { if (n > 0) navigator.setAppBadge?.(n).catch(() => {}); else navigator.clearAppBadge?.().catch(() => {}); } catch (e) {}
+  },
+  async setSurveys(ids) {
+    this.surveys = ids || []; this.apply();
+    navigator.serviceWorker?.controller?.postMessage({ type: 'survey-count', keep: this.surveys.length });
+    try { const r = await navigator.serviceWorker?.getRegistration?.(); if (!r || !r.getNotifications) return;
+      const open = await r.getNotifications();
+      /* 참여했거나 마감된 설문 알림은 닫음 → 안드로이드 아이콘 숫자도 함께 줄어듦 */
+      open.forEach(n => { const m = (n.tag || '').match(/^voy-survey-(\d+)/); if (m && !this.surveys.includes(+m[1])) try { n.close(); } catch (e) {} });
+      /* 안드로이드(아이콘 숫자 = 알림창 알림 수): 알림이 없는 미참여 설문은 조용한 알림을 1회 남겨 숫자 표시 */
+      if (navigator.setAppBadge || !('Notification' in window) || Notification.permission !== 'granted') return;
+      const have = new Set(open.map(n => n.tag));
+      for (const id of this.surveys) {
+        const k = 'voy_rs_noti_' + id; let done = false; try { done = !!localStorage.getItem(k); } catch (e) {}
+        if (done || have.has('voy-survey-' + id)) continue;
+        const sv = (S.surveys || []).find(x => x.id === id);
+        await r.showNotification('📋 참여할 설문이 있어요', { body: sv ? sv.title : 'VOY Research', icon: 'icons/voy-192.png', badge: 'icons/badge-bell.png', tag: 'voy-survey-' + id, silent: true, data: { url: './#/research/' + id } });
+        try { localStorage.setItem(k, '1'); } catch (e) {}
+      }
     } catch (e) {}
   },
   async poll() {
     if (!S.me || !document.hidden) return;
     try { const last = this.last(); if (!last) return;
       const n = (await API.latestPosts(50)).filter(p => p.id > last && !p.mine).length;
-      if (n && navigator.setAppBadge) navigator.setAppBadge(n).catch(() => {});
+      if (n) this.apply(n);
     } catch (e) {}
   },
   start() {
@@ -3731,7 +3758,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261122.1619" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261122.1659" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3760,7 +3787,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261122.1619" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261122.1659" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
