@@ -1778,6 +1778,7 @@ const QL_DEFAULTS = [
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
   { id: 'yuleca', name: 'YULECA',          url: 'https://yuleca.co.kr/', icon: 'yuleca', auto: false, ext: true, on: true, updated_at: null },   // 유한 러닝 아카데미 — 새 창으로 열림
+  { id: 'barkiri', name: '약국 가격 비교|(발키리)',  url: 'https://barkiri.com/', icon: 'pharmacy', auto: false, ext: true, on: true, orgs: ['otc'], updated_at: null },   // 발키리 약국 가격 비교 — OTC 전용, 새 창
   { id: 'kpic', name: '약품검색|(약학정보원)',          url: 'https://www.health.kr/', icon: 'kpic', auto: false, ext: true, on: true, updated_at: null },   // 약학정보원 의약품 정보 — 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -1823,6 +1824,11 @@ const QL_ICONS = {
     '<circle cx="22" cy="42" r="11" fill="#fff"/><path d="M14.5 42h15" stroke="#7FA6E6" stroke-width="2.6" stroke-linecap="round"/>' +
     '<g transform="rotate(-40 43 23)"><rect x="32" y="17" width="22" height="12" rx="6" fill="#fff"/><path d="M43 17h5a6 6 0 0 1 0 12h-5Z" fill="#FF8A5B"/></g>' +
     '<circle cx="46" cy="46" r="3" fill="#fff" opacity=".8"/><circle cx="15" cy="18" r="2.4" fill="#fff" opacity=".65"/>' },
+  pharmacy: { name: '약국 (가격 비교)', c: ['#FF9A6B', '#E8532E'], g:
+    '<rect x="13" y="29" width="38" height="22" rx="2.5" fill="#fff"/>' +
+    '<path d="M10 22h44l-3 8H13z" fill="#fff"/><path d="M15 22h6l-1 8h-5zM27 22h6l0 8h-6zM39 22h6l1 8h-5z" fill="#FFD3C2"/>' +
+    '<rect x="28" y="37" width="9" height="14" rx="1.5" fill="#E8532E" opacity=".85"/><rect x="17" y="35" width="8" height="7" rx="1.5" fill="#FFD3C2"/><rect x="40" y="35" width="7" height="7" rx="1.5" fill="#FFD3C2"/>' +
+    '<circle cx="32" cy="13" r="7.5" fill="#fff"/><path d="M30.2 8.6h3.6v2.6h2.6v3.6h-2.6v2.6h-3.6v-2.6h-2.6v-3.6h2.6z" fill="#1FA55B"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -2083,7 +2089,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261123.1037</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261124.0045</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;

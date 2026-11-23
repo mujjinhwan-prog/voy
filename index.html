@@ -258,6 +258,7 @@ body{min-height:100vh}
 .v-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px}
 .v-card h4{display:flex;align-items:center;gap:7px;margin:0 0 12px;font-size:15px}
 .v-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.v-head small{color:var(--muted);font-size:12.5px}
+@media(max-width:699px){.v-head{flex-direction:column;gap:6px}.v-head small{display:block;white-space:nowrap;margin-top:2px}.v-head .v-stage{align-self:flex-start}}   /* 모바일: 제목 → '11월 Voice · 12월 11일(금) 발표 예정' 한 줄 → 현재 단계 */
 .v-stage{flex-shrink:0;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-size:12px;font-weight:800;padding:5px 10px;border-radius:99px}
 .v-steps{display:grid;gap:8px}
 .v-step{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);border-radius:14px;padding:12px;background:var(--surface2)}
@@ -1970,6 +1971,7 @@ const QL_DEFAULTS = [
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
   { id: 'yuleca', name: 'YULECA',          url: 'https://yuleca.co.kr/', icon: 'yuleca', auto: false, ext: true, on: true, updated_at: null },   // 유한 러닝 아카데미 — 새 창으로 열림
+  { id: 'barkiri', name: '약국 가격 비교|(발키리)',  url: 'https://barkiri.com/', icon: 'pharmacy', auto: false, ext: true, on: true, orgs: ['otc'], updated_at: null },   // 발키리 약국 가격 비교 — OTC 전용, 새 창
   { id: 'kpic', name: '약품검색|(약학정보원)',          url: 'https://www.health.kr/', icon: 'kpic', auto: false, ext: true, on: true, updated_at: null },   // 약학정보원 의약품 정보 — 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
@@ -2015,6 +2017,11 @@ const QL_ICONS = {
     '<circle cx="22" cy="42" r="11" fill="#fff"/><path d="M14.5 42h15" stroke="#7FA6E6" stroke-width="2.6" stroke-linecap="round"/>' +
     '<g transform="rotate(-40 43 23)"><rect x="32" y="17" width="22" height="12" rx="6" fill="#fff"/><path d="M43 17h5a6 6 0 0 1 0 12h-5Z" fill="#FF8A5B"/></g>' +
     '<circle cx="46" cy="46" r="3" fill="#fff" opacity=".8"/><circle cx="15" cy="18" r="2.4" fill="#fff" opacity=".65"/>' },
+  pharmacy: { name: '약국 (가격 비교)', c: ['#FF9A6B', '#E8532E'], g:
+    '<rect x="13" y="29" width="38" height="22" rx="2.5" fill="#fff"/>' +
+    '<path d="M10 22h44l-3 8H13z" fill="#fff"/><path d="M15 22h6l-1 8h-5zM27 22h6l0 8h-6zM39 22h6l1 8h-5z" fill="#FFD3C2"/>' +
+    '<rect x="28" y="37" width="9" height="14" rx="1.5" fill="#E8532E" opacity=".85"/><rect x="17" y="35" width="8" height="7" rx="1.5" fill="#FFD3C2"/><rect x="40" y="35" width="7" height="7" rx="1.5" fill="#FFD3C2"/>' +
+    '<circle cx="32" cy="13" r="7.5" fill="#fff"/><path d="M30.2 8.6h3.6v2.6h2.6v3.6h-2.6v2.6h-3.6v-2.6h-2.6v-3.6h2.6z" fill="#1FA55B"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -3595,7 +3602,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261123.1129</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261124.0045</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3629,7 +3636,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261123.1129`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261124.0045`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3788,7 +3795,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261123.1129" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261124.0045" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3817,7 +3824,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261123.1129" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261124.0045" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
