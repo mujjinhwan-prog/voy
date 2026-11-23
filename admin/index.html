@@ -1778,7 +1778,7 @@ const QL_DEFAULTS = [
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
   { id: 'yuleca', name: 'YULECA',          url: 'https://yuleca.co.kr/', icon: 'yuleca', auto: false, ext: true, on: true, updated_at: null },   // 유한 러닝 아카데미 — 새 창으로 열림
-  { id: 'kpic', name: '약학정보원',          url: 'https://www.health.kr/', icon: 'kpic', auto: false, ext: true, on: true, updated_at: null },   // 약학정보원 의약품 정보 — 새 창으로 열림
+  { id: 'kpic', name: '약품검색|(약학정보원)',          url: 'https://www.health.kr/', icon: 'kpic', auto: false, ext: true, on: true, updated_at: null },   // 약학정보원 의약품 정보 — 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1834,7 +1834,7 @@ function qlIconSVG(key, size) {
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
-const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'], rest: ['쉬는시간|놀이터', '쉬는시간 놀이터', 'Fun펀!!'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
+const QL_RENAMED = { yhfriend: ['건강의 벗', '건강의벗'], soc: ['2026 국내·해외 학회정보', '2026국내해외학회정보', '2026 국내해외 학회정보'], pm: ['품목 검색', '품목검색'], kpic: ['약학정보원'], rest: ['쉬는시간|놀이터', '쉬는시간 놀이터', 'Fun펀!!'] };   // 예전 기본 이름 → 새 기본 이름으로 자동 교체
 /* 이름 안의 | 는 줄바꿈 (예: 건강의 벗|USE) */
 function qlName(n) { return String(n || '').split('|').map(esc).join('<br>'); }
 function qlMerge(raw) {
@@ -1926,7 +1926,7 @@ const QL = {
 function openSiteViewer(name, url, icon) {
   closeSiteViewer(true);
   try { if (typeof API !== 'undefined' && API.touchMenu && !/\/admin\//.test(location.pathname)) API.touchMenu('바로가기 · ' + String(name).replace(/\|/g, ' ')); } catch (e) {}
-  const sameOrigin = (() => { try { return new URL(url).origin === location.origin; } catch (e) { return false; } })();
+  const sameOrigin = (() => { try { return new URL(url, location.href).origin === location.origin; } catch (e) { return false; } })();
   const w = document.createElement('div'); w.className = 'siteview'; w.id = 'siteViewer';
   w.innerHTML = `<div class="sv-bar">
       <button class="sv-btn" data-sv="close" aria-label="닫기">${I('left', 22)}</button>
@@ -1938,8 +1938,14 @@ function openSiteViewer(name, url, icon) {
       ${sameOrigin ? '' : `<div class="sv-ext">이 페이지가 보이지 않으면 사이트에서 화면 안 열기를 막아둔 경우입니다. 같은 도메인 폴더(예: /yhdbt)로 옮기면 해결됩니다.</div>`}</div>`;
   document.body.appendChild(w); document.documentElement.classList.add('sv-open');
   const fr = w.querySelector('iframe');
-  fr.onload = () => { const l = w.querySelector('.sv-load'); if (l) l.remove(); };
+  /* 같은 도메인 바로가기 페이지: 밤·낮은 VOY [내 정보] 설정을 그대로 따름 — 페이지 안의 밤·낮 버튼은 숨김 */
+  const th = (() => { try { return themePref(); } catch (e) { return 'light'; } })();
+  if (sameOrigin) QL_THEME_KEYS.forEach(k => { try { localStorage.setItem(k, th); } catch (e) {} });   // 첫 화면부터 같은 모드로 그려지게
+  fr.onload = () => { const l = w.querySelector('.sv-load'); if (l) l.remove(); if (sameOrigin) qlSyncFrameTheme(fr, th); };
   fr.src = url;
+  if (sameOrigin) { let n = 0; const tk = setInterval(() => { n++;   // 글꼴 등 외부 파일이 늦어 onload가 늦어도 버튼은 바로 숨김
+    try { const d = fr.contentDocument; if (d && d.readyState !== 'loading' && d.URL !== 'about:blank') { qlSyncFrameTheme(fr, th); clearInterval(tk); } } catch (e) { clearInterval(tk); }
+    if (n > 40 || !document.body.contains(fr)) clearInterval(tk); }, 150); }
   w.addEventListener('click', e => {
     const b = e.target.closest('[data-sv]'); if (!b) return;
     /* 닫기(<, ✕): 페이지 안에서 몇 단계를 이동했든 바로 VOY 메인(피드)으로 — 안쪽 페이지 기록을 되감지 않음 */
@@ -1952,6 +1958,17 @@ function openSiteViewer(name, url, icon) {
     if (b.dataset.sv === 'reload') { try { fr.contentWindow.location.reload(); } catch (er) { fr.src = url; } }
   });
   try { history.pushState({ sv: 1 }, ''); } catch (e) {}
+}
+/* 바로가기 페이지별 밤·낮 저장 키 (WeeklyNews · BRP insight · 학회행사 · 비대면진료) — 밤·낮을 지원하지 않는 페이지는 항상 낮 화면 */
+const QL_THEME_KEYS = ['pbnews-theme', 'brp-theme2', 'congress-theme', 'chronic_theme'];
+function qlSyncFrameTheme(fr, th) {
+  try {
+    const d = fr.contentDocument; if (!d || !d.documentElement) return;
+    if (d.documentElement.hasAttribute('data-theme') || d.querySelector('[role=group][aria-label*="테마"],[role=group][aria-label="화면 모드"]')) d.documentElement.setAttribute('data-theme', th);
+    if (!d.getElementById('voy-theme-hide')) { const st = d.createElement('style'); st.id = 'voy-theme-hide';
+      st.textContent = '[role="group"][aria-label="화면 테마"],[role="group"][aria-label="테마"],[role="group"][aria-label="화면 모드"],.themedock,.theme-fab{display:none!important}';
+      (d.head || d.documentElement).appendChild(st); }
+  } catch (e) {}
 }
 function closeSiteViewer(silent) {
   const w = document.getElementById('siteViewer'); if (!w) return;
@@ -2066,7 +2083,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261123.0953</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261123.1037</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
