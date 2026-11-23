@@ -156,6 +156,7 @@ body{min-height:100vh}
 .ql-strip{border-top:1px solid var(--border);margin:10px -18px -12px}
 .ql-strip-in{display:flex;gap:2px;overflow-x:auto;padding:6px 10px 6px;scrollbar-width:none}
 .ql-strip-in::-webkit-scrollbar{display:none}
+@media(max-width:979px){html[data-view=post] .ql-strip{display:none}}   /* 모바일 글 보기: 바로가기 아이콘을 빼고 글에 집중 (PC는 오른쪽 줄 그대로) */
 .ql-tile.mini{width:74px;flex-shrink:0;padding:6px 2px;gap:5px}
 .ql-tile.mini .ql-name{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ql-rail-in{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 6px 6px}
@@ -2445,6 +2446,7 @@ function route() {
   if (S.me && needAppGate()) return renderGate();
   const h = location.hash.replace(/^#\/?/, '') || 'feed';
   const [view, arg] = h.split('/');
+  document.documentElement.dataset.view = view;   // 모바일 글 보기: 바로가기 줄 숨김 (CSS)
   window.scrollTo(0, 0);
   if (S.me) API.touchMenu({ post: '글 보기', write: '글쓰기', edit: '글 수정', rank: '랭킹', me: '내 정보', guide: '이용 안내', privacy: '개인정보 안내', myposts: '내가 쓴 글', review: 'Voice 심사', research: 'VOY Research' }[view] || '피드');
   if (view === 'post' && arg) return viewPost(arg);
@@ -3589,7 +3591,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261123.1037</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261123.1051</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3623,7 +3625,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261123.1037`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261123.1051`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3782,7 +3784,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261123.1037" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261123.1051" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3811,7 +3813,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261123.1037" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261123.1051" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
