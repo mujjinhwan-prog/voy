@@ -1584,7 +1584,7 @@ const API = {
   async voiceAwardsPublic(mk) {
     if (!LOCAL) return must(await sb.rpc('voice_awards_public', { mk, org_: this.room })) || [];
     const A = this._aw(mk), db = Local.db; if (!A.published) return [];
-    return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: a.note }; });
+    return A.items.map(a => { const po = a.post_id ? db.posts.find(x => x.id === a.post_id) : null; return { category: a.category, nickname: a.nickname, post_id: a.post_id, post_title: po ? po.title : null, note: null }; });   // 회원에게는 닉네임만 (메모 비공개)
   },
   async voiceAwardMonths() {
     if (!LOCAL) return (must(await sb.rpc('voice_award_months', { org_: this.room })) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]);
@@ -1778,6 +1778,7 @@ const QL_DEFAULTS = [
   { id: 'rest',     name: 'FunVOY!!',        url: 'rest/',     icon: 'rest',     auto: true, on: true, updated_at: null },   // 사다리·로또 번호 등 미니게임
   { id: 'workspace', name: 'Yuhan|Workspace',   url: 'https://asuid.dashboard.yuhan.co.kr/', icon: 'workspace', auto: false, ext: true, on: true, updated_at: null },   // 회사 업무 포털 — 로그인이 필요해 새 창으로 열림
   { id: 'yuleca', name: 'YULECA',          url: 'https://yuleca.co.kr/', icon: 'yuleca', auto: false, ext: true, on: true, updated_at: null },   // 유한 러닝 아카데미 — 새 창으로 열림
+  { id: 'kpic', name: '약학정보원',          url: 'https://www.health.kr/', icon: 'kpic', auto: false, ext: true, on: true, updated_at: null },   // 약학정보원 의약품 정보 — 새 창으로 열림
   { id: 'research', name: 'VOY Research',          url: '#/research', icon: 'research', auto: false, on: true, updated_at: null }   // 커뮤니티 안 설문 (닉네임 입력 없음)
 ];
 
@@ -1818,6 +1819,10 @@ const QL_ICONS = {
     '<rect x="16" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="16" width="14" height="14" rx="4" fill="#fff"/><rect x="16" y="34" width="14" height="14" rx="4" fill="#fff"/><rect x="34" y="34" width="14" height="14" rx="4" fill="#fff"/>' },
   yuleca: { name: 'YULECA (학사모)', c: ['#6FDCCF', '#22A394'], g:
     '<path d="M32 15 9 26l23 11 23-11L32 15Z" fill="#fff"/><path d="M19 31.5v9.5c0 3.6 5.8 6.5 13 6.5s13-2.9 13-6.5v-9.5L32 38l-13-6.5Z" fill="#fff" opacity=".92"/><path d="M50 28v11" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><circle cx="50" cy="42" r="3" fill="#fff"/><path d="M32 22.5 22 27" stroke="#2BAE9F" stroke-width="2.2" stroke-linecap="round"/>' },
+  kpic: { name: '약학정보원 (정제·캡슐)', c: ['#6FB6FF', '#2A63D4'], g:
+    '<circle cx="22" cy="42" r="11" fill="#fff"/><path d="M14.5 42h15" stroke="#7FA6E6" stroke-width="2.6" stroke-linecap="round"/>' +
+    '<g transform="rotate(-40 43 23)"><rect x="32" y="17" width="22" height="12" rx="6" fill="#fff"/><path d="M43 17h5a6 6 0 0 1 0 12h-5Z" fill="#FF8A5B"/></g>' +
+    '<circle cx="46" cy="46" r="3" fill="#fff" opacity=".8"/><circle cx="15" cy="18" r="2.4" fill="#fff" opacity=".65"/>' },
   link: { name: '기본 (링크)', c: ['#A0A8B4', '#5F6874'], g:
     '<path d="M28 36a8 8 0 0 0 11 0l6-6a8 8 0 0 0-11-11l-2 2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M36 28a8 8 0 0 0-11 0l-6 6a8 8 0 0 0 11 11l2-2" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>' }
 };
@@ -1825,7 +1830,7 @@ QL_ICONS.pm_otc.g = QL_ICONS.pm.g.replace(/#7B3FE4/g, '#0E8F86');   // OTC 품�
 function qlIconSVG(key, size) {
   const ic = QL_ICONS[key] || QL_ICONS.link, id = 'qg' + key + Math.random().toString(36).slice(2, 6);
   return `<svg width="${size || 56}" height="${size || 56}" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${ic.c[0]}"/><stop offset="1" stop-color="${ic.c[1]}"/></linearGradient></defs>
-    <rect width="64" height="64" rx="16" fill="url(#${id})"/><rect width="64" height="32" rx="16" fill="#fff" opacity=".08"/>${ic.g}</svg>`;
+    <rect width="64" height="64" rx="16" fill="url(#${id})"/>${ic.img ? `<rect x=".5" y=".5" width="63" height="63" rx="15.5" fill="none" stroke="#DDE3EC"/><image href="${ic.img}" x="${32 - 23 * ic.iw / ic.ih}" y="9" width="${46 * ic.iw / ic.ih}" height="46" preserveAspectRatio="xMidYMid meet"/>` : `<rect width="64" height="32" rx="16" fill="#fff" opacity=".08"/>${ic.g}`}</svg>`;
 }
 
 /* 관리자가 저장한 목록 + 새로 추가된 기본 메뉴(예: 품목 검색)를 합침. 관리자가 지운 기본 메뉴는 removed 표시로 다시 생기지 않음 */
@@ -2061,7 +2066,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261122.1619</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261123.0953</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
