@@ -1461,16 +1461,23 @@ const API = {
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
     const adm = new Set(db.users.filter(u => !awardEligible(u)).map(u => u.id)), room = this.room;   // 운영진·통합 회원의 댓글은 점수에서 제외
-    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
+    const kday = t => new Date(new Date(t).getTime() + 9 * 3600e3).toISOString().slice(0, 10), pday = {};
+    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts_raw = (o.posts_raw || 0) + 1;
+      const dk = p.user_id + kday(p.created_at); pday[dk] = (pday[dk] || 0) + 1; if (pday[dk] <= 3) o.posts++;   // 📣 하루 최대 3개 인정
       // 인기 Voice: 본인 제외 좋아요(관리자 포함, 최고관리자는 누른 횟수만큼) + 본인·관리자 제외 다른 회원 댓글(한 글에 같은 사람은 1번)
       o.likes += db.reactions.filter(r => r.post_id === p.id && r.type === 'like' && r.user_id !== p.user_id).reduce((a, r) => a + (r.qty || 1), 0);
       o.comments_received += new Set(db.comments.filter(c => c.post_id === p.id && c.user_id && c.user_id !== p.user_id && !adm.has(c.user_id)).map(c => c.user_id)).size; });
     const roomPosts = new Set(db.posts.filter(p => orgOf(p) === room).map(p => p.id));
-    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
+    const pown = {}; db.posts.forEach(p => pown[p.id] = p.user_id); const per = {};
+    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').sort((a, b) => a.id - b.id).forEach(c => { const o = row(c.user_id); o.comments_raw = (o.comments_raw || 0) + 1;
+      if (pown[c.post_id] === c.user_id || (c.body || '').trim().length < 5) return;   // 💬 다른 사람 글 · 5자 이상
+      const k = c.user_id + ':' + c.post_id; per[k] = (per[k] || 0) + 1; if (per[k] <= 3) o.comments_written++; });   // 한 글당 3개까지
+    db.reactions.filter(r => r.type === 'like' && roomPosts.has(r.post_id) && pown[r.post_id] !== r.user_id && (db.posts.find(p => p.id === r.post_id) || {}).month_key === mk).forEach(r => { const o = row(r.user_id); o.likes_given = (o.likes_given || 0) + 1; });
     const items = this._aw(mk).items;
     return Object.values(g).filter(o => awardEligible(users[o.uid]) && orgOf(users[o.uid]) === room).map(o => { const u = users[o.uid];
       return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
-        score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
+        score: o.likes * w.like + o.comments_received * w.comment, posts_raw: o.posts_raw || 0, comments_raw: o.comments_raw || 0, likes_given: o.likes_given || 0,
+        reaction_score: o.comments_written + Math.min((o.likes_given || 0) * 0.5, 10), ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
   async adminAwardCandidates(mk) {
     if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk, org_: this.room }));
@@ -2090,7 +2097,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261124.0858</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261126.0828</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -2628,9 +2635,11 @@ function pageRank(c) {
 
 /* ---------------- 이달의 Voice 시상 · 선정 → 저장 → 게시 ---------------- */
 const AWARDS = [
-  { k: 'popular',  t: '인기 Voice',   e: '🔥', d: '받은 좋아요(관리자 포함)·다른 회원 댓글 점수', v: o => o.score, u: '점', sub: o => `유효 좋아요 ${o.likes} · 유효 댓글 ${o.comments_received}` },
-  { k: 'reaction', t: '리액션 Voice', e: '💬', d: '댓글을 가장 많이 쓴 회원', v: o => o.comments_written, u: '개', sub: o => `글 ${o.posts}개` },
-  { k: 'big',      t: 'Big Voice',    e: '📣', d: '글을 가장 많이 쓴 회원', v: o => o.posts, u: '개', sub: o => `점수 ${o.score}점` }
+  { k: 'popular',  t: '인기 Voice',   e: '🔥', d: '받은 좋아요 × 1 + 다른 회원 댓글 × 2 (본인 제외)', v: o => o.score, u: '점', sub: o => `유효 좋아요 ${o.likes} · 유효 댓글 ${o.comments_received}` },
+  { k: 'reaction', t: '리액션 Voice', e: '💬', d: '단 댓글 × 1 + 누른 좋아요 × 0.5 (좋아요 최대 10점)', v: o => +o.reaction_score || 0, u: '점',
+    sub: o => `인정 댓글 ${o.comments_written}개${o.comments_raw > o.comments_written ? ` (전체 ${o.comments_raw})` : ''} · 좋아요 ${o.likes_given || 0}개 +${Math.min((o.likes_given || 0) * 0.5, 10)}점` },
+  { k: 'big',      t: 'Big Voice',    e: '📣', d: '한 달 동안 쓴 글 수 (하루 3개까지 인정)', v: o => o.posts, u: '개',
+    sub: o => o.posts_raw > o.posts ? `작성 ${o.posts_raw}개 중 ${o.posts}개 인정` : `작성 ${o.posts_raw || o.posts}개` }
 ];
 function awLoad(mk, force) {
   A.awardCache = A.awardCache || {};
@@ -3568,7 +3577,9 @@ document.addEventListener('click', async e => {
       catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
     case 'aw-csv': { const mk = t.dataset.mk, D = A.awardCache[mk]; if (!D || D === 'loading') break; const sup = SUP();
       csv(`VOY_이달의Voice_${mk}.csv`, [['시상', '닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '선정 글', '메모', '게시'],
-        ...D.list.map(a => [voiceCat(a.category).t, a.nickname, ...(sup ? [a.real_name, a.emp_no, a.dept] : []), a.post_title || '', a.note || '', D.published ? '게시됨' : '미게시'])]); break; }
+        ...D.list.map(a => [voiceCat(a.category).t, a.nickname, ...(sup ? [a.real_name, a.emp_no, a.dept] : []), a.post_title || '', a.note || '', D.published ? '게시됨' : '미게시']),
+        [], ['[점수 집계]'], ['닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '인기 점수', '받은 좋아요', '받은 댓글', '리액션 점수', '인정 댓글', '전체 댓글', '누른 좋아요', 'Big 인정 글', '전체 글'],
+        ...D.stats.slice().sort((x, y) => y.score - x.score).map(o => [o.nickname, ...(sup ? [o.real_name, o.emp_no, o.dept] : []), o.score, o.likes, o.comments_received, +o.reaction_score || 0, o.comments_written, o.comments_raw || 0, o.likes_given || 0, o.posts, o.posts_raw || 0])]); break; }
     case 'aw-pub': { const mk = t.dataset.mk, on = t.dataset.on === '1';
       if (!(await confirmBox(on ? `${monthLabel(mk)} 이달의 Voice 결과를 회원 화면에 게시할까요?\n회원에게는 닉네임만 공개됩니다.` : '게시를 취소하면 회원 화면에서 결과가 사라집니다. 취소할까요?', on ? '게시' : '게시 취소', !on))) break;
       try { await API.adminPublishAwards(mk, on); toast(on ? '🎉 회원 화면에 게시했습니다' : '게시를 취소했습니다'); awLoad(mk, true); } catch (er) { toast(friendly(er), 'err'); } break; }

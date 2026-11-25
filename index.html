@@ -279,6 +279,10 @@ body{min-height:100vh}
 .v-how-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;font-size:13px}.v-how-row+.v-how-row{border-top:1px dashed var(--border)}
 .v-how-row span{flex-shrink:0;white-space:nowrap}.v-how-row em{font-style:normal;color:var(--text2);text-align:right}.v-how-row em b{color:var(--accent)}
 .v-how-row.main{font-size:13.5px}.v-how-row.main em b{color:var(--point)}
+.v-rule{display:grid;grid-template-columns:118px 1fr;column-gap:12px;row-gap:2px;padding:9px 0;align-items:baseline}.v-rule+.v-rule{border-top:1px dashed var(--border)}
+.v-rule-h{grid-row:span 2;font-size:13.5px;white-space:nowrap}.v-rule-f{font-size:13px;color:var(--text2);line-height:1.5}.v-rule-f b{color:var(--point)}
+.v-rule small{grid-column:2;font-size:11.5px;color:var(--muted);line-height:1.45}
+@media(max-width:699px){.v-rule{grid-template-columns:1fr}.v-rule-h{grid-row:auto}.v-rule small{grid-column:1}}   /* 모바일: 시상 이름 → 점수식 → 인정 기준 세 줄 */
 .v-how p,.v-note{margin:8px 0 0;font-size:12px;color:var(--muted);line-height:1.55}
 .v-anon{font-size:12px;color:var(--muted);text-align:center;margin:4px 0 12px}
 .ver-tag{text-align:center;font-size:10.5px;color:var(--muted);opacity:.6;margin:6px 0 0;font-variant-numeric:tabular-nums}
@@ -1657,16 +1661,23 @@ const API = {
     const users = {}; db.users.forEach(u => users[u.id] = u);
     const row = uid => g[uid] = g[uid] || { uid, posts: 0, comments_written: 0, likes: 0, comments_received: 0 };
     const adm = new Set(db.users.filter(u => !awardEligible(u)).map(u => u.id)), room = this.room;   // 운영진·통합 회원의 댓글은 점수에서 제외
-    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts++;
+    const kday = t => new Date(new Date(t).getTime() + 9 * 3600e3).toISOString().slice(0, 10), pday = {};
+    db.posts.filter(p => orgOf(p) === room && p.month_key === mk && p.user_id && p.author_role !== 'admin').forEach(p => { const o = row(p.user_id); o.posts_raw = (o.posts_raw || 0) + 1;
+      const dk = p.user_id + kday(p.created_at); pday[dk] = (pday[dk] || 0) + 1; if (pday[dk] <= 3) o.posts++;   // 📣 하루 최대 3개 인정
       // 인기 Voice: 본인 제외 좋아요(관리자 포함, 최고관리자는 누른 횟수만큼) + 본인·관리자 제외 다른 회원 댓글(한 글에 같은 사람은 1번)
       o.likes += db.reactions.filter(r => r.post_id === p.id && r.type === 'like' && r.user_id !== p.user_id).reduce((a, r) => a + (r.qty || 1), 0);
       o.comments_received += new Set(db.comments.filter(c => c.post_id === p.id && c.user_id && c.user_id !== p.user_id && !adm.has(c.user_id)).map(c => c.user_id)).size; });
     const roomPosts = new Set(db.posts.filter(p => orgOf(p) === room).map(p => p.id));
-    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').forEach(c => row(c.user_id).comments_written++);
+    const pown = {}; db.posts.forEach(p => pown[p.id] = p.user_id); const per = {};
+    db.comments.filter(c => roomPosts.has(c.post_id) && c.month_key === mk && c.user_id && c.author_role !== 'admin').sort((a, b) => a.id - b.id).forEach(c => { const o = row(c.user_id); o.comments_raw = (o.comments_raw || 0) + 1;
+      if (pown[c.post_id] === c.user_id || (c.body || '').trim().length < 5) return;   // 💬 다른 사람 글 · 5자 이상
+      const k = c.user_id + ':' + c.post_id; per[k] = (per[k] || 0) + 1; if (per[k] <= 3) o.comments_written++; });   // 한 글당 3개까지
+    db.reactions.filter(r => r.type === 'like' && roomPosts.has(r.post_id) && pown[r.post_id] !== r.user_id && (db.posts.find(p => p.id === r.post_id) || {}).month_key === mk).forEach(r => { const o = row(r.user_id); o.likes_given = (o.likes_given || 0) + 1; });
     const items = this._aw(mk).items;
     return Object.values(g).filter(o => awardEligible(users[o.uid]) && orgOf(users[o.uid]) === room).map(o => { const u = users[o.uid];
       return { token: this._tok(mk, o.uid), nickname: this._monthNick(o.uid, mk), posts: o.posts, comments_written: o.comments_written, likes: o.likes, comments_received: o.comments_received,
-        score: o.likes * w.like + o.comments_received * w.comment, ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
+        score: o.likes * w.like + o.comments_received * w.comment, posts_raw: o.posts_raw || 0, comments_raw: o.comments_raw || 0, likes_given: o.likes_given || 0,
+        reaction_score: o.comments_written + Math.min((o.likes_given || 0) * 0.5, 10), ...this._supRow(u), picked: [...new Set(items.filter(a => a.user_id === o.uid).map(a => a.category))].sort() }; });
   },
   async adminAwardCandidates(mk) {
     if (!LOCAL) return must(await sb.rpc('admin_award_candidates', { mk, org_: this.room }));
@@ -3178,10 +3189,16 @@ async function viewRank() {
   const tile = c => { const ws = winners(c.k); return `<div class="v-tile v-${c.g} ${ws.length ? 'has' : ''}"><span class="v-e">${c.e}</span><b class="v-tt">${esc(c.t).replace(/^(.+?) (Voice)$/, '<span>$1</span> <span>$2</span>')}</b>
       ${ws.length ? `<div class="v-wins">${ws.map(a => `<span class="v-win" ${a.post_id ? `data-act="open" data-id="${a.post_id}" title="${esc(a.post_title || '')}"` : ''}>${esc(a.nickname || '')}</span>`).join('')}</div>` : `<small>${pub ? '해당자 없음' : esc(c.d)}</small>`}</div>`; };
   const howto = { result: `<div class="v-how">
-      <div class="v-how-row main"><span>🔥 <b>인기 Voice</b> 점수</span><em>내 글이 받은 <b>좋아요 × ${w.like}점</b> + 다른 회원이 단 <b>댓글 × ${w.comment}점</b></em></div>
-      <div class="v-how-row"><span>💬 <b>리액션 Voice</b></span><em>한 달 동안 내가 쓴 <b>댓글 수</b></em></div>
-      <div class="v-how-row"><span>📣 <b>Big Voice</b></span><em>한 달 동안 내가 쓴 <b>글 수</b></em></div>
-      <p>· 작성자의 좋아요, 댓글, 관리자 공지글은 점수 집계에서 제외<br>· 좋아요와 댓글은 1인 1개만 집계됩니다.</p></div>`,
+      <div class="v-rule"><div class="v-rule-h">🔥 <b>인기 Voice</b></div>
+        <div class="v-rule-f">내 글이 받은 <b>좋아요 × ${w.like}점</b> + 다른 회원이 단 <b>댓글 × ${w.comment}점</b></div>
+        <small>본인 좋아요·댓글 제외 · 한 글에 같은 사람 댓글은 1번만</small></div>
+      <div class="v-rule"><div class="v-rule-h">💬 <b>리액션 Voice</b></div>
+        <div class="v-rule-f">다른 사람 글에 단 <b>댓글 × 1점</b> + 누른 <b>좋아요 × 0.5점</b></div>
+        <small>5자 이상 댓글 · 한 글당 3개까지 · 좋아요는 월 10점까지</small></div>
+      <div class="v-rule"><div class="v-rule-h">📣 <b>Big Voice</b></div>
+        <div class="v-rule-f">한 달 동안 내가 쓴 <b>글 1개 = 1점</b></div>
+        <small>하루 최대 3개까지 인정</small></div>
+      <p>· 점수는 매달 자동으로 집계되고, 운영진이 확인해 수상자를 선정합니다.<br>· 관리자 공지글과 운영진의 좋아요·댓글은 집계에서 제외됩니다.</p></div>`,
     review: `<p class="v-note">본사 심의에서 한 달 동안 올라온 글의 내용·현장 활용도를 보고 선정합니다.</p>`,
     event: `<p class="v-note">N번째 Voice는 이달의 히든 번호 글을 쓴 분, 설문 이벤트는 VOY Research 참여자 중 추첨으로 선정합니다.</p>` };
   const group = g => `<section class="v-card"><h4>${g === 'review' ? I('trophy', 18) : g === 'result' ? I('trend', 18) : I('gift', 18)} ${VOICE_GROUPS[g]}</h4><div class="v-tiles ${g === 'event' ? 'two' : ''}">${VOICE_CATS.filter(c => c.g === g).map(tile).join('')}</div>${howto[g] || ''}</section>`;
@@ -3620,7 +3637,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261124.1650</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261126.0828</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3654,7 +3671,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261124.1650`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261126.0828`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3813,7 +3830,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261124.1650" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261126.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3842,7 +3859,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261124.1650" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261126.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
