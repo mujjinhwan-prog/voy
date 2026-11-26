@@ -279,6 +279,7 @@ body{min-height:100vh}
 .v-how-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0;font-size:13px}.v-how-row+.v-how-row{border-top:1px dashed var(--border)}
 .v-how-row span{flex-shrink:0;white-space:nowrap}.v-how-row em{font-style:normal;color:var(--text2);text-align:right}.v-how-row em b{color:var(--accent)}
 .v-how-row.main{font-size:13.5px}.v-how-row.main em b{color:var(--point)}
+@media(max-width:699px){.v-tile small span{display:block}}   /* 모바일: 설명을 두 줄로 (예: 받은 좋아요, 댓글 / 점수 1위권) */
 .v-rule{display:grid;grid-template-columns:118px 1fr;column-gap:12px;row-gap:2px;padding:9px 0;align-items:baseline}.v-rule+.v-rule{border-top:1px dashed var(--border)}
 .v-rule-h{grid-row:span 2;font-size:13.5px;white-space:nowrap}.v-rule-f{font-size:13px;color:var(--text2);line-height:1.5}.v-rule-f b{color:var(--point)}
 .v-rule small{grid-column:2;font-size:11.5px;color:var(--muted);line-height:1.45}
@@ -870,7 +871,7 @@ const VOICE_CATS = [
   { k: 'grand',     g: 'review', t: '최우수 Voice', e: '🏆', d: '본사 심의로 선정' },
   { k: 'excellent', g: 'review', t: '우수 Voice',   e: '🥈', d: '본사 심의로 선정' },
   { k: 'merit',     g: 'review', t: '장려 Voice',   e: '🥉', d: '본사 심의로 선정' },
-  { k: 'popular',   g: 'result', t: '인기 Voice',   e: '🔥', d: '받은 좋아요·댓글 점수 1위권' },
+  { k: 'popular',   g: 'result', t: '인기 Voice',   e: '🔥', d: '받은 좋아요, 댓글|점수 1위권' },   // '|' = 모바일 줄바꿈
   { k: 'reaction',  g: 'result', t: '리액션 Voice', e: '💬', d: '댓글을 가장 많이 쓴 회원' },
   { k: 'big',       g: 'result', t: 'Big Voice',    e: '📣', d: '글을 가장 많이 쓴 회원' },
   { k: 'nth',       g: 'event',  t: 'N번째 Voice',  e: '🎁', d: '히든보이스 이벤트 당첨' },
@@ -3187,7 +3188,7 @@ async function viewRank() {
   const cur = st, stName = `${stm}월 Voice ${(steps.find(x => x.k === cur) || {}).t || ''}`;
   const winners = k => list.filter(a => a.category === k);
   const tile = c => { const ws = winners(c.k); return `<div class="v-tile v-${c.g} ${ws.length ? 'has' : ''}"><span class="v-e">${c.e}</span><b class="v-tt">${esc(c.t).replace(/^(.+?) (Voice)$/, '<span>$1</span> <span>$2</span>')}</b>
-      ${ws.length ? `<div class="v-wins">${ws.map(a => `<span class="v-win" ${a.post_id ? `data-act="open" data-id="${a.post_id}" title="${esc(a.post_title || '')}"` : ''}>${esc(a.nickname || '')}</span>`).join('')}</div>` : `<small>${pub ? '해당자 없음' : esc(c.d)}</small>`}</div>`; };
+      ${ws.length ? `<div class="v-wins">${ws.map(a => `<span class="v-win" ${a.post_id ? `data-act="open" data-id="${a.post_id}" title="${esc(a.post_title || '')}"` : ''}>${esc(a.nickname || '')}</span>`).join('')}</div>` : `<small>${pub ? '해당자 없음' : esc(c.d).split('|').map(x => `<span>${x}</span>`).join(' ')}</small>`}</div>`; };
   const howto = { result: `<div class="v-how">
       <div class="v-rule"><div class="v-rule-h">🔥 <b>인기 Voice</b></div>
         <div class="v-rule-f">내 글이 받은 <b>좋아요 × ${w.like}점</b> + 다른 회원이 단 <b>댓글 × ${w.comment}점</b></div>
@@ -3637,7 +3638,7 @@ async function pwRender() {
     if (ok === true) h += `<div class="pw-done">✅ 모든 점검 완료 — 새 글이 올라오면 이 기기로 알림이 와요.<br><small>· 알림을 받을 다른 기기(PC·휴대폰)에서도 각각 한 번씩 켜 주세요.<br>· <b>내가 쓴 글은 나에게 알림이 오지 않아요</b> (다른 사람 글만).<br>· VOY™ 화면을 보고 있는 동안에는 알림 대신 피드에 바로 보여요.</small></div>`;
   } else h += step(6, null, '서버 → 기기 실제 알림 테스트', '');
   h += `<details class="pw-more"><summary>기기·브라우저별 자세한 설정 방법</summary><p class="hint">${esc(pushEnvName())} 기준으로 열려요.</p><button type="button" class="btn sm" data-act="push-help">설정 방법 열기</button></details>
-    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261126.0828</p>`;
+    <p class="hint pw-diag">점검: ${esc(pushEnvName())} · 권한 ${st.perm === 'granted' ? '허용' : st.perm === 'denied' ? '차단' : st.perm === 'x' ? '미지원' : '미설정'} · 서비스워커 ${st.reg ? '정상' : '없음'} · 연결 ${st.sub ? '있음' : '없음'} · 기록 ${st.flag ? '켜짐' : '없음'}${PW.serverInfo ? ` · 서버등록 ${PW.serverInfo.subs}대` : ''} · v261126.0905</p>`;
   box.innerHTML = `<p class="hint" style="margin:0 0 10px">위에서부터 하나씩 확인해요. <b>!</b> 표시된 단계의 버튼을 누르면 다음으로 넘어가요.</p>` + h;
 }
 async function pwAct(act, t) {
@@ -3671,7 +3672,7 @@ async function pushDiag(extra) {
   const el = document.getElementById('pushDiag'); if (!el || !pushSupported()) return;
   let reg = null, sub = null; try { reg = await swReg(); sub = reg && await reg.pushManager.getSubscription(); } catch (e) {}
   let flag = ''; try { flag = localStorage.getItem(PUSH_FLAG) || ''; } catch (e) {}
-  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261126.0828`;
+  el.textContent = (extra ? extra + ' · ' : '') + `점검: ${pushEnvName()} · 권한 ${Notification.permission === 'granted' ? '허용' : Notification.permission === 'denied' ? '차단' : '미설정'} · 서비스워커 ${reg ? '정상' : '없음'} · 기기 연결 ${sub ? '있음' : '없음'} · 기록 ${flag === '1' ? '켜짐' : '없음'} · v261126.0905`;
 }
 function sameKey(sub) {
   try { const k = sub.options && sub.options.applicationServerKey; if (!k) return true;
@@ -3830,7 +3831,7 @@ function landingHTML() {
       ${tabs.map(([id, , st, note]) => `<div class="land-pane" data-lpane="${id}" ${id === def ? '' : 'hidden'}><ol class="steps">${st.map(x => `<li><span>${x}</span></li>`).join('')}</ol><p class="hint" style="margin:6px 0 0">${note}</p></div>`).join('')}
     </div>
     <p class="hint" style="text-align:center;margin-top:10px">설치한 아이콘으로 열면 <b>로그인 화면</b>이 나와요.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.</p>
-    <p class="ver-tag" title="v261126.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+    <p class="ver-tag" title="v261126.0905" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     <p style="text-align:center;margin:6px 0 0"><button type="button" class="land-admin" data-act="browser-login">관리자 로그인</button></p>
   </div></div>`;
 }
@@ -3859,7 +3860,7 @@ async function renderAuth() {
       <button class="btn primary block ${ms ? 'ms-btn' : ''}" id="asub">${ms ? `<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" style="flex:none"><rect x="1" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".95"/><rect x="11" y="1" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="1" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".8"/><rect x="11" y="11" width="8" height="8" rx="1.2" fill="#fff" opacity=".65"/></svg> 회사 계정으로 로그인` : '로그인'}</button>
       <p class="hint" style="text-align:center;margin-top:8px">${ms ? '다음 화면(Microsoft)에서 <b>회사 메일 비밀번호</b>를 입력하면<br>VOY™로 돌아와 로그인됩니다.<br>한 번 로그인하면 로그아웃 전까지 유지돼요.' : '로그인 후 <b>VOY™ 웹앱</b>에서 열립니다.<br>비밀번호를 잊으셨다면 영업기획팀에<br>초기화를 요청해주세요.'}</p>
       ${MS_LOGIN ? `<p style="text-align:center;margin:4px 0 0"><button type="button" class="land-admin" id="authMode">${ms ? '기존 비밀번호로 로그인' : '회사 계정(Microsoft)으로 로그인'}</button></p>` : ''}
-      <p class="ver-tag" title="v261126.0828" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
+      <p class="ver-tag" title="v261126.0905" style="margin-top:10px">ⓒ 2026 YUHAN Sales Strategic Planning Team.<br>All rights reserved.</p>
     </form>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · Supabase 연결 전 미리보기입니다.<br>admin <b>admin / admin1234</b> · ETC 회원 <b>demo</b> · OTC 회원 <b>otc1</b> · 통합 회원 <b>cross</b> · <b>e_admin</b> · <b>o_admin</b> (비밀번호 모두 demo1234)</p>` : ''}
   </div></div>`;
