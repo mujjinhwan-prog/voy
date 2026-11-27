@@ -742,7 +742,11 @@ function surveyStatus(sv) {
 const SURVEY_STATUS = { draft: '준비 중', before: '시작 전', open: '진행 중', closed: '종료' };
 function fmtDT(iso) { if (!iso) return ''; const d = new Date(new Date(iso).getTime() + KST_OFFSET); const z = n => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}.${z(d.getUTCMonth() + 1)}.${z(d.getUTCDate())} ${z(d.getUTCHours())}:${z(d.getUTCMinutes())}`; }
-const MEMBER_FIELDS = [['real_name', '성명'], ['emp_no', '사번'], ['category', '구분'], ['org_branch', '조직지점'], ['work_branch', '근무지점'], ['sales_office', '영업소'], ['position', '직위'], ['duty', '직책']];
+// MEMBER_LITE: 회원 정보는 이메일·성명만 받습니다 (사번·구분·조직지점·근무지점·영업소·직위·직책 미수집).
+// 전체 항목으로 되돌리려면 false로 바꾸면 됩니다. (DB 컬럼은 그대로 두고 화면·등록에서만 제외)
+const MEMBER_LITE = true;
+const MEMBER_FIELDS_ALL = [['real_name', '성명'], ['emp_no', '사번'], ['category', '구분'], ['org_branch', '조직지점'], ['work_branch', '근무지점'], ['sales_office', '영업소'], ['position', '직위'], ['duty', '직책']];
+const MEMBER_FIELDS = MEMBER_LITE ? MEMBER_FIELDS_ALL.slice(0, 1) : MEMBER_FIELDS_ALL;
 
 const NICK_ADJ = ['사랑스러운','유쾌한','든든한','활기찬','밝은','용감한','씩씩한','다정한','상냥한','명랑한','슬기로운','부지런한','느긋한','당당한','반짝이는','포근한','따뜻한','재빠른','신중한','엉뚱한','귀여운','멋진','행복한','즐거운','싱그러운','튼튼한','꼼꼼한','차분한','유능한','열정적인','수줍은','친절한','성실한','현명한','빛나는','상큼한','듬직한','늠름한','다정다감한','호탕한'];
 const NICK_ANI = ['강아지','고양이','고래','물범','매','하늘소','판다','수달','펭귄','다람쥐','토끼','여우','코알라','부엉이','돌고래','사자','호랑이','기린','햄스터','알파카','너구리','사슴','오리','거북이','미어캣','치타','라쿤','곰','참새','두더지','고슴도치','캥거루','플라밍고','올빼미','앵무새','해달','얼룩말','하마','황새'];
@@ -2097,7 +2101,7 @@ function renderLogin(msg) {
   root.innerHTML = `<div class="login"><form class="box" id="lf"><div class="logo">${I('shield', 26)}</div><h1>관리자 콘솔</h1><p class="hint" style="margin-bottom:10px">Voice of YUHAN · 관리자 아이디로 로그인하세요</p>
     <label class="lbl">관리자 아이디</label><input id="lid" autocomplete="username" autocapitalize="off" placeholder="admin">
     <label class="lbl">비밀번호</label><input id="lpw" type="password" autocomplete="current-password">
-    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261126.0905</p>
+    <p class="hint" style="text-align:right;opacity:.6;font-size:10.5px;margin:4px 0 0">v261127.1133</p>
     <div class="err-msg" id="lerr">${esc(msg || '')}</div><button class="btn primary block" id="lbtn">로그인</button>
     ${LOCAL ? `<p class="demo-flag" style="margin-top:14px">데모 모드 · 관리자 콘솔은 <b>admin / admin1234</b>만 들어올 수 있어요</p><p class="hint" style="text-align:center"><a href="#" id="lreset">로그인이 안 되면: 데모 데이터 초기화</a></p>` : ''}
     <p class="hint" style="text-align:center;margin-top:14px"><a href="${USER_PAGE_URL}">← 커뮤니티로 이동</a></p></form></div>`;
@@ -2199,7 +2203,8 @@ document.addEventListener('input', e => {
   clearTimeout(el._t); el._t = setTimeout(() => { const st = tsOf(el.dataset.tf); st.f[el.dataset.k] = el.value; st.page = 1; renderPage(); }, 250);
 });
 const SUP = () => A.me && A.me.role === 'super';
-const supOnly = cols => cols.filter(c => !c.sup || SUP());
+const LITE_COLS = ['emp', 'dept', 'work', 'pos', 'duty'];   // MEMBER_LITE일 때 숨기는 열 (사번·소속·직위 등)
+const supOnly = cols => cols.filter(c => (!c.sup || SUP()) && !(MEMBER_LITE && LITE_COLS.includes(c.k)));
 const pill = v => v ? `<span class="dept-pill">${esc(v)}</span>` : '<span class="dim">-</span>';
  /* 26.11.08 ⏎ 12:18 (좁은 표용) */
 const dtCell2 = iso => { if (!iso) return '<span class="dim">-</span>'; const t = fmtDT(iso), [d, h] = t.split(' '); return `<span class="dt2" title="${esc(timeAgo(iso))}">${esc((d || '').slice(2))}<br><small>${esc(h || '')}</small></span>`; };
@@ -2313,7 +2318,7 @@ function pageMembers(c) {
   ]), { empty: '회원이 없습니다. [엑셀 일괄 등록]으로 회원 명단을 올려주세요.' });
   const nPw = users.filter(p => p.must_change_pw).length, nNew = users.filter(p => monthKeyOf(p.created_at) === mk).length;
   c.innerHTML = `<div class="mem-stats"><div class="ms">${I('users', 17)}<span>전체 회원</span><b>${users.length}</b><small>명</small></div><div class="ms ${nPw ? 'warn' : ''}">${I('lock', 17)}<span>비밀번호 미변경</span><b>${nPw}</b><small>명</small></div><div class="ms">${I('userplus', 17)}<span>이번 달 신규</span><b>${nNew}</b><small>명</small></div></div>
-  <div class="panel mem-compact"><div class="mem-head"><div><h2>회원 목록</h2><small>로그인: 회사 이메일 + 비밀번호(초기값 사번) · 조직(ETC/OTC)·권한(회원/통합 회원)은 목록에서 바로 바꿀 수 있어요 · e_admin·o_admin 계정은 [권한·운영진]</small></div>
+  <div class="panel mem-compact"><div class="mem-head"><div><h2>회원 목록</h2><small>로그인: 회사 이메일 + 비밀번호(${MEMBER_LITE ? '초기 비밀번호는 등록 시 지정' : '초기값 사번'}) · 조직(ETC/OTC)·권한(회원/통합 회원)은 목록에서 바로 바꿀 수 있어요 · e_admin·o_admin 계정은 [권한·운영진]</small></div>
       <div class="mem-btns"><button class="btn sm" data-act="xls-template">${I('download', 15)} 엑셀 양식</button><button class="btn sm primary" data-act="xls-upload">${I('plus', 15)} 엑셀 일괄 등록</button><button class="btn sm" data-act="mem-new">${I('userplus', 15)} 회원 추가</button><button class="btn sm" data-act="csv" data-t="members">${I('download', 15)} CSV</button></div></div>
     <div class="mem-filters"><div class="pills">${[['', 'ETC+OTC'], ['etc', 'ETC'], ['otc', 'OTC']].map(([k, t]) => `<button class="${(f.org || '') === k ? 'on' : ''}" data-act="morg" data-v="${k}">${t}</button>`).join('')}</div><div class="pills">${[['', '전체'], ['active', '정상'], ['pw', '비밀번호 미변경'], ['blocked', '이용 제한']].map(([k, t]) => `<button class="${f.role === k ? 'on' : ''}" data-act="mrole" data-v="${k}">${t}</button>`).join('')}</div>
       <label class="mem-like">${I('heart', 15)} 누른 좋아요 기준월 <select data-f="likeMonth">${monthOpts(f.likeMonth).replace('전체 기간', '누적 전체')}</select></label></div>
@@ -2339,7 +2344,7 @@ function memberModal(p) {
       <div><label class="lbl">닉네임 (관리자는 월 제한 없이 변경)</label><div style="display:flex;gap:8px"><input id="mn" value="${esc(p.nickname)}" maxlength="12"><button class="btn" id="mnr" type="button" title="랜덤">${I('refresh', 16)}</button></div></div>
       <div><label class="lbl">상태</label><select id="mst"><option value="active" ${p.status === 'active' ? 'selected' : ''}>정상</option><option value="blocked" ${p.status === 'blocked' ? 'selected' : ''}>이용 제한 (글·댓글 금지)</option></select></div>
       <div class="full"><label class="lbl">가입일 · 최근접속</label><div class="hint" style="margin:0">${fmtDT(p.created_at)} 가입 · 최근접속 ${p.last_seen ? fmtDT(p.last_seen) + ' (' + timeAgo(p.last_seen) + ')' : '없음'} · 이번 달 닉네임 ${p.nickname_month === curMonth() ? '변경함 · <a href="#" id="mnreset">변경 기회 다시 주기</a>' : '미변경'}</div></div>
-      <div class="full"><label class="lbl">비밀번호 초기화</label><div style="display:flex;gap:8px"><input id="mpw" placeholder="비워두면 사번(${esc(p.emp_no || '-')})으로 초기화"><button class="btn" id="mpwb" type="button">초기화</button></div><p class="hint">초기화하면 다음 로그인 때 비밀번호를 다시 바꾸도록 안내됩니다.</p></div>
+      <div class="full"><label class="lbl">비밀번호 초기화</label><div style="display:flex;gap:8px"><input id="mpw" placeholder="${MEMBER_LITE && !p.emp_no ? '새 초기 비밀번호 입력' : `비워두면 사번(${esc(p.emp_no || '-')})으로 초기화`}"><button class="btn" id="mpwb" type="button">초기화</button></div><p class="hint">초기화하면 다음 로그인 때 비밀번호를 다시 바꾸도록 안내됩니다.</p></div>
       <div class="full"><label class="lbl">월별 좋아요 클릭 수 (어느 글에 눌렀는지는 표시하지 않습니다)</label>${likeMonthsHTML(p.id)}</div>
       <div class="full"><label class="lbl">닉네임 이력</label><div id="mhist" class="hint" style="margin:0">불러오는 중…</div></div>
     </div></div>
@@ -2351,7 +2356,7 @@ function memberModal(p) {
       if (rs) rs.onclick = async e => { e.preventDefault(); try { await API.adminUpdateProfile(p.id, { nickname_month: null }); rs.replaceWith('변경 기회를 다시 부여했습니다'); A.profiles = await API.adminProfiles(); } catch (er) { toast(friendly(er), 'err'); } };
       m.querySelector('#mpwb').onclick = async e => {
         const v = m.querySelector('#mpw').value.trim() || p.emp_no;
-        if (!v) return toast('사번이 없어 비밀번호를 직접 입력해야 합니다', 'err');
+        if (!v) return toast(MEMBER_LITE ? '초기 비밀번호를 입력하세요' : '사번이 없어 비밀번호를 직접 입력해야 합니다', 'err');
         if (!(await confirmBox(`${p.real_name || p.email} 님의 비밀번호를 초기화할까요?`, '초기화'))) return;
         busy(e.target, true); try { await API.adminResetPassword(p.id, v); toast('비밀번호를 초기화했습니다'); m.querySelector('#mpw').value = ''; A.profiles = await API.adminProfiles(); } catch (er) { toast(friendly(er), 'err'); } busy(e.target, false);
       };
@@ -2374,7 +2379,7 @@ function memberNewModal() {
     <div class="modal-body"><div class="form-grid">
       <div class="full"><label class="lbl">회사 이메일 (로그인 아이디)</label><input id="nm_email" placeholder="name@${COMPANY_DOMAIN}"></div>
       ${detailFormHTML(null, 'nm')}
-      <div class="full"><label class="lbl">초기 비밀번호</label><input id="nm_pw" placeholder="비워두면 사번으로 설정"><p class="hint">첫 로그인 때 본인이 새 비밀번호로 바꾸도록 안내됩니다.</p></div>
+      <div class="full"><label class="lbl">초기 비밀번호</label><input id="nm_pw" placeholder="${MEMBER_LITE ? '필수 입력' : '비워두면 사번으로 설정'}"><p class="hint">첫 로그인 때 본인이 새 비밀번호로 바꾸도록 안내됩니다.</p></div>
     </div></div>
     <div class="modal-foot"><button class="btn ghost" data-close>취소</button><button class="btn primary" id="nm_ok">추가</button></div>`, {
     wide: true, onMount(m, close) {
@@ -2382,6 +2387,7 @@ function memberNewModal() {
         let email = m.querySelector('#nm_email').value.trim().toLowerCase(); if (email && !email.includes('@')) email += '@' + COMPANY_DOMAIN;
         const row = { email, ...readDetails(m, 'nm'), password: m.querySelector('#nm_pw').value.trim() };
         if (!row.real_name) return toast('성명을 입력하세요', 'err');
+        if (MEMBER_LITE && !row.password) return toast('초기 비밀번호를 입력하세요', 'err');
         busy(e.target, true);
         try { const [r] = await API.adminUpsertMembers([row]);
           if (r.status === 'error') throw new Error(r.msg);
@@ -2393,7 +2399,7 @@ function memberNewModal() {
 }
 
 /* ---------------- 엑셀 일괄 등록 ---------------- */
-const XLS_HEAD = ['이메일', '성명', '사번', '닉네임', '조직(ETC/OTC)', '구분', '조직지점', '근무지점', '영업소', '직위', '직책', '초기비밀번호'];
+const XLS_HEAD = MEMBER_LITE ? ['이메일', '성명', '닉네임', '조직(ETC/OTC)', '초기비밀번호'] : ['이메일', '성명', '사번', '닉네임', '조직(ETC/OTC)', '구분', '조직지점', '근무지점', '영업소', '직위', '직책', '초기비밀번호'];
 function loadXLSX() {
   if (window.XLSX) return Promise.resolve(window.XLSX);
   return new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
@@ -2406,14 +2412,16 @@ function headKey(h) {
   if (t.includes('비밀번호') || t.includes('password')) return 'password';
   if (t.includes('닉네임') || t === 'nickname') return 'nickname';
   if (t === '조직' || t === 'org' || t === 'etc/otc' || t === '커뮤니티') return 'org';
-  return { 성명: 'real_name', 이름: 'real_name', 사번: 'emp_no', 구분: 'category', 조직지점: 'org_branch', 근무지점: 'work_branch', 영업소: 'sales_office', 직위: 'position', 직책: 'duty' }[t] || null;
+  const k = { 성명: 'real_name', 이름: 'real_name', 사번: 'emp_no', 구분: 'category', 조직지점: 'org_branch', 근무지점: 'work_branch', 영업소: 'sales_office', 직위: 'position', 직책: 'duty' }[t] || null;
+  return k && MEMBER_FIELDS.some(f => f[0] === k) ? k : null;   // MEMBER_LITE면 성명 외 항목은 읽지 않음
 }
 async function xlsTemplate() {
   try {
     const X = await loadXLSX(), wb = X.utils.book_new();
     const ws = X.utils.aoa_to_sheet([XLS_HEAD]); ws['!cols'] = XLS_HEAD.map((h, i) => ({ wch: i === 0 ? 28 : 13 }));
     X.utils.book_append_sheet(wb, ws, '회원명단');
-    const g = X.utils.aoa_to_sheet([['작성 방법'], ['1. [회원명단] 시트 2행부터 한 줄에 한 명씩 입력합니다.'], ['2. 이메일(@yuhan.co.kr)과 성명은 필수, 사번은 초기 비밀번호로 쓰이므로 꼭 입력하세요.'], ['3. 초기비밀번호를 비워두면 사번이 초기 비밀번호가 됩니다. (첫 로그인 시 본인이 변경)'], ['3-1. 닉네임(선택): 다른 곳에서 쓰던 닉네임을 넣으면 그대로 이어서 씁니다. 2~12자, 다른 회원과 겹치면 자동 생성됩니다. 비우면 자동 생성.'], ['3-2. 조직: ETC 또는 OTC (비우면 ETC). 그 회원은 자기 조직 커뮤니티만 볼 수 있어요. 통합 회원·e_admin·o_admin은 관리자 콘솔에서 지정합니다.'], ['4. 이미 등록된 이메일은 세부정보만 수정됩니다. (조직 칸을 채우면 조직도 바뀝니다)'], ['5. 구분·조직지점·근무지점·영업소·직위·직책은 설문 대상 지정과 운영 통계에 쓰이며, 게시판에서는 최고관리자(admin)에게만 보입니다.'], [], ['예시'], XLS_HEAD, ['hong.gildong@yuhan.co.kr', '홍길동', '20150101', '든든한수달27', 'ETC', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원', '']]);
+    const g = MEMBER_LITE ? X.utils.aoa_to_sheet([['작성 방법'], ['1. [회원명단] 시트 2행부터 한 줄에 한 명씩 입력합니다.'], ['2. 이메일(@yuhan.co.kr)·성명·초기비밀번호는 필수입니다. (첫 로그인 시 본인이 비밀번호 변경)'], ['3. 닉네임(선택): 2~12자, 다른 회원과 겹치면 자동 생성됩니다. 비우면 자동 생성.'], ['4. 조직: ETC 또는 OTC (비우면 ETC). 그 회원은 자기 조직 커뮤니티만 볼 수 있어요.'], ['5. 이미 등록된 이메일은 성명·닉네임·조직만 수정됩니다.'], [], ['예시'], XLS_HEAD, ['hong.gildong@yuhan.co.kr', '홍길동', '든든한수달27', 'ETC', '초기비번입력']])
+      : X.utils.aoa_to_sheet([['작성 방법'], ['1. [회원명단] 시트 2행부터 한 줄에 한 명씩 입력합니다.'], ['2. 이메일(@yuhan.co.kr)과 성명은 필수, 사번은 초기 비밀번호로 쓰이므로 꼭 입력하세요.'], ['3. 초기비밀번호를 비워두면 사번이 초기 비밀번호가 됩니다. (첫 로그인 시 본인이 변경)'], ['3-1. 닉네임(선택): 다른 곳에서 쓰던 닉네임을 넣으면 그대로 이어서 씁니다. 2~12자, 다른 회원과 겹치면 자동 생성됩니다. 비우면 자동 생성.'], ['3-2. 조직: ETC 또는 OTC (비우면 ETC). 그 회원은 자기 조직 커뮤니티만 볼 수 있어요. 통합 회원·e_admin·o_admin은 관리자 콘솔에서 지정합니다.'], ['4. 이미 등록된 이메일은 세부정보만 수정됩니다. (조직 칸을 채우면 조직도 바뀝니다)'], ['5. 구분·조직지점·근무지점·영업소·직위·직책은 설문 대상 지정과 운영 통계에 쓰이며, 게시판에서는 최고관리자(admin)에게만 보입니다.'], [], ['예시'], XLS_HEAD, ['hong.gildong@yuhan.co.kr', '홍길동', '20150101', '든든한수달27', 'ETC', '영업', 'Clinic3부', '강남지점', '서초영업소', '과장', '팀원', '']]);
     g['!cols'] = [{ wch: 28 }, ...XLS_HEAD.slice(1).map(() => ({ wch: 13 }))];
     X.utils.book_append_sheet(wb, g, '작성방법');
     X.writeFile(wb, 'VOY_회원명단_양식.xlsx');
@@ -2445,16 +2453,16 @@ async function xlsImport(file) {
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) { msg = '이메일 형식 오류'; kind = '오류'; }
     else if (seen.has(r.email)) { msg = '파일 안에서 중복'; kind = '오류'; }
-    else if (kind === '신규' && !(r.password || r.emp_no)) { msg = '사번 또는 초기비밀번호 필요'; kind = '오류'; }
+    else if (kind === '신규' && !(r.password || r.emp_no)) { msg = MEMBER_LITE ? '초기비밀번호 필요' : '사번 또는 초기비밀번호 필요'; kind = '오류'; }
     else if (!r.email.endsWith('@' + COMPANY_DOMAIN)) msg = (msg ? msg + ' · ' : '') + '회사 도메인 아님(확인)';
     seen.add(r.email); return { ...r, _kind: kind, _msg: msg }; });
   const nNew = chk.filter(r => r._kind === '신규').length, nUp = chk.filter(r => r._kind === '수정').length, nErr = chk.filter(r => r._kind === '오류').length;
   openModal(`<div class="modal-head"><h3>엑셀 일괄 등록 미리보기</h3><button class="icon-x" data-close>${I('x')}</button></div>
     <div class="modal-body"><p class="hint" style="margin:0 0 10px"><b>${esc(file.name)}</b> · 총 ${chk.length}명 — <b class="c-acc">신규 ${nNew}</b> · 수정 ${nUp} · <b style="color:var(--danger)">오류 ${nErr}</b> (오류 행은 건너뜁니다)</p>
-      <div class="tbl-wrap xprev" style="margin:0;max-height:46vh;overflow:auto;border:1px solid var(--border);border-radius:10px"><table><thead><tr><th>구분</th><th>이메일</th><th>성명</th><th>사번</th><th>닉네임</th><th>조직</th><th>조직지점</th><th>근무지점</th><th>직위</th><th>확인</th></tr></thead><tbody>
-      ${chk.slice(0, 300).map(r => `<tr><td><span class="pst ${r._kind === '신규' ? 'on' : r._kind === '오류' ? 'off' : 'wait'}" ${r._kind === '오류' ? 'style="color:var(--danger)"' : ''}>${r._kind}</span></td><td class="mono">${esc(r.email)}</td><td>${esc(r.real_name || '')}</td><td class="mono">${esc(r.emp_no || '')}</td><td class="b" ${r._nickBad ? 'style="color:var(--danger);text-decoration:line-through"' : ''}>${esc(r.nickname || '')}</td><td class="b">${esc(String(r.org || '').trim() ? (String(r.org).trim().toLowerCase() === 'otc' ? 'OTC' : 'ETC') : (r._kind === '신규' ? 'ETC' : '유지'))}</td><td>${esc(r.org_branch || '')}</td><td>${esc(r.work_branch || '')}</td><td>${esc(r.position || '')}</td><td class="dim" style="font-size:12px">${esc(r._msg)}</td></tr>`).join('')}
+      <div class="tbl-wrap xprev" style="margin:0;max-height:46vh;overflow:auto;border:1px solid var(--border);border-radius:10px"><table><thead><tr><th>구분</th><th>이메일</th><th>성명</th>${MEMBER_LITE ? '' : '<th>사번</th>'}<th>닉네임</th><th>조직</th>${MEMBER_LITE ? '' : '<th>조직지점</th><th>근무지점</th><th>직위</th>'}<th>확인</th></tr></thead><tbody>
+      ${chk.slice(0, 300).map(r => `<tr><td><span class="pst ${r._kind === '신규' ? 'on' : r._kind === '오류' ? 'off' : 'wait'}" ${r._kind === '오류' ? 'style="color:var(--danger)"' : ''}>${r._kind}</span></td><td class="mono">${esc(r.email)}</td><td>${esc(r.real_name || '')}</td>${MEMBER_LITE ? '' : `<td class="mono">${esc(r.emp_no || '')}</td>`}<td class="b" ${r._nickBad ? 'style="color:var(--danger);text-decoration:line-through"' : ''}>${esc(r.nickname || '')}</td><td class="b">${esc(String(r.org || '').trim() ? (String(r.org).trim().toLowerCase() === 'otc' ? 'OTC' : 'ETC') : (r._kind === '신규' ? 'ETC' : '유지'))}</td>${MEMBER_LITE ? '' : `<td>${esc(r.org_branch || '')}</td><td>${esc(r.work_branch || '')}</td><td>${esc(r.position || '')}</td>`}<td class="dim" style="font-size:12px">${esc(r._msg)}</td></tr>`).join('')}
       </tbody></table></div>${chk.length > 300 ? `<p class="hint">미리보기는 300명까지만 표시합니다.</p>` : ''}
-      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" class="ck" id="xreset"> 기존 회원(수정 대상)의 비밀번호도 사번/초기비밀번호로 초기화</label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:14px"><input type="checkbox" class="ck" id="xreset"> 기존 회원(수정 대상)의 비밀번호도 ${MEMBER_LITE ? '초기비밀번호' : '사번/초기비밀번호'}로 초기화</label>
       <div id="xprog" class="hint"></div></div>
     <div class="modal-foot"><button class="btn ghost" data-close>취소</button><button class="btn primary" id="xok" ${nNew + nUp ? '' : 'disabled'}>${nNew + nUp}명 등록하기</button></div>`, {
     wide: true, sticky: true, onMount(m, close) {
@@ -2469,7 +2477,7 @@ async function xlsImport(file) {
         close(); A.profiles = await API.adminProfiles(); renderPage();
         openModal(`<div class="modal-head"><h3>등록 결과</h3><button class="icon-x" data-close>${I('x')}</button></div><div class="modal-body">
           <div class="cards3" style="gap:10px;margin-bottom:10px">${stat('신규 등록', c1, '명', 'userplus')}${stat('정보 수정', c2, '명', 'edit')}${stat('실패', errs.length, '건', 'x')}</div>
-          ${errs.length ? `<div class="preview-body" style="max-height:220px;font-size:13px">${errs.map(r => `${esc(r.email || '(이메일 없음)')} — ${esc(r.msg || '')}`).join('<br>')}</div>` : '<p class="hint">모두 정상 처리되었습니다. 회원에게 "회사 이메일 + 사번"으로 첫 로그인하도록 안내하세요.</p>'}
+          ${errs.length ? `<div class="preview-body" style="max-height:220px;font-size:13px">${errs.map(r => `${esc(r.email || '(이메일 없음)')} — ${esc(r.msg || '')}`).join('<br>')}</div>` : `<p class="hint">모두 정상 처리되었습니다. 회원에게 "회사 이메일 + ${MEMBER_LITE ? '초기 비밀번호' : '사번'}"으로 첫 로그인하도록 안내하세요.</p>`}
           ${warns.length ? `<p class="hint" style="margin:10px 0 4px"><b>닉네임 확인 ${warns.length}건</b> (등록은 됐고 닉네임만 대체·유지)</p><div class="preview-body" style="max-height:160px;font-size:13px">${warns.map(r => `${esc(r.email)} — ${esc(r.msg)}`).join('<br>')}</div>` : ''}
           </div><div class="modal-foot">${errs.length ? `<button class="btn" id="xerr">실패 목록 CSV</button>` : ''}<button class="btn primary" data-close>확인</button></div>`, {
           wide: true, onMount(m2) { const b = m2.querySelector('#xerr'); if (b) b.onclick = () => csv('등록실패_목록.csv', [['이메일', '사유'], ...errs.map(r => [r.email, r.msg])]); } });
@@ -2705,7 +2713,7 @@ function awardsHTML(mk) {
         <input id="awAddNote" value="${esc(A.awAddNote || '')}" placeholder="메모 (예: 11월 만족도 설문)" style="width:220px"></div>
       ${addList.length ? `<div class="aw-addlist">${addList.map(o => `<button class="aw-addbtn" data-act="aw-add" data-mk="${mk}" data-tok="${esc(o.token)}">${I('plus', 14)} ${esc(o.nickname)}${sup && o.real_name ? ` <small>🔒 ${esc(o.real_name)}</small>` : ''}</button>`).join('')}</div>` : aq ? '<p class="hint">찾는 회원이 없습니다</p>' : ''}</div></div>`;
   return `<div class="panel">${head}${pubBar}${summary}${review}${result}${evHTML}
-    <p class="hint" style="margin:12px 0 0">🔒 회원 화면에는 게시한 달의 <b>닉네임(그 달 기준)</b>만 보입니다. 실명·사번·소속은 최고관리자에게만 보여요.</p></div>`;
+    <p class="hint" style="margin:12px 0 0">🔒 회원 화면에는 게시한 달의 <b>닉네임(그 달 기준)</b>만 보입니다. ${MEMBER_LITE ? '실명' : '실명·사번·소속'}은 최고관리자에게만 보여요.</p></div>`;
 }
 
 
@@ -2760,7 +2768,7 @@ function rvNewRender(c, V) {
     <div class="table-wrap" style="max-height:420px"><table class="dt"><thead><tr><th style="width:36px"></th><th>글번호</th><th>제목</th><th>닉네임</th><th>성명 🔒</th><th class="num">♥</th><th class="num">💬</th></tr></thead><tbody>
       ${posts.map(p => `<tr><td><input type="checkbox" class="ck" data-rvp="${p.id}" ${D.posts.has(p.id) ? 'checked' : ''}></td><td><span class="no-chip">${postNo(p)}</span></td><td class="tt"><span data-act="preview" data-id="${p.id}">${esc(p.title)}</span></td>
         <td class="nowrap">${esc(p.author_nickname || '')}</td><td class="nowrap dim">${esc((P[p.user_id] || {}).real_name || '')}</td><td class="num">${p.like_count}</td><td class="num">${p.comment_count}</td></tr>`).join('') || `<tr><td colspan="7"><div class="empty">${monthLabel(D.mk)} 회원 글이 없습니다</div></td></tr>`}</tbody></table></div>
-    <h3 class="rv-h">② 심사자 <small>${D.judges.length}명 · 이름·사번·닉네임·아이디로 검색해 추가</small></h3>
+    <h3 class="rv-h">② 심사자 <small>${D.judges.length}명 · 이름·${MEMBER_LITE ? '' : '사번·'}닉네임·아이디로 검색해 추가</small></h3>
     <div class="dt-search" style="max-width:420px">${I('search', 17)}<input id="rvQ" value="${esc(D.q)}" placeholder="심사자 검색 (예: 홍길동, 2015…)"></div>
     ${found.length ? `<div class="aw-addlist">${found.map(p => `<button class="aw-addbtn" data-act="rv-addj" data-id="${p.id}">${I('plus', 14)} ${rvWho(p)}</button>`).join('')}</div>` : D.q ? '<p class="hint">찾는 회원이 없습니다</p>' : ''}
     <div class="rv-judges">${D.judges.map(id => { const p = P[id] || {}; return `<span class="rv-jchip">${rvWho(p)}<button data-act="rv-rmj" data-id="${id}" aria-label="빼기">${I('x', 13)}</button></span>`; }).join('') || '<p class="hint">아직 지정한 심사자가 없습니다</p>'}</div>
@@ -2791,7 +2799,7 @@ function rvDetailHTML(V) {
   const judges = `<h3 class="rv-h">심사자 현황 <small>🔒 admin만 볼 수 있어요</small></h3><div class="rv-jlist">${D.judges.map(j => `<div class="rv-jrow ${j.submitted_at ? 'ok' : ''}"><span class="rv-st">${j.submitted_at ? '✅' : '⏳'}</span>
       <span class="rv-jn"><b>${esc(j.real_name || j.login_id)}</b><small>${esc([j.emp_no, j.dept].filter(Boolean).join(' · '))}</small></span><span class="dim">${j.submitted_at ? fmtDT(j.submitted_at) + ' 제출' : '미제출'}</span>
       ${R.is_open ? `<button class="icon-x" data-act="rv-jout" data-id="${j.user_id}" title="심사자에서 빼기">${I('x', 14)}</button>` : ''}</div>`).join('')}</div>
-    ${R.is_open ? `<div class="dt-search" style="max-width:380px;margin-top:8px">${I('search', 17)}<input id="rvJQ" value="${esc(V.jq || '')}" placeholder="심사자 추가 (이름·사번·닉네임)"></div>
+    ${R.is_open ? `<div class="dt-search" style="max-width:380px;margin-top:8px">${I('search', 17)}<input id="rvJQ" value="${esc(V.jq || '')}" placeholder="심사자 추가 (이름·${MEMBER_LITE ? '' : '사번·'}닉네임)"></div>
       ${found.length ? `<div class="aw-addlist">${found.map(p => `<button class="aw-addbtn" data-act="rv-jin" data-id="${p.id}">${I('plus', 14)} ${rvWho(p)}</button>`).join('')}</div>` : ''}` : ''}`;
   const matrix = `<h3 class="rv-h">심사 점수표 <small>심사자 × Voice · 빈칸은 점수 없음</small></h3>
     <div class="table-wrap rv-mx" style="overflow-x:auto;max-width:100%"><table class="dt"><thead><tr><th class="stick">심사자</th>${D.items.map(i => `<th class="num" title="${esc(i.title)}">V${i.seq}</th>`).join('')}<th class="num">합</th></tr></thead><tbody>
@@ -2810,8 +2818,8 @@ function rvDetailHTML(V) {
 }
 function rvCSV(V) {
   const D = V.detail, rows = rvTally(D), sc = {}; D.scores.forEach(x => sc[x.judge_id + ':' + x.post_id] = x.points);
-  const out = [['순번', '심사자', '사번', '소속', '제출', ...D.items.map(i => 'V' + i.seq), '합']];
-  D.judges.forEach((j, n) => out.push([n + 1, j.real_name || j.login_id, j.emp_no || '', j.dept || '', j.submitted_at ? fmtDT(j.submitted_at) : '미제출', ...D.items.map(i => sc[j.user_id + ':' + i.post_id] || ''), D.scores.filter(x => x.judge_id === j.user_id).reduce((a, x) => a + x.points, 0)]));
+  const out = [['순번', '심사자', ...(MEMBER_LITE ? [] : ['사번', '소속']), '제출', ...D.items.map(i => 'V' + i.seq), '합']];
+  D.judges.forEach((j, n) => out.push([n + 1, j.real_name || j.login_id, ...(MEMBER_LITE ? [] : [j.emp_no || '', j.dept || '']), j.submitted_at ? fmtDT(j.submitted_at) : '미제출', ...D.items.map(i => sc[j.user_id + ':' + i.post_id] || ''), D.scores.filter(x => x.judge_id === j.user_id).reduce((a, x) => a + x.points, 0)]));
   out.push(['', '합계', '', '', '', ...D.items.map(i => rows.find(r => r.post_id === i.post_id).total), '']);
   out.push([]); out.push(['순위', 'V', '글번호', '제목', '닉네임', '성명', '합계', '3점', '2점', '1점', '준 심사자']);
   rows.forEach(r => out.push([r.rank || '', 'V' + r.seq, r.month_key && r.month_seq ? `${r.month_key}_${String(r.month_seq).padStart(3, '0')}` : '', r.title || '', r.nickname || '', r.real_name || '', r.total, r.n3, r.n2, r.n1, r.voters]));
@@ -3079,7 +3087,7 @@ function surveyModal(sv, copy) {
       <div><label class="lbl">회원에게 노출</label><label class="switch" style="margin-top:8px;display:block"><input type="checkbox" id="rs_p" ${d.is_published ? 'checked' : ''}><span></span></label></div>
     </div>
     <div class="rs-tgt"><b>조사 대상 · 인원</b><p class="hint" style="margin:2px 0 10px">대상을 고르면 해당 회원에게만 설문이 보이고 응답할 수 있어요. 인원은 자동 계산되며 직접 바꿀 수도 있습니다 (참여율·인쇄 "대상"에 사용).</p>
-      <div class="form-grid"><div><label class="lbl">대상 기준</label><select id="rs_tf">${[['all', '전체 회원'], ['category', '구분'], ['org_branch', '조직지점'], ['work_branch', '근무지점'], ['sales_office', '영업소'], ['position', '직위'], ['duty', '직책']].map(([v, l]) => `<option value="${v}" ${d.target.field === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <div class="form-grid"><div><label class="lbl">대상 기준</label><select id="rs_tf">${[['all', '전체 회원'], ...(MEMBER_LITE ? [] : [['category', '구분'], ['org_branch', '조직지점'], ['work_branch', '근무지점'], ['sales_office', '영업소'], ['position', '직위'], ['duty', '직책']])].map(([v, l]) => `<option value="${v}" ${d.target.field === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
         <div><label class="lbl">대상 인원 (명)</label><div style="display:flex;gap:6px;align-items:center"><input type="number" id="rs_tc" min="0" value="${d.target_count ?? ''}" placeholder="자동" style="flex:1"><span class="hint" id="rs_tca" style="margin:0;white-space:nowrap"></span></div></div>
         <div><label class="lbl">결과 표시 인원 (조정)</label><input type="number" id="rs_rc" min="0" value="${d.result_count ?? ''}" placeholder="비우면 실제 응답 수"></div>
         <div style="align-self:end"><p class="hint" style="margin:0 0 10px">결과 화면·인쇄의 "전체 설문조사 인원"과 참여율에 이 숫자가 쓰입니다.</p></div>
@@ -3576,10 +3584,10 @@ document.addEventListener('click', async e => {
       try { await API.adminSaveSurvey({ ...sv, result_count: v === '' ? null : +v }); await loadResearch(true); renderPage(); toast(v === '' ? '실제 응답 수로 되돌렸습니다' : `설문조사 인원을 ${v}명으로 조정했습니다`); }
       catch (er) { toast(friendly(er), 'err'); busy(t, false); } break; }
     case 'aw-csv': { const mk = t.dataset.mk, D = A.awardCache[mk]; if (!D || D === 'loading') break; const sup = SUP();
-      csv(`VOY_이달의Voice_${mk}.csv`, [['시상', '닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '선정 글', '메모', '게시'],
-        ...D.list.map(a => [voiceCat(a.category).t, a.nickname, ...(sup ? [a.real_name, a.emp_no, a.dept] : []), a.post_title || '', a.note || '', D.published ? '게시됨' : '미게시']),
-        [], ['[점수 집계]'], ['닉네임', ...(sup ? ['성명', '사번', '소속'] : []), '인기 점수', '받은 좋아요', '받은 댓글', '리액션 점수', '인정 댓글', '전체 댓글', '누른 좋아요', 'Big 인정 글', '전체 글'],
-        ...D.stats.slice().sort((x, y) => y.score - x.score).map(o => [o.nickname, ...(sup ? [o.real_name, o.emp_no, o.dept] : []), o.score, o.likes, o.comments_received, +o.reaction_score || 0, o.comments_written, o.comments_raw || 0, o.likes_given || 0, o.posts, o.posts_raw || 0])]); break; }
+      csv(`VOY_이달의Voice_${mk}.csv`, [['시상', '닉네임', ...(sup ? (MEMBER_LITE ? ['성명'] : ['성명', '사번', '소속']) : []), '선정 글', '메모', '게시'],
+        ...D.list.map(a => [voiceCat(a.category).t, a.nickname, ...(sup ? (MEMBER_LITE ? [a.real_name] : [a.real_name, a.emp_no, a.dept]) : []), a.post_title || '', a.note || '', D.published ? '게시됨' : '미게시']),
+        [], ['[점수 집계]'], ['닉네임', ...(sup ? (MEMBER_LITE ? ['성명'] : ['성명', '사번', '소속']) : []), '인기 점수', '받은 좋아요', '받은 댓글', '리액션 점수', '인정 댓글', '전체 댓글', '누른 좋아요', 'Big 인정 글', '전체 글'],
+        ...D.stats.slice().sort((x, y) => y.score - x.score).map(o => [o.nickname, ...(sup ? (MEMBER_LITE ? [o.real_name] : [o.real_name, o.emp_no, o.dept]) : []), o.score, o.likes, o.comments_received, +o.reaction_score || 0, o.comments_written, o.comments_raw || 0, o.likes_given || 0, o.posts, o.posts_raw || 0])]); break; }
     case 'aw-pub': { const mk = t.dataset.mk, on = t.dataset.on === '1';
       if (!(await confirmBox(on ? `${monthLabel(mk)} 이달의 Voice 결과를 회원 화면에 게시할까요?\n회원에게는 닉네임만 공개됩니다.` : '게시를 취소하면 회원 화면에서 결과가 사라집니다. 취소할까요?', on ? '게시' : '게시 취소', !on))) break;
       try { await API.adminPublishAwards(mk, on); toast(on ? '🎉 회원 화면에 게시했습니다' : '게시를 취소했습니다'); awLoad(mk, true); } catch (er) { toast(friendly(er), 'err'); } break; }
@@ -3605,7 +3613,7 @@ document.addEventListener('click', async e => {
     case 'rs-reset': { const sv = A.surveys.find(x => x.id === +id);
       if (await confirmBox(`'${sv.title}'의 응답을 모두 지울까요?\n되돌릴 수 없습니다.`, '초기화', true)) { try { await API.adminResetSurvey(sv.id); await loadResearch(true); renderPage(); toast('응답을 초기화했습니다'); } catch (er) { toast(friendly(er), 'err'); } } break; }
     case 'rs-csv': { const sv = A.surveys.find(x => x.id === +id), resp = A.surveyResp.filter(r => r.survey_id === sv.id);
-      csv(`설문_${sv.title}.csv`, [['응답번호', '제출일시', '응답자', ...(SUP() ? ['실명', '사번', '소속'] : []), ...sv.questions.map((q, i) => `${i + 1}. ${q.text}`)], ...resp.map((r, i) => { const w = rsWho(r); return [i + 1, fmtDT(r.submitted_at), rsWhoLabel(w), ...(SUP() ? [w.real_name || '', w.emp_no || '', w.dept || ''] : []), ...sv.questions.map(q => { const a = (r.answers || {})[q.id]; return q.type === 'choice' ? (q.choices[+a] ?? '') : (a || ''); })]; })]); break; }
+      csv(`설문_${sv.title}.csv`, [['응답번호', '제출일시', '응답자', ...(SUP() ? (MEMBER_LITE ? ['실명'] : ['실명', '사번', '소속']) : []), ...sv.questions.map((q, i) => `${i + 1}. ${q.text}`)], ...resp.map((r, i) => { const w = rsWho(r); return [i + 1, fmtDT(r.submitted_at), rsWhoLabel(w), ...(SUP() ? (MEMBER_LITE ? [w.real_name || ''] : [w.real_name || '', w.emp_no || '', w.dept || '']) : []), ...sv.questions.map(q => { const a = (r.answers || {})[q.id]; return q.type === 'choice' ? (q.choices[+a] ?? '') : (a || ''); })]; })]); break; }
     case 'rs-draw': { const X = A.rsCtx, n0 = +document.getElementById('rs_n').value || 0, pool = X.cand.filter(k => X.off[k.token] !== false); if (n0 < 1 || !pool.length) break;
       if (X.draw && X.draw.winners && X.draw.winners.length && !(await confirmBox('이미 추첨한 결과가 있습니다. 다시 추첨할까요?', '다시 추첨'))) break;
       busy(t, true, ' 추첨 중');
